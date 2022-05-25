@@ -1,6 +1,6 @@
 # ActiPASS
 
-![ActiPASS_GUI](https://user-images.githubusercontent.com/26480941/170268922-a89244dc-d845-485d-88f9-a8a20ca61e34.PNG)
+![ActiPASS_GUI](https://user-images.githubusercontent.com/26480941/170270279-4f626d69-a906-4aa8-9207-3f2f97c3e0f2.PNG)
 
 
 **About ActiPASS**
