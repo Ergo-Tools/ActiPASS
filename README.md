@@ -18,12 +18,14 @@ The development of ActiPASS has partly been funded by ProPASS Consortium www.pro
 ActiPASS may not be used for any commercial purposes without written permission from the developers.
 Please acknowledge the Developers and NFA as the source of the Software in any publications by referring to relevant publications about Acti4 /ActiPASS. 
 
-**Documentation**
+[**Documentation**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-Documentation)
 
 [**ActiPASS References**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References)
 
 [**Open source contributions**](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS)
 
-**Acknowledgements**
+[**Acknowledgements**](https://github.com/Ergo-Tools/ActiPASS/wiki/acknowledgements#actipass-acknowledgements)
+
+[**Enduser License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement)
 
 
