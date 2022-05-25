@@ -26,6 +26,6 @@ Please acknowledge the Developers and NFA as the source of the Software in any p
 
 [**Acknowledgements**](https://github.com/Ergo-Tools/ActiPASS/wiki/acknowledgements#actipass-acknowledgements)
 
-[**Enduser License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement)
+[**Enduser License Agreement**](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement)
 
 
