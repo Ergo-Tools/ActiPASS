@@ -1,7 +1,11 @@
 # ActiPASS
-![ActiPASS_startup_logo](https://user-images.githubusercontent.com/26480941/170260923-00a45eb5-7f98-4698-919c-01cfd1a40aec.png)
+
+![ActiPASS_GUI](https://user-images.githubusercontent.com/26480941/170268922-a89244dc-d845-485d-88f9-a8a20ca61e34.PNG)
+
 
 **About ActiPASS**
+![ActiPASS_startup_logo](https://user-images.githubusercontent.com/26480941/170260923-00a45eb5-7f98-4698-919c-01cfd1a40aec.png)
+
 
 ActiPASS is developed by: [Pasan Hettiarachchi](mailto:pasan.hettiarachchi@medsci.uu.se) and [Peter Johansson](mailto:peter.johansson@medsci.uu.se) 
 at Occupational and Environmental Medicine, Department of Medical Sciences, Uppsala University, <Magnus.svartengren@medsci.uu.se>
