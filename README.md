@@ -1,9 +1,9 @@
 # ActiPASS
 [**About**](#about-actipass)
 
-[**Documentation**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-Documentation)
-
 [**ActiPASS References**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References)
+
+[**Documentation**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-Documentation)
 
 [**Open source contributions**](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS)
 
