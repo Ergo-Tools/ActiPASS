@@ -18,12 +18,14 @@
 
 
 ActiPASS is developed by: [Pasan Hettiarachchi](mailto:pasan.hettiarachchi@medsci.uu.se) and [Peter J. Johansson](mailto:peter.johansson@medsci.uu.se) 
-at Occupational and Environmental Medicine, Department of Medical Sciences, Uppsala University, <Magnus.svartengren@medsci.uu.se>
+at Occupational and Environmental Medicine, Department of Medical Sciences, Uppsala University, [Magnus Svartengren](mailto:magnus.svartengren@medsci.uu.se)
 
 ActiPASS is based on: Acti4 thigh accelerometer activity detection algorithm developed by Jørgen Skotte 
 at the National Research Centre for the Working Environment (NFA), Copenhagen, Denmark,  [Andreas Holtermann](mailto:aho@nfa.dk)
 
-The development of ActiPASS has partly been funded by ProPASS Consortium www.propassconsortium.org
+The development of ActiPASS has partly been funded by [ProPASS Consortium](https://www.propassconsortium.org)
 
 ActiPASS may not be used for any commercial purposes without written permission from the developers.
-Please acknowledge the Developers and NFA as the source of the Software in any publications by referring to relevant publications about Acti4 /ActiPASS. 
+Please acknowledge the Developers and NFA as the source of the Software in any publications by referring to relevant publications about Acti4 /ActiPASS.
+
+ActiPASS is made possible by [these open source software](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS) and we [acknowledge](https://github.com/Ergo-Tools/ActiPASS/wiki/acknowledgements) the all who contributed to development of ActiPASS. 
