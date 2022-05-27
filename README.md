@@ -1,4 +1,6 @@
 # ActiPASS
+[**About**](#about-actipass)
+
 [**Documentation**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-Documentation)
 
 [**ActiPASS References**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References)
@@ -13,7 +15,7 @@
 
 
 
-**About ActiPASS**
+### About ActiPASS
 ![ActiPASS logo blue](https://user-images.githubusercontent.com/26480941/170669286-19ad73a9-df25-4903-ad07-29746b6ca0c8.PNG)
 
 
