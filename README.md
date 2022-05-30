@@ -3,7 +3,7 @@
 
 [**ActiPASS References**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References)
 
-[**Documentation**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-Documentation)
+[**Documentation**](https://github.com/Ergo-Tools/ActiPASS/wiki)
 
 [**Open source contributions**](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS)
 
