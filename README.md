@@ -11,7 +11,7 @@
 
 [**End-User License Agreement**](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement)
 
-![ActiPASS_GUI](https://user-images.githubusercontent.com/26480941/170270279-4f626d69-a906-4aa8-9207-3f2f97c3e0f2.PNG)
+![main_gui](https://user-images.githubusercontent.com/26480941/170997299-6eda1630-b788-41fc-b83d-005bb2e96335.PNG)
 
 
 
