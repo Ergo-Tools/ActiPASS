@@ -28,6 +28,6 @@ at the National Research Centre for the Working Environment (NFA), Copenhagen, D
 The development of ActiPASS has partly been funded by [ProPASS Consortium](https://www.propassconsortium.org)
 
 ActiPASS may not be used for any commercial purposes without written permission from the developers.
-Please acknowledge the Developers and NFA as the source of the Software in any publications by referring to relevant publications about Acti4 /ActiPASS.
+Please acknowledge the Developers and NFA as the source of the Software in any publications by referring to [relevant publications](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References) about Acti4 /ActiPASS.
 
 ActiPASS is made possible by [these open source software](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS) and developers [acknowledge](https://github.com/Ergo-Tools/ActiPASS/wiki/acknowledgements) all who contributed in various means.
