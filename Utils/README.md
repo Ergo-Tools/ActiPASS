@@ -1,4 +1,6 @@
-### Various utility functions used by ActiPASS software
+## Various utility functions used by ActiPASS software
+
+### License
 
 Copyright (c) 2022, Pasan Hettiarachchi .
 All rights reserved.
