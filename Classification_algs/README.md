@@ -1,6 +1,6 @@
 ### Various classifications algorithms used by ActiPASS software
 
-Copyright (c) 2022, Pasan Hettiarachchi .
+Copyright (c) 2022, Pasan Hettiarachchi & Peter Johansson.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
