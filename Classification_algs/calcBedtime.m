@@ -29,7 +29,7 @@ function [status,tblBedtime,aktFull,logicBD,logicSlpInt] = calcBedtime(Settings,
 %  diaryStrct.rawData - the raw diary data for this subjectID as a table (including invalid entries)
 
 
-% Copyright (c) 2021, Pasan Hettiarachchi .
+% Copyright (c) 2021, Pasan Hettiarachchi & Peter Johansson.
 % All rights reserved.
 % 
 % Redistribution and use in source and binary forms, with or without 

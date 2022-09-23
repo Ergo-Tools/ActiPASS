@@ -22,7 +22,7 @@ function Akt = lyingAlgB(AccFilt,StdMax,VrefThigh,Akt,Fs,Tid,saveDirP)
 % Akt [n]: Combined activity with Sit/Lie seperated according to Lyden's
 % algorithm
 
-% Copyright (c) 2021, Pasan Hettiarachchi .
+% Copyright (c) 2021, Pasan Hettiarachchi & Peter Johansson.
 % All rights reserved.
 % 
 % Redistribution and use in source and binary forms, with or without 
@@ -141,17 +141,17 @@ for section=1:numSitS
 %             plot(axThRot,Tid(slctPts),meanRotAngle(slctPts));
 %             plot(axThRot,Tid(pltPtsH),meanRotAngle(pltPtsH),'rs');
 %             plot(axThRot,Tid(pltPtsL),meanRotAngle(pltPtsL),'ms');
-%             ylabel(axThRot,'Thigh Rotation °');
+%             ylabel(axThRot,'Thigh Rotation ï¿½');
 %             datetick(axThRot,'x',13);
 %             
 %             axTheta=subplot(4,2,3);
 %             plot(axTheta,Tid(slctPts),theta(slctPts),'Color','#D95319');
-%             ylabel(axTheta,'Theta °');
+%             ylabel(axTheta,'Theta ï¿½');
 %             datetick(axTheta,'x',13);
 %             
 %             axInc=subplot(4,2,5);
 %             plot(axInc,Tid(slctPts),Inc(slctPts),'Color','#77AC30');
-%             ylabel(axInc,'Inc °');
+%             ylabel(axInc,'Inc ï¿½');
 %             datetick(axInc,'x',13);
 %             
 %             axSD=subplot(4,2,7);

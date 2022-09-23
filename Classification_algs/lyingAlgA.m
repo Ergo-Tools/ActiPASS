@@ -21,7 +21,7 @@ function Akt = lyingAlgA(AccFilt,VrefThigh,Akt,Fs)
 % Akt [n]: Combined activity with Sit/Lie seperated according to Lyden's algorithm
 
 
-% Copyright (c) 2021, Pasan Hettiarachchi .
+% Copyright (c) 2021, Pasan Hettiarachchi & Peter Johansson.
 % All rights reserved.
 % 
 % Redistribution and use in source and binary forms, with or without 
