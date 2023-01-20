@@ -29,34 +29,35 @@ function [status,tblBedtime,aktFull,logicBD,logicSlpInt] = calcBedtime(Settings,
 %  diaryStrct.rawData - the raw diary data for this subjectID as a table (including invalid entries)
 
 
-% Copyright (c) 2021, Pasan Hettiarachchi & Peter Johansson.
+% Copyright (c) 2021, Pasan Hettiarachchi .
 % All rights reserved.
-% 
-% Redistribution and use in source and binary forms, with or without 
-% modification, are permitted provided that the following conditions are met: 
-% 1. Redistributions of source code must retain the above copyright notice, 
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+% 1. Redistributions of source code must retain the above copyright notice,
 %    this list of conditions and the following disclaimer.
-% 2. Redistributions in binary form must reproduce the above copyright notice, 
-%    this list of conditions and the following disclaimer in the documentation 
+% 2. Redistributions in binary form must reproduce the above copyright notice,
+%    this list of conditions and the following disclaimer in the documentation
 %    and/or other materials provided with the distribution.
 % 3. Neither the name of the copyright holder nor the names of its contributors
 %    may be used to endorse or promote products derived from this software without
 %    specific prior written permission.
-% 
-% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
-% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-% POSSIBILITY OF SUCH DAMAGE. 
+%
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+% POSSIBILITY OF SUCH DAMAGE.
 
-lenLieFilt=Settings.BDMINLIET*3600; % minimum accepted bedtime
-lenAktFilt=Settings.BDMAXAKTT*3600; % maximum active gap within a given bedtime
+lenLieFilt=Settings.BDMINLIET*60; % minimum accepted bedtime when start/stop is a lying bout
+lenAktFilt=Settings.BDMAXAKTT*60; % maximum active gap within a given bedtime
+VLongSitBt=Settings.BDVLONGSIT*60; % very-long-sit bouts to consider for bedtime expanding and also minimum bedtime length when start/stop is not a lying bout (240*60)
 maxDiffD=4; % when comparing auto and diary bedtimes, maximum allowed differance of bedtime-start (hrs)
 indvDirOut="IndividualOut"; % individual output directory
 
@@ -116,8 +117,7 @@ try
     %% find bedtime automatically or using diary
     % fiirst find diary bedtimes irrespective of Bedtime method
     % find indices of diary events matching 'bed' or 'night'
-    iBdStarts=find(strcmpi(diaryStrct.Events,"bed")| strcmpi(diaryStrct.Events,"bedtime")|...
-        strcmpi(diaryStrct.Events,"night"));
+    iBdStarts=find(matches(diaryStrct.Events,["bed","bedtime","night"],"IgnoreCase",true));
     % dfeine the diary dedtime starts: bdDStarts
     bdDStarts=diaryStrct.Ticks(iBdStarts);
     % diary bedtime ends should be the next indices respectively
@@ -136,10 +136,14 @@ try
     %the number of diary bedtimes
     numDBedTs=length(bdDStarts);
     
-    if strcmpi(Settings.BEDTIME,"auto")
+    if  matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)
         % this is where automatic bedtime detection happens. It is done using a simple filtering of lying
-        bedLgc=~bwareaopen(aktFull~=1,lenAktFilt);
-        bedLgc=bwareaopen(bedLgc,lenLieFilt);
+        if strcmpi(Settings.BEDTIME,"auto1")
+            bedLgc=~bwareaopen(aktFull~=1,lenAktFilt);
+            bedLgc=bwareaopen(bedLgc,lenLieFilt);
+        elseif strcmpi(Settings.BEDTIME,"auto2")
+            bedLgc=calcBedLgc(aktFull,lenAktFilt,lenLieFilt,VLongSitBt);
+        end
         % find indices of bedtime starts and stops
         indBdStarts=find(diff([0,bedLgc])==1);
         indBdEnds=find(diff([0,bedLgc])==-1);
@@ -211,7 +215,7 @@ try
             bdDStart=bdStart;
             bdDEnd=bdEnd;
             % if the bedtime methosdi auto
-        elseif strcmpi(Settings.BEDTIME,"auto")
+        elseif matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)
             % if the differance of start bedtime is less than 4hrs we match auto bedtime to a diary bedtime
             %find middle point of this auto bedtime and each diary bedtimes
             midAutoBed=bdStart+(bdEnd-bdStart)/2;
@@ -352,7 +356,7 @@ try
         axComb.XMinorGrid = 'on';
         
         
-        if strcmpi(Settings.BEDTIME,"auto")
+        if matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)
             for itrL=1:numDBedTs
                 % define the line colour
                 lineC=rgb('RoyalBlue');
@@ -371,7 +375,7 @@ try
         
         %finalize figure with legends, ticks and labels
         
-        if strcmpi(Settings.BEDTIME,"auto")
+        if matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)
             ylim([0.9,1.4]);
             yticks([1,1.13,1.2]);
             yticklabels({'Activity','AutoBed','DiaryBed'});
