@@ -1,32 +1,32 @@
 function [status,tblBedtime,aktFull,logicBD,logicSlpInt] = calcBedtime(Settings,subjectID,diaryStrct,timeFull,aktFull,Acc,Fs,figW,figH)
-% calcBedtime Calculate bedtime by filtering Liying (or consider the diary defined bedtimes) and calculate sleep within bedtime
+% Calculate bedtime by filtering Liying (or consider the diary defined bedtimes) and calculate sleep within bedtime
 %
-% Inputs:
-%   Settings [struct] - The main settings structure
-%   SubjectID [string] - The ID - used for debug printing/visualizations
-%   diaryStruct [struct] - The diary data structure for the given ID. See below for details
-%   timeFull[datenum - n] - The times given at 1s epoch -complete data for all days
-%   aktFull [double-n] - Full Activity vector given at 1s epoch for all days
-%   Acc [double - nx4] - Acc matrix including time
-%   Fs - sample interval
-%   figW, figH - debug figure width, height
-%
-% Outputs:
-%   status - [string] - execution status string
-%   tblBedtime - [table] - the bedtime and sleep parameter table
-%   aktFull [double-n] - Full Activity vector given at 1s epoch for all days
-%   logicBD [double-n] - A logical vector given at 1s epoch representing bedtime status
-%   logicSlpInt [double-n] - A logical vector given at 1s epoch representing sleep-interval status
-%
-% diary-structure fileds:
-%   diaryStrct.ID - subjectID ;
-%   diaryStrct.Ticks - all transitions times as Matlab datenum;
-%   diaryStrct.Events - all diary events names (work, leisure etc);
-%   diaryStrct.Comments - all comments for each diary event
-%   diaryStrct.StartT- the diary defined data start time;
-%   diaryStrct.StopT - diary defined data stop time;
-%   diaryStrct.RefTs - standing reference times defined in diary;
-%   diaryStrct.rawData - the raw diary data for this subjectID as a table (including invalid entries)
+%  %%Inputs %%%%%%%%%%%%%%%%%
+% Settings [struct] - The main settings structure
+% SubjectID [string] - The ID - used for debug printing/visualizations
+% diaryStruct [struct] - The diary data structure for the given ID. See below for details
+% timeFull[datenum - n] - The times given at 1s epoch -complete data for all days
+% aktFull [double-n] - Full Activity vector given at 1s epoch for all days
+% Acc [double - nx4] - Acc matrix including time
+% Fs - sample interval
+% figW, figH - debug figure width, height
+
+% %%Outputs%%%%%%%%%%%%%%%%%%%%
+% status - [string] - execution status string
+% tblBedtime - [table] - the bedtime and sleep parameter table
+% aktFull [double-n] - Full Activity vector given at 1s epoch for all days
+% logicBD [double-n] - A logical vector given at 1s epoch representing bedtime status
+% logicSlpInt [double-n] - A logical vector given at 1s epoch representing sleep-interval status
+
+% %%diary-structure%% example - diary structure is used only to find diary defined night/bed
+%  diaryStrct.ID - subjectID ;
+%  diaryStrct.Ticks - all transitions times as Matlab datenum;
+%  diaryStrct.Events - all diary events names (work, leisure etc);
+%  diaryStrct.Comments - all comments for each diary event
+%  diaryStrct.StartT- the diary defined data start time;
+%  diaryStrct.StopT - diary defined data stop time;
+%  diaryStrct.RefTs - standing reference times defined in diary;
+%  diaryStrct.rawData - the raw diary data for this subjectID as a table (including invalid entries)
 
 
 % Copyright (c) 2021, Pasan Hettiarachchi .
