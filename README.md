@@ -1,13 +1,5 @@
 # ActiPASS
 
-<figure>
-    <img src="https://user-images.githubusercontent.com/26480941/170997299-6eda1630-b788-41fc-b83d-005bb2e96335.PNG"
-         alt="ActiPASS GUI">
-    <figcaption>ActiPASS - a user friendly tool to process thigh-worn accelerometer data</figcaption>
-</figure>
-
-[**About**](#about-actipass)
-
 [**ActiPASS References**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References)
 
 [**Documentation**](https://github.com/Ergo-Tools/ActiPASS/wiki)
@@ -22,6 +14,11 @@
 
 [**Source code license**](https://github.com/Ergo-Tools/ActiPASS/blob/main/LICENSE.md)
 
+<figure>
+    <img src="https://user-images.githubusercontent.com/26480941/170997299-6eda1630-b788-41fc-b83d-005bb2e96335.PNG"
+         alt="ActiPASS GUI">
+    <figcaption>ActiPASS - a user friendly tool to process thigh-worn accelerometer data</figcaption>
+</figure>
 
 
 ### About ActiPASS
