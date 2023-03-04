@@ -2,7 +2,7 @@
 
 ### License
 
-Unless otherwise specified in an individual source file, all source code in this repositery are release under **BSD 3-Clause license**. This means if a different license is included in a source file, that license supersedes the BSD 3-Clause license.
+Unless otherwise specified in an individual source file, all source code in this repository are release under **BSD 3-Clause license**. This means if a different license is included in a source file, that license supersedes the BSD 3-Clause license.
 
 **BSD 3-Clause license**
 
