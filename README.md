@@ -17,6 +17,7 @@ Please acknowledge the Developers and NFA as the source of the Software in any p
 
 ActiPASS is made possible by [these open source software](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS) and developers [acknowledge](https://github.com/Ergo-Tools/ActiPASS/wiki/acknowledgements) all who contributed in various means.
 
+### ActiPASS graphical user interface
 
 <figure>
     <img src="https://user-images.githubusercontent.com/26480941/170997299-6eda1630-b788-41fc-b83d-005bb2e96335.PNG"
@@ -24,11 +25,10 @@ ActiPASS is made possible by [these open source software](https://github.com/Erg
     <figcaption>ActiPASS - a user friendly tool to process thigh-worn accelerometer data</figcaption>
 </figure>
 
+### Links
 [**ActiPASS References**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References)
 
 [**Documentation**](https://github.com/Ergo-Tools/ActiPASS/wiki)
-
-[**Source**](https://github.com/Ergo-Tools/ActiPASS)
 
 [**Open source contributions**](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS)
 
