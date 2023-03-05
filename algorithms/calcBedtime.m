@@ -1,4 +1,4 @@
-function [status,tblBedtime,aktFull,logicBD,logicSlpInt] = calcBedtime(Settings,subjectID,diaryStrct,timeFull,aktFull,Acc,Fs,figW,figH)
+function [status,tblBedtime,metaBDs,aktFull,logicBD,logicSlpInt] = calcBedtime(Settings,subjectID,diaryStrct,timeFull,aktFull,Acc,Fs,figW,figH)
 % calcBedtime Calculate bedtime by filtering Liying (or consider the diary defined bedtimes) and calculate sleep within bedtime
 %
 % Inputs:
@@ -14,9 +14,10 @@ function [status,tblBedtime,aktFull,logicBD,logicSlpInt] = calcBedtime(Settings,
 % Outputs:
 %   status - [string] - execution status string
 %   tblBedtime - [table] - the bedtime and sleep parameter table
-%   aktFull [double-n] - Full Activity vector given at 1s epoch for all days
-%   logicBD [double-n] - A logical vector given at 1s epoch representing bedtime status
-%   logicSlpInt [double-n] - A logical vector given at 1s epoch representing sleep-interval status
+%   metaBDs  (double)[m x 2] - a cellarray of number of primary and extra bedtimes for each calander day
+%   aktFull (double)[n] - Full Activity vector given at 1s epoch for all days
+%   logicBD (logical)[n] - A logical vector given at 1s epoch representing bedtime status
+%   logicSlpInt (logical)[n] - A logical vector given at 1s epoch representing sleep-interval status
 %
 % diary-structure fileds:
 %   diaryStrct.ID - subjectID ;
@@ -68,7 +69,7 @@ visStep=round(24*3600/figW);% the shortest possible odd stepSize is 61s for 1440
 
 %define output table vartypes and varnames
 
-varNames=["ID","Method","Flag","Start","End","Duration","DiaryStart","DiaryStartDiff","DiaryEnd","DiaryEndDiff","DiaryDurDiff","SleepOnset",...
+varNames=["ID","Method","Start","End","Duration","DiaryStart","DiaryStartDiff","DiaryEnd","DiaryEndDiff","DiaryDurDiff","SleepOnset",...
     "FinalSleep","MidSleep","SleepInterval","TotalSleep","AwakeIndx","NumAwakes","SleepLatency","WASO"];
 varTypes=repmat("string",size(varNames)); %all variables are defined as string to keep formatting while saving
 
@@ -95,6 +96,7 @@ try
     %define the directories to save distributions
     saveDir=fullfile(Settings.out_folder,indvDirOut,subjectID);
     
+    %prepare for visualizing bedtimes
     if visualizeBD
         %The primary color-map for activities as rgb triplets (for plotting activities in colour)
         actvtColMap=cellfun(@rgb,actvtColors,'UniformOutput',false);
@@ -135,29 +137,31 @@ try
     end
     %the number of diary bedtimes
     numDBedTs=length(bdDStarts);
-    
+    % keep track of extra bedtimes by recording the midpoints of such bedtimes
+    midXtraBDs=[];
     if  matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)
         % this is where automatic bedtime detection happens. It is done using a simple filtering of lying "auto1"
         if strcmpi(Settings.BEDTIME,"auto1")
             bedLgc=~bwareaopen(aktFull~=1,lenAktFilt);
             bedLgc=bwareaopen(bedLgc,lenLieFilt);
-            
+            % find indices of bedtime starts and stops
+            indBdStarts=find(diff([0,bedLgc])==1);
+            indBdEnds=find(diff([0,bedLgc])==-1);
+            % if for some reason last element of bedtime logic vector bedLgc is true
+            % then length(indBdEnds) < length(indBdStarts)
+            if length(indBdEnds) < length(indBdStarts)
+                indBdEnds=[indBdEnds,length(bedLgc)];
+            end
             % or somewhat complicated "auto2" bedtime algorithm
         elseif strcmpi(Settings.BEDTIME,"auto2")
-            [bedLgc,bedFlags]=calcBedLgc(aktFull,timeFlDT,lenAktFilt,lenLieFilt,VLongSitBt);
+            runLsBL=calcBedLgc(aktFull,timeFlDT,lenAktFilt,lenLieFilt,VLongSitBt);
+            indBdStarts=runLsBL{3}(runLsBL{1}==1); % the start of primary bedtimes
+            indBdEnds=runLsBL{4}(runLsBL{1}==1); % the end of primary bedtimes
             
-            infoTxt=join(split(strip(string(num2str(bedFlags,2)))),",");
+            midXtraBDs=timeFlDT(runLsBL{3}(runLsBL{1}==-1))+...
+                (timeFlDT(runLsBL{4}(runLsBL{1}==-1))-timeFlDT(runLsBL{3}(runLsBL{1}==-1)))/2;
             % find indices of bedtime starts and stops
         end
-        % find indices of bedtime starts and stops
-        indBdStarts=find(diff([0,bedLgc])==1);
-        indBdEnds=find(diff([0,bedLgc])==-1);
-        % if for some reason last element of bedtime logic vector bedLgc is true
-        % then length(indBdEnds) < length(indBdStarts)
-        if length(indBdEnds) < length(indBdStarts)
-            indBdEnds=[indBdEnds,length(bedLgc)];
-        end
-        
         
         %find bedtime starts
         bdStarts=timeFlDT(indBdStarts);
@@ -191,7 +195,16 @@ try
     numBedTs=length(bdStarts);
     % find the mid points of auto-bedtimes
     midBeds=bdStarts+(bdEnds-bdStarts)/2;
-    
+    %% count number of bedtimes ffalling on each day
+    startDay=dateshift(timeFlDT(1),'start','day'); % the start day
+    endDay=dateshift(timeFlDT(end),'start','day'); % the last day
+    selDays=startDay:endDay; % range of calander days
+    metaBDs=NaN(length(selDays),2);
+    %find number of primary and extra bedtimes for each calander days
+    for itrDay=1:length(selDays)
+        metaBDs(itrDay,1)=sum(isbetween(midBeds,selDays(itrDay),selDays(itrDay)+days(1)));
+        metaBDs(itrDay,2)=sum(isbetween(midXtraBDs,selDays(itrDay),selDays(itrDay)+days(1)));
+    end
     %% calculating bedtime and sleep parameters
     tblBedtime=table('Size',[numBedTs,length(varNames)],'VariableTypes',varTypes,'VariableNames',varNames);
     
@@ -222,14 +235,14 @@ try
             diffDur=hours(0);%thereis no diff
             bdDStart=bdStart;
             bdDEnd=bdEnd;
-            bdFlag=0;
+            
             % if the bedtime methosdi auto
         elseif matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)
             % if the differance of start bedtime is less than 4hrs we match auto bedtime to a diary bedtime
             %find middle point of this auto bedtime and each diary bedtimes
             midAutoBed=midBeds(itrL);
             midDBeds=bdDStarts+(bdDEnds-bdDStarts)/2;
-            bdFlag=bedFlags(itrL,1);
+            
             if any(abs(midAutoBed-midDBeds)< hours(maxDiffD))
                 %find the relevant bedtime from the diary
                 [~,iMin]=min(abs(midDBeds-midAutoBed));
@@ -253,7 +266,7 @@ try
         logicBD(indBDS)=true; %flag the bedtime in logical bedtime vector
         %run sleep algorithm for each bedtime
         if strcmpi(Settings.SLEEPALG,'In-Bed') || strcmpi(Settings.SLEEPALG,'InOut-Bed')
-            if ~strcmpi(Settings.BEDTIME,"auto2") || (strcmpi(Settings.BEDTIME,"auto2") && bdFlag==1)
+            
             indBdStartAcc=floor(find(Acc(:,1)>= timeFull(indBdStarts(itrL)),1,'first')/Fs)*Fs+1;
             % SkottesSlp algorithm expects exactly aktEvent*Fs elements in ACC matrix.
             % Therefore we have to create the eventEndIndx as follows
@@ -262,7 +275,7 @@ try
             %skotte sleep function is called with opMode=2, which considers both sit and lie periods within bedtime
             Sleep = SkottesSlp(aktFull(indBDS),2,Acc(indBdStartAcc:indBdEndAcc,2:4),Fs,'Thigh');
             aktFull(indBDS(Sleep==0))=10;
-            end
+            
         end
         
         bdAkt=aktFull(indBDS); % Crop the activity vector to current bedtime limits
@@ -292,7 +305,7 @@ try
         if isempty(slpLtncy), slpLtncy=minutes(nan); end
         
         %fill-in the bedtime parameters table
-        tblBedtime{itrL,:}=[subjectID,bdMethod,string(bdFlag),string(bdStart,"yyyy-MM-dd HH:mm:ss"),string(bdEnd,"yyyy-MM-dd HH:mm:ss"),...
+        tblBedtime{itrL,:}=[subjectID,bdMethod,string(bdStart,"yyyy-MM-dd HH:mm:ss"),string(bdEnd,"yyyy-MM-dd HH:mm:ss"),...
             string(bdDur),string(bdDStart,"yyyy-MM-dd HH:mm:ss"),string(diffStart),string(bdDEnd,"yyyy-MM-dd HH:mm:ss"),string(diffEnd),...
             string(diffDur),string(slpOnset,"yyyy-MM-dd HH:mm:ss"),string(finalSlp,"yyyy-MM-dd HH:mm:ss"),...
             string(midSleep,"yyyy-MM-dd HH:mm:ss"),string(slpIntvl),string(totalSlp),awakeIndx,numAwakes,string(slpLtncy),string(tWASO)];
@@ -300,11 +313,7 @@ try
         if visualizeBD
             
             % define the line colour
-            if bdFlag~=-1
-                lineC=rgb('DeepSkyBlue');
-            else
-                lineC=rgb('Khaki');
-            end
+            lineC=rgb('DeepSkyBlue');
             % create the X values line segments
             lineX=[bdStarts(itrL),bdEnds(itrL)];
             lineY=[1.12,1.12];
@@ -314,12 +323,6 @@ try
             txtTick(2)=text(axComb,bdEnds(itrL),1.13,"- "+string(bdEnds(itrL),"HH:mm"),'FontSize',6);
             txtTick(1).Rotation=90;
             txtTick(2).Rotation=90;
-            
-            %debug text
-            if bdFlag~=0
-                txtTick(5)=text(axComb,midBeds(itrL),1.12,"("+infoTxt(itrL)+")",'FontSize',6);
-                txtTick(5).Rotation=90;
-            end
         end
     end
     
@@ -336,26 +339,16 @@ try
         SleepOBD = SkottesSlp(~logicBD.*aktFull,1,Acc(indStartAcc:indEndAcc,2:4),Fs,'Thigh');
         aktFull(SleepOBD==0)=11;
     end
-    %% Plot diary bedtimes
+    %% Plot diary bedtimes (when auto bedtimes also enabled) and finalize bedtime figure
     if visualizeBD
         
         %% processing activity vector for visualization
         % change aktFull vector offset by one (inorder to match against activity color vector)
         
-        % use a moving-mode filter (using colfilt) to reduce the resolution of activity vector (for faster plotting)
-        % aktFullVis = colfilt(aktFull+1,[1,visStep],'sliding',@mode);
+        % use a moving-mode filter to reduce the resolution of activity vector (for faster plotting)
+        
         aktFullVis = modefilt(aktFull+1,[1,2*floor(visStep/2)+1],'replicate');
-        
-        % fix zero padding errors caused by colfilt
-        % nonZeroFirst=find(aktFullVis~=0,1,'first');
-        % nonZeroLast=find(aktFullVis~=0,1,'last');
-        % if ~isempty(nonZeroFirst)
-        %     aktFullVis(1:nonZeroFirst-1)=aktFullVis(nonZeroFirst);
-        % end
-        % if ~isempty(nonZeroLast)
-        %     aktFullVis(nonZeroLast+1:end)=aktFullVis(nonZeroLast);
-        % end
-        
+               
         % find the indices of activity transitions
         diffAkts=[find(diff([0,aktFullVis])~=0),length(aktFullVis)];
         % find the number of activity bouts (consecutive periods of the same activity)
@@ -383,8 +376,11 @@ try
         axComb.XGrid = 'on';
         axComb.XMinorGrid = 'on';
         
+      
+        %plot diary-bedtimes (if auto bedtime selected) and finalize figure with legends, ticks and labels
         
         if matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)
+            %plot diary-bedtimes (if auto bedtime selected)
             for itrL=1:numDBedTs
                 % define the line colour
                 lineC=rgb('RoyalBlue');
@@ -398,16 +394,11 @@ try
                 txtTick(3).Rotation=90;
                 txtTick(4).Rotation=90;
             end
-        end
-        
-        
-        %finalize figure with legends, ticks and labels
-        
-        if matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)
+            % set y-axis limits, ticks and labels
             ylim([0.9,1.4]);
             yticks([1,1.13,1.2]);
             yticklabels({'Activity','AutoBed','DiaryBed'});
-            % set y-axis limits, ticks and labels
+            % keep track of labels to be used in the legend
             lblsAkt=[lblsAkt;lblsBedLgc;lblsBedDLgc];
             linesAkt=[linesAkt;linesBedLgc;linesBedDLgc];
         elseif strcmpi(Settings.BEDTIME,"diary")
@@ -439,9 +430,11 @@ try
 catch ME
     % if an exception occur assign status with error details
     status=getReport(ME,'extended','hyperlinks','off');
+    %set  other outputs to empty
     logicBD=[];
     logicSlpInt=[];
     tblBedtime=[];
+    metaBDs=[];
 end
 
 end

@@ -1,3 +1,4 @@
+function runLsBL=calcBedLgc(aktFull,timeFull,lenAktFilt,lenLieFilt,VLongSitBt)
 % CALCBEDLGC Calculate bedtime logic using by filtering the activities
 %
 % %% Inputs %%%%%%%%%%%%%%%%%
@@ -8,7 +9,11 @@
 % VLongSitBt - very long sit bouts to consider for bedtime filtering (4*3600 default)
 %
 % %% Outputs%%%%%%%%%%%%%%%%%%%%
-% bedLgc [double-n] - A logical vector given at 1s epoch representing bedtime status
+% runLsBL {4 x1} - the run-length-encoded bedTime logic
+%   runLsBL{1}= [m x1] type of bedtime: 1-primary, 2-extra, 0-nobedtime
+%   runLsBL{2}= [m x1] run length (seconds)
+%   runLsBL{3}= [m x1] start index of each run
+%   runLsBL{4}= [m x1] end index of each run
 %
 % Copyright (c) 2021, Pasan Hettiarachchi .
 % All rights reserved.
@@ -35,10 +40,6 @@
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
-
-
-function [bedLgc,bedFlags]=calcBedLgc(aktFull,timeFull,lenAktFilt,lenLieFilt,VLongSitBt)
-
 
 MinLieBt=3600; % minimum lying bout to consider for bedtime expanding
 MinSitBt=7200; % try to connect sit bouts longer than this to adjacent lying or very-long sit bouts
@@ -176,14 +177,13 @@ for itr=1:length(runLsBL{1})
 end
 
 
-%do a run-length-decoding and  return the betime logical vector
-bedLgc=rle(runLsBL);
+
 
 %% scan through the full days to select primary bedtimes.
-runLsBL=rle(bedLgc); % re-do the run-length-encoding (because we changed the encoding above)
+runLsBL=rle(rle(runLsBL)); % re-do the run-length-encoding (because we changed the encoding above)
 
-startDay=dateshift(timeFull(1),'start','day'); % if the day starts dayStartMx hours or later starting day is next day, otherwise start day is today
-endDay=dateshift(timeFull(end),'start','day'); % if the day ends dayEndMin or earlier last day is last-calander day, otherwise last-day is previous day
+startDay=dateshift(timeFull(1),'start','day'); % the start day
+endDay=dateshift(timeFull(end),'start','day'); % the last day
 
 selDays=startDay:endDay;
 
@@ -245,7 +245,7 @@ for itrDay=1:length(selDays)
     end
 end
 
-bedFlags=[bedFlags,selScore,prod(selScore,2)];
+runLsBL{1}(runLsBL{1}==1)=bedFlags;
 
 % remove low scoring bedtimes from run-length-encoding
 % runLsBL{1}(selBedtms(indDel))=0;
