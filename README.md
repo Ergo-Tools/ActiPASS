@@ -26,7 +26,7 @@ ActiPASS is made possible by [these open source software](https://github.com/Erg
 </figure>
 
 ### Links
-[**ActiPASS References**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References)
+[**ActiPASS Citation**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References)
 
 [**Documentation**](https://github.com/Ergo-Tools/ActiPASS/wiki)
 
