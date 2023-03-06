@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Hettiarachchi"
+  given-names: "Pasan"
+  orcid: "https://orcid.org/0000-0003-1377-1923"
+- family-names: "Johansson"
+  given-names: "Peter"
+  orcid: "https://orcid.org/0000-0001-9354-6704"
+title: "ActiPASS"
+version: 1.49
+doi: 10.5281/zenodo.7701099
+date-released: 2023-03-06
+url: "https://github.com/Ergo-Tools/ActiPASS"
