@@ -1,27 +1,28 @@
-# Basic .gitattributes for a MATLAB repo.
-# This template includes Simulink and MuPAD extensions, in addition
-# to the MATLAB extensions.
+*.fig binary
+*.mat binary
+*.mdl binary
+*.mdlp binary
+*.mexa64 binary
+*.mexw64 binary
+*.mexmaci64 binary
+*.mlapp binary
+*.mldatx binary
+*.mlproj binary
+*.mlx binary
+*.p binary
+*.sfx binary
+*.sldd binary
+*.slreqx binary
+*.slmx binary
+*.sltx binary
+*.slxc binary
+*.slx binary merge=mlAutoMerge
+*.slxp binary
 
-# Source files
-# ============
-*.m             text diff=matlab
-*.mu            text diff=matlab
-
-# Caution: *.m also matches Mathematica packages.
-
-# Binary files
-# ============
-*.p             binary
-*.mex*          binary
-*.fig           binary
-*.mat           binary
-*.mdl           binary
-*.slx           binary
-*.mdlp          binary
-*.mlapp         binary
-*.slxp          binary
-*.sldd          binary
-*.mltbx         binary
-*.mlappinstall  binary
-*.mlpkginstall  binary
-*.mn            binary
+## Other common binary file types
+*.docx binary
+*.exe binary
+*.jpg binary
+*.pdf binary
+*.png binary
+*.xlsx binary
