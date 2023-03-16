@@ -138,7 +138,7 @@ try
     %the number of diary bedtimes
     numDBedTs=length(bdDStarts);
     % keep track of extra bedtimes by recording the midpoints of such bedtimes
-    midXtraBDs=[];
+    
     if  matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)
         % this is where automatic bedtime detection happens. It is done using a simple filtering of lying "auto1"
         if strcmpi(Settings.BEDTIME,"auto1")
@@ -203,7 +203,11 @@ try
     %find number of primary and extra bedtimes for each calander days
     for itrDay=1:length(selDays)
         metaBDs(itrDay,1)=sum(isbetween(midBeds,selDays(itrDay),selDays(itrDay)+days(1)));
-        metaBDs(itrDay,2)=sum(isbetween(midXtraBDs,selDays(itrDay),selDays(itrDay)+days(1)));
+        if strcmpi(Settings.BEDTIME,"auto2")
+            metaBDs(itrDay,2)=sum(isbetween(midXtraBDs,selDays(itrDay),selDays(itrDay)+days(1)));
+        else
+            metaBDs(itrDay,2)=0;
+        end
     end
     %% calculating bedtime and sleep parameters
     tblBedtime=table('Size',[numBedTs,length(varNames)],'VariableTypes',varTypes,'VariableNames',varNames);
@@ -275,7 +279,8 @@ try
             %skotte sleep function is called with opMode=2, which considers both sit and lie periods within bedtime
             Sleep = SkottesSlp(aktFull(indBDS),2,Acc(indBdStartAcc:indBdEndAcc,2:4),Fs,'Thigh');
             aktFull(indBDS(Sleep==0))=10;
-            
+        elseif strcmpi(Settings.SLEEPALG,"diary") && strcmpi(Settings.BEDTIME,"diary")
+             aktFull(indBDS)=10;
         end
         
         bdAkt=aktFull(indBDS); % Crop the activity vector to current bedtime limits
