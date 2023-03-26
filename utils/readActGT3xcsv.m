@@ -8,8 +8,8 @@ function [Data,SF,deviceID] = readActGT3xcsv(Fil)
 %       Data          [Nx4]  datetime (Matlab datenum format) and triaxial Acc data
 %       SF            [double] sample frequency
 %       deviceID      [string] the device ID
-
-
+%
+%
 % Copyright (c) 2021, Pasan Hettiarachchi .
 % All rights reserved.
 % 
@@ -41,11 +41,9 @@ function [Data,SF,deviceID] = readActGT3xcsv(Fil)
 Data=[];
 SF=NaN;
 deviceID=NaN;
+
 try
-       
-    
     %Import of data from csv-file:
-    
     Rec = importdata(Fil,',');
     headLs=string(Rec.textdata(:,1));
     %parse the text data in header

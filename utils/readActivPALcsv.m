@@ -10,9 +10,7 @@ function [Data,SF,deviceID,ID] = readActivPALcsv(Fil)
 %       SF            [double] sample frequency
 %       deviceID      [string] the device ID
 %       ID            [string] the participant ID
-
-
-
+%
 % Copyright (c) 2021, Pasan Hettiarachchi .
 % All rights reserved.
 % 
@@ -43,8 +41,6 @@ function [Data,SF,deviceID,ID] = readActivPALcsv(Fil)
 [~,FileName] = fileparts(Fil);
 
 try
-    
-    
     patSN_ID = (textBoundary|"-")+alphanumericsPattern+"-AP" + digitsPattern(6) + whitespaceBoundary;
     textSN_ID=extract(FileName,patSN_ID);
     if ~isempty(textSN_ID)
@@ -55,15 +51,12 @@ try
         
         ID=FileName;
         deviceID=NaN;
-        
     end
     
     %Import af data fra csv-datafilen:
     
     Rec = importdata(Fil,';',2);
-   
     time = Rec.data(:,1);
-    
     
     it = Rec.data(:,2); %sampleindex
     Acc = Rec.data(:,size(Rec.data,2)-2:size(Rec.data,2)); %last 3 columns
@@ -81,8 +74,7 @@ try
     
     Data=zeros(length(t),4);
     Data(:,1)=x2mdate(t);
-    
-    
+  
     if max(max(Acc))> 255 % if any number exceed 255 the file must be a AP4 file
         Grange = 2*4; %range +/-4G
         Data(:,2:4) = (Acc-(1023+4)/2) * (Grange/(1023-4));
