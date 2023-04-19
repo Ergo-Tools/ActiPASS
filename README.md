@@ -20,7 +20,7 @@ ActiPASS is made possible by [these open source software](https://github.com/Erg
 ### ActiPASS graphical user interface
 
 <figure>
-    <img src="https://user-images.githubusercontent.com/26480941/170997299-6eda1630-b788-41fc-b83d-005bb2e96335.PNG"
+    <img src="https://user-images.githubusercontent.com/26480941/230112571-0baca0d0-957a-4974-b3c9-58d21b1d4678.PNG"
          alt="ActiPASS GUI">
     <figcaption>ActiPASS - a user friendly tool to process thigh-worn accelerometer data</figcaption>
 </figure>
