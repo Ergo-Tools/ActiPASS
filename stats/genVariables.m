@@ -44,10 +44,6 @@ function statTable = genVariables(statTable,Activity,Steps,rows_SI,rows_BT,itrSe
 statVars=["Lie","Sit","SitLie","Stand","Move","StandMove","Walk","Run","Stair","Cycle","Upright","Other","INT1",...
     "INT2","INT2_Amb","INT3","INT4","INT34"];
 
-% The activity types
-% NonWear=0, Lie=1, Sit=2, Stand=3, Move=4, Walk=5, Run=6, Stair=7, Cycle=8, Other=9, Sleep=10, LieStill=11
-
-
 %generate non repetitive (for each activity or energy-class) basic variables
 % statTable.Duration(itrSeg)=round(length(Activity)/60,Settings.prec_dig_min);
 % statTable.Excluded(itrSeg)=round(sum(Activity==-1)/60,Settings.prec_dig_min);
