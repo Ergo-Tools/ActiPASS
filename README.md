@@ -4,11 +4,11 @@
 
 ### About ActiPASS
 
-ActiPASS is developed by: [Pasan Hettiarachchi](mailto:pasan.hettiarachchi@medsci.uu.se) and [Peter J. Johansson](mailto:peter.johansson@medsci.uu.se) 
-at Occupational and Environmental Medicine, Department of Medical Sciences, Uppsala University. [[Magnus Svartengren](mailto:magnus.svartengren@medsci.uu.se)]
+ActiPASS is a thigh-worn accelerometer data processing software which is developed by: [Pasan Hettiarachchi](mailto:pasan.hettiarachchi@medsci.uu.se) and [Peter J. Johansson](mailto:peter.johansson@medsci.uu.se) 
+at Occupational and Environmental Medicine, Department of Medical Sciences, Uppsala University. Lead: [[Magnus Svartengren](mailto:magnus.svartengren@medsci.uu.se)]
 
 ActiPASS is based on: Acti4 thigh accelerometer activity detection algorithm developed by Jørgen Skotte 
-at the National Research Centre for the Working Environment (NFA), Copenhagen, Denmark. [[Andreas Holtermann](mailto:aho@nfa.dk)]
+at the National Research Centre for the Working Environment (NFA), Copenhagen, Denmark. Lead: [[Andreas Holtermann](mailto:aho@nfa.dk)]
 
 The development of ActiPASS has partly been funded by [ProPASS Consortium](https://www.propassconsortium.org)
 
@@ -20,7 +20,7 @@ ActiPASS is made possible by [these open source software](https://github.com/Erg
 ### ActiPASS graphical user interface
 
 <figure>
-    <img src="https://user-images.githubusercontent.com/26480941/170997299-6eda1630-b788-41fc-b83d-005bb2e96335.PNG"
+    <img src="https://user-images.githubusercontent.com/26480941/230112571-0baca0d0-957a-4974-b3c9-58d21b1d4678.PNG"
          alt="ActiPASS GUI">
     <figcaption>ActiPASS - a user friendly tool to process thigh-worn accelerometer data</figcaption>
 </figure>
