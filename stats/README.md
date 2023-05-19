@@ -1,6 +1,6 @@
 ## Source code relevant to ActiPASS stats generation module
 
-See [**ActiPASS variables**](ActiPASS-variables-and-other-quality-check-files) for more information about the variables and different tables.
+See [**ActiPASS variables**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-variables-and-other-quality-check-files) for more information about the variables and different tables.
 
 ### License
 Unless otherwise specified in an individual source file, all source code in this repository are release under **BSD 3-Clause license**. This means if a different license is included in a source file, that license supersedes the BSD 3-Clause license.
