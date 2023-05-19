@@ -37,11 +37,15 @@ function statTable = genVariables(statTable,Activity,Steps,rows_SI,rows_BT,itrSe
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
 
+%% generate variables: here we go
+% The activity types and corresponding numbers are:
+% NonWear=0, Lie=1, Sit=2, Stand=3, Move=4, Walk=5, Run=6, Stair=7, Cycle=8, Other=9, Sleep=10, LieStill=11
 
 statVars=["Lie","Sit","SitLie","Stand","Move","StandMove","Walk","Run","Stair","Cycle","Upright","Other","INT1",...
     "INT2","INT2_Amb","INT3","INT4","INT34"];
 
-%check whether valid data is present (specialy for domain specific tables this can be true)
+% The activity types
+% NonWear=0, Lie=1, Sit=2, Stand=3, Move=4, Walk=5, Run=6, Stair=7, Cycle=8, Other=9, Sleep=10, LieStill=11
 
 
 %generate non repetitive (for each activity or energy-class) basic variables
