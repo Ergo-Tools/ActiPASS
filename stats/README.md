@@ -2,7 +2,14 @@
 
 See [**ActiPASS variables**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-variables-and-other-quality-check-files) for more information about the variables and different tables.
 
-### License
+## How stats generation module work
+1. The function [**genStat**](genStats.m) is called by ActiPASS GUI after the completion of one or more batch processes
+2. [**genStat**](genStats.m) parses the file [**ActiPASS_QC_MasterFile.xlsx**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-project-folder-structure#5-actipass_qc_masterfilexlsx)
+3. It then loads raw (1s epoch) activity and sedentary behaviour data for each participant
+4. It calls the function [**genDlyTable**](genDlyTable.m) and/or [**genEventTable**](genEventTable.m) to generate daily and/or event interval based tables
+5. These functions in turn calls **genVariables**, **genAktStats** and **findBouts** functions.
+
+## License
 Unless otherwise specified in an individual source file, all source code in this repository are release under **BSD 3-Clause license**. This means if a different license is included in a source file, that license supersedes the BSD 3-Clause license.
 
 **BSD 3-Clause license**
