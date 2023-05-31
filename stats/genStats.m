@@ -408,7 +408,7 @@ try
     end
     
     % Saving events table to disk
-    if matches(Settings.TblFormat,["Events","EventsNoBreak","Long+Events"],'IgnoreCase',true)
+    if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events"],'IgnoreCase',true)
         % merge finalHozTbl with existing master horizontal table in the disk
         % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         fnlEvntTblF=fullfile(Settings.projectDir,Settings.evntMasterFile);
