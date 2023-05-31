@@ -2,9 +2,10 @@ function statTable = genVariables(statTable,Activity,Steps,rows_SI,rows_BT,itrSe
 %genVariables generate variables for given activity of a given segment(a day or an Event)
 % INPUTS:
 % statTable - the table to fill data with
-% Activity - a logical vector representing an activity or intensity class (per-sec)
+% Activity - a vector representing an activity or behaviour for each second
 % Steps - the steps count (when applicable) for each second
-% rows_SI - the logical flag of sleep-interval for each second
+% rows_SI - the logical flag representing sleep-interval for each second
+% rows_BT - the logical flag representing bedtime for each second
 % itrSeg - the iteration number of current segment
 % Settings - the settings structure
 
