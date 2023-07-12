@@ -424,7 +424,7 @@ try
                     impOptVertT.VariableTypes=varfun(@class,finalEvntTbl(1,:),'OutputFormat','cell');
                     oldEvntTbl=readtable(fnlEvntTblF,impOptVertT);
                     indOverlap = ismember(oldEvntTbl.SubjectID,finalEvntTbl.SubjectID);
-                    oldEvntTbl(indOverlap,:)=[]; % delete those overlapping rows from old horizontal table
+                    oldEvntTbl(indOverlap,:)=[]; % delete those overlapping rows from old event table
                     
                     finalEvntTbl=vertcat(oldEvntTbl,finalEvntTbl); % concatenate master QC table with current batch  QC table
                     finalEvntTbl=sortrows(finalEvntTbl,1); % sort the table first by ID
