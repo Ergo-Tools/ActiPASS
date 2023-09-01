@@ -222,8 +222,11 @@ bedFlags=zeros(length(selBedtms),1); % the primary/secondary bedtime marker inti
 
 % iterate through each day and find primary/secondary bedtimes based on a 48h window
 for itrDay=1:length(selDays)
-    % find bedtimes embedded in a period of 04:00 to 04:00 of the selected day and proportion of inclusion (using midpoint)
-    startT48h=max(selDays(itrDay)-hours(8),timeFull(1)); endT48h=min(selDays(itrDay)+hours(40),timeFull(end)); % start end times of current 24h window
+    % find bedtimes embedded in 48h periods of 16:00 to 16:00 
+    % find the start of 48h period
+    startT48h=max(selDays(itrDay)-hours(8),timeFull(1));
+    % find end time of 48h period
+    endT48h=min(selDays(itrDay)+hours(40),timeFull(end)); 
     
     % find the total valid time within the 48h window (use data from previous iteration when available)
    
