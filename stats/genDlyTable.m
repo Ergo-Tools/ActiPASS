@@ -59,7 +59,8 @@ endDay=dateshift(dateTimeDT(end),'start','day');
 
 % if for some case data ends exactly at midnight, endDay should actually be the previous day
 if endDay==dateTimeDT(end)
-    endDay=endDay-days(1);
+    qcMeta(datetime(qcMeta.Start)==endDay,:)=[]; %remove the last day from daily-qc table
+    endDay=endDay-days(1); % select the previous day as the end day
 end
 
 %check whether stat domains is empty
