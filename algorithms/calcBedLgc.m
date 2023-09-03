@@ -247,7 +247,8 @@ for itrDay=1:length(selDays)
         bedFlags(embdBed48h(indKp))=1;
     end
 end
-
+% store primary/seconday bedtimes directly in runLsBL by converting runLsBL{1} to double
+runLsBL{1}=double(runLsBL{1});
 runLsBL{1}(runLsBL{1}==1)=bedFlags;
 
 % remove low scoring bedtimes from run-length-encoding
