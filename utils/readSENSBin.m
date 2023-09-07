@@ -46,6 +46,7 @@ SF=NaN;
 deviceID=NaN;
 
 try
+    
     Fid = fopen(File);
     D_raw = fread(Fid,[6,Inf],'int16=>int16',0,'b')'; %6 bytes (Unix ms), 2 bytes (X), 2 bytes (Y), 2 bytes (Z)
     fclose(Fid);
@@ -53,7 +54,22 @@ try
     T_raw = double([typecast(D_raw(:,1),'uint16'),typecast(D_raw(:,2),'uint16'),typecast(D_raw(:,3),'uint16')]) * [2^32,2^16,1]';
     T_sens = datenum('1970/01/01') + T_raw/1000/86400 + timeZoneOffset/24; %return local time
     SF=round(1/(86400*mean(diff(T_sens(1:min(1000,length(T_sens)))))),1); % find the sample frequency
-    Data =  [T_sens,Acc];
+    Data =  [T_sens,Acc]; % merge time and Acc data horizontally into one matrix
+    patStartID = filesep+"export_";
+    patEndID = "_acc-"+wildcardPattern;
+    deviceID=extractBetween(File,patStartID,patEndID); % find the device-ID string
+    % check whether the iD_string have the correct format
+    if ~matches(deviceID,textBoundary+alphanumericsPattern(2)+"-"+alphanumericsPattern(2)+"."+alphanumericsPattern(2)+textBoundary)
+        deviceID=NaN;
+    else
+        try
+            % assume ID string is hexadecimal and find the decimal value from the hex value
+            deviceID=hex2dec(erase(deviceID,["-","."]));
+        catch
+            deviceID=NaN;
+        end
+    end
+    
 catch ME
     error("Error loading SENS motion bin file: "+ME.message);
 end
