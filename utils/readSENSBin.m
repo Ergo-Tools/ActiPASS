@@ -1,7 +1,7 @@
 function [Data,SF,deviceID] = readSENSBin(File,timeZoneOffset)
 arguments
-    File string
-    timeZoneOffset double = 0
+    File {mustBeFile}
+    timeZoneOffset double = hours(tzoffset(datetime('now','TimeZone','local'))) % if no timeZoneOffset is given assume it's UTC
 end
 % Read SENS motion binary files
 % 
