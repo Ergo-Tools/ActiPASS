@@ -1,9 +1,13 @@
-function [Data,SF,deviceID] = readSENSBin(File)
-
+function [Data,SF,deviceID] = readSENSBin(File,timeZoneOffset)
+arguments
+    File string
+    timeZoneOffset double = 0
+end
 % Read SENS motion binary files
 % 
 % Input:
 %       File   [string/char-array]    full file path as a string
+%       timeZoneOffset [double] Timezone offset in hours from UTC where the measurement is made
 %   Output:
 %       Data          [Nx4]  datetime (Matlab datenum format) and triaxial Acc data
 %       SF            [double] sample frequency
@@ -47,7 +51,7 @@ try
     fclose(Fid);
     Acc = double(D_raw(:,4:6))*0.0078125; %Acceleration
     T_raw = double([typecast(D_raw(:,1),'uint16'),typecast(D_raw(:,2),'uint16'),typecast(D_raw(:,3),'uint16')]) * [2^32,2^16,1]';
-    T_sens = datenum('1970/01/01') + T_raw/1000/86400 + 2/24; %UTC
+    T_sens = datenum('1970/01/01') + T_raw/1000/86400 + timeZoneOffset/24; %return local time
     SF=round(1/(86400*mean(diff(T_sens(1:min(1000,length(T_sens)))))),1); % find the sample frequency
     Data =  [T_sens,Acc];
 catch ME
