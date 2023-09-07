@@ -1,16 +1,16 @@
-function  Acc = ChangeAxes(Acc,Type,Orientation)
+function [Data,SF,deviceID] = readSENSBin(File)
 
-% ChangeAxes Change the raw Acc data based on orientation and device type. 
+% Read SENS motion binary files
+% 
+% Input:
+%       File   [string/char-array]    full file path as a string
+%   Output:
+%       Data          [Nx4]  datetime (Matlab datenum format) and triaxial Acc data
+%       SF            [double] sample frequency
+%       deviceID      [string] the device ID -currently set to NaN since SENS bin files do not carry this information
 %
-% Type (text): ActiGraph, Axivity or ActivPAL
-% Orientation: 1, 2, 3, 4 
-% Acc: [n,3]: Triaxial accelerometer data
 %
-% Standard Acti4 orientationn: x downwards, z outward from body surface (Manufacturer serial number inward)
-% it is assumed the ActivPAL data is corrected intially to match Axivity data.
-
-% **********************************************************************************
-% % Copyright (c) 2022, Pasan Hettiarachchi .
+% Copyright (c) 2023, Pasan Hettiarachchi .
 % All rights reserved.
 % 
 % Redistribution and use in source and binary forms, with or without 
@@ -35,23 +35,21 @@ function  Acc = ChangeAxes(Acc,Type,Orientation)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE. 
-% ************************************************************************************
 
-if  strcmp(Type,'ActiGraph') || strcmp(Type,'Axivity') || strcmp(Type,'ActivPAL') || strcmp(Type,'SENS')
-   if Orientation == 1 %no shift
-      Acc = -Acc; 
-   end
-   if Orientation == 2 %in/out shift
-      Acc = Acc.*[-1,1,1]; 
-   end
-   if Orientation == 3 %up/down shift
-      Acc = Acc.*[1,1,-1]; 
-   end
-   if Orientation == 4 %both up/down and in/out shift
-      Acc = Acc.*[1,-1,1];  
-   end
+% intialise outputs
+Data=[];
+SF=NaN;
+deviceID=NaN;
+
+try
+    Fid = fopen(File);
+    D_raw = fread(Fid,[6,Inf],'int16=>int16',0,'b')'; %6 bytes (Unix ms), 2 bytes (X), 2 bytes (Y), 2 bytes (Z)
+    fclose(Fid);
+    Acc = double(D_raw(:,4:6))*0.0078125; %Acceleration
+    T_raw = double([typecast(D_raw(:,1),'uint16'),typecast(D_raw(:,2),'uint16'),typecast(D_raw(:,3),'uint16')]) * [2^32,2^16,1]';
+    T_sens = datenum('1970/01/01') + T_raw/1000/86400 + 2/24; %UTC
+    SF=round(1/(86400*mean(diff(T_sens(1:min(1000,length(T_sens)))))),1); % find the sample frequency
+    Data =  [T_sens,Acc];
+catch ME
+    error("Error loading SENS motion bin file: "+ME.message);
 end
-
-
-
-
