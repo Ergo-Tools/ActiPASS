@@ -1,10 +1,6 @@
 function [Data,SF,deviceID] = readSENSBin(File,timeZoneOffset)
-arguments
-    File {mustBeFile}
-    timeZoneOffset double = hours(tzoffset(datetime('now','TimeZone','local'))) % if no timeZoneOffset is given assume it's UTC
-end
 % Read SENS motion binary files
-% 
+
 % Input:
 %       File   [string/char-array]    full file path as a string
 %       timeZoneOffset [double] Timezone offset in hours from UTC where the measurement is made
@@ -12,8 +8,15 @@ end
 %       Data          [Nx4]  datetime (Matlab datenum format) and triaxial Acc data
 %       SF            [double] sample frequency
 %       deviceID      [string] the device ID -currently set to NaN since SENS bin files do not carry this information
-%
-%
+
+% arguments checks
+arguments
+    
+    File {mustBeFile}
+    % if no timeZoneOffset is given assume it's local time-zone
+    timeZoneOffset double = hours(tzoffset(datetime('now','TimeZone','local'))) 
+end
+
 % Copyright (c) 2023, Pasan Hettiarachchi .
 % All rights reserved.
 % 
@@ -40,7 +43,7 @@ end
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE. 
 
-% intialise outputs
+% initialise outputs
 Data=[];
 SF=NaN;
 deviceID=NaN;

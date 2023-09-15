@@ -70,19 +70,27 @@ try
         t = time;
     end
     
-    SF=round(1/(86400*mean(diff(t(1:min(1000,length(t))))))); % find the sample frequency
-    
+    % Number of samples to check to extract information
+    NumSmpls=min(1000,length(t));
+    % find the sample frequency
+    SF=round(1/(86400*mean(diff(t(1:NumSmpls))))); 
+    %intialize a 4 column matrix to store time and Acc data
     Data=zeros(length(t),4);
     Data(:,1)=x2mdate(t);
-  
-    if max(max(Acc))> 255 % if any number exceed 255 the file must be a AP4 file
-        Grange = 2*4; %range +/-4G
-        Data(:,2:4) = (Acc-(1023+4)/2) * (Grange/(1023-4));
-    else % otherwise it's an ActivPAL3 file
-        Grange = 2*2; %range +/-2G
-        Data(:,2:4) = (Acc-(253+1)/2)*(Grange/(253-1));
+    % test for g-format or integer format 2023-09-15
+    if all(round(Acc(1:NumSmpls,1))==Acc(1:NumSmpls,1)) % if all values are integers
+        if max(max(Acc))> 255 % if any number exceed 255 the file must be a AP4 file
+            Grange = 2*4; %range +/-4G
+            %Data(:,2:4) = (Acc-(1023+4)/2) * (Grange/(1023-4));
+            Data(:,2:4) = Acc*Grange/1024-Grange/2;
+        else % otherwise it's an ActivPAL3 file (8-bit)
+            Grange = 2*2; %range +/-2G
+            %Data(:,2:4) = (Acc-(253+1)/2)*(Grange/(253-1));
+            Data(:,2:4) = Acc*Grange/256-Grange/2;
+        end
+    else
+        Data(:,2:4)=Acc;
     end
-    
 catch APE
     error("Error loading ActivPal CSV file: "+APE.message);
 end
