@@ -27,7 +27,7 @@ ActiPASS is made possible by [these open source software](https://github.com/Erg
 
 ### Download ActiPASS
 
-Please contact authors to receive a compiled executable version of ActiPASS if you agree to the [End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement) above.
+Please contact developers via email to receive a compiled executable version of ActiPASS if you agree to the [End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement) above.
 
 ### Links
 
