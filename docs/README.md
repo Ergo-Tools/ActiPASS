@@ -1,6 +1,6 @@
 # ActiPASS
 
-![ActiPASS logo blue](https://user-images.githubusercontent.com/26480941/170669286-19ad73a9-df25-4903-ad07-29746b6ca0c8.PNG)
+![actipass_Horizontal](https://github.com/Ergo-Tools/ActiPASS/assets/26480941/c68b2bb3-10c2-4a89-bad6-0b99913e1199)
 
 ### About ActiPASS
 
