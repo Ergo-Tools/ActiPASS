@@ -25,6 +25,10 @@ ActiPASS is made possible by [these open source software](https://github.com/Erg
     <figcaption>ActiPASS - a user friendly tool to process thigh-worn accelerometer data</figcaption>
 </figure>
 
+### Download ActiPASS
+
+Please contact authors to receive a compiled executable version of ActiPASS if you agree to the [End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement) above.
+
 ### Links
 
 [**Citing ActiPASS**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References)
@@ -38,11 +42,4 @@ ActiPASS is made possible by [these open source software](https://github.com/Erg
 [**End-User License Agreement (for compiled binary releases)**](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement)
 
 [**Source code license**](https://github.com/Ergo-Tools/ActiPASS/blob/main/LICENSE.md)
-
-### Download ActiPASS
-
-Please contact authors to receive a compiled executable version of ActiPASS if you agree to the [End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement) above.
-
-
-
 
