@@ -11,7 +11,7 @@ function [Data,SF,deviceID,ID] = readActivPALcsv(Fil)
 %       deviceID      [string] the device ID
 %       ID            [string] the participant ID
 %
-% Copyright (c) 2021, Pasan Hettiarachchi .
+% Copyright (c) 2023, Pasan Hettiarachchi .
 % All rights reserved.
 % 
 % Redistribution and use in source and binary forms, with or without 
@@ -38,7 +38,7 @@ function [Data,SF,deviceID,ID] = readActivPALcsv(Fil)
 % POSSIBILITY OF SUCH DAMAGE.  
 
 %File name information:
-[~,FileName] = fileparts(Fil);
+[~,FileName,ext] = fileparts(Fil);
 
 try
     patSN_ID = (textBoundary|"-")+alphanumericsPattern+"-AP" + digitsPattern(6) + whitespaceBoundary;
@@ -53,21 +53,24 @@ try
         deviceID=NaN;
     end
     
-    %Import af data fra csv-datafilen:
-    
-    Rec = importdata(Fil,';',2);
-    time = Rec.data(:,1);
-    
-    it = Rec.data(:,2); %sampleindex
-    Acc = Rec.data(:,size(Rec.data,2)-2:size(Rec.data,2)); %last 3 columns
-    clear Rec
-    
-    % check for compressed or uncompressed data format
-    if length(it) < it(end)+1 %Compressed data
-        t = interp1(it,time,0:it(end),'linear');
-        Acc = interp1(time,Acc,t,'nearest');
-    else %uncompresses data
-        t = time;
+    %Import af data from csv or npy file:
+    if strcmpi(ext,".npy")
+        %data = readNPY(Fil);
+         error("Cannot load NPY format files");
+    elseif strcmpi(ext,".csv")
+        Rec = importdata(Fil,';',2);
+        time = Rec.data(:,1);
+        it = Rec.data(:,2); %sampleindex
+        Acc = Rec.data(:,size(Rec.data,2)-2:size(Rec.data,2)); %last 3 columns
+        clear Rec
+        
+        % check for compressed or uncompressed data format
+        if length(it) < it(end)+1 %Compressed data
+            t = interp1(it,time,0:it(end),'linear');
+            Acc = interp1(time,Acc,t,'nearest');
+        else %uncompresses data
+            t = time;
+        end
     end
     
     % Number of samples to check to extract information
@@ -79,7 +82,7 @@ try
     Data(:,1)=x2mdate(t);
     % test for g-format or integer format 2023-09-15
     if all(round(Acc(1:NumSmpls,1))==Acc(1:NumSmpls,1)) % if all values are integers
-        if max(max(Acc))> 255 % if any number exceed 255 the file must be a AP4 file
+        if max(Acc,[],'all')> 255 % if any number exceed 255 the file must be a AP4 file
             Grange = 2*4; %range +/-4G
             %Data(:,2:4) = (Acc-(1023+4)/2) * (Grange/(1023-4));
             Data(:,2:4) = Acc*Grange/1024-Grange/2;
