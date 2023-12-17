@@ -82,7 +82,7 @@ try
     Data(:,1)=x2mdate(t);
     % test for g-format or integer format 2023-09-15
     if ~any(rem(Acc,1),'all') % if all values are integers, remainder by division of 1 should be zeros
-        if max(abs(Acc),[],'all')> 255 % if any number exceed 255 the file must be a AP4 file
+        if max(Acc,[],'all')> 255 % if any number exceed 255 the file must be a AP4 file
             Grange = 2*4; %range +/-4G
             %Data(:,2:4) = (Acc-(1023+4)/2) * (Grange/(1023-4));
             Data(:,2:4) = Acc*Grange/1024-Grange/2;
