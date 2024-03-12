@@ -8,7 +8,7 @@
 ActiPASS is a thigh-worn accelerometer data processing software which is developed by: [Pasan Hettiarachchi](mailto:pasan.hettiarachchi@medsci.uu.se) and [Peter J. Johansson](mailto:peter.johansson@medsci.uu.se) 
 at Occupational and Environmental Medicine, Department of Medical Sciences, Uppsala University. Lead: [[Magnus Svartengren](mailto:magnus.svartengren@medsci.uu.se)]
 
-ActiPASS is based on: Acti4 thigh accelerometer activity detection algorithm developed by Jørgen Skotte 
+ActiPASS is based on: [Acti4 thigh accelerometer activity detection algorithm](https://github.com/motus-nfa/Acti4/) developed by Jørgen Skotte 
 at the National Research Centre for the Working Environment (NFA), Copenhagen, Denmark. Lead: [[Andreas Holtermann](mailto:aho@nfa.dk)]
 
 The development of ActiPASS has partly been funded by [ProPASS Consortium](https://www.propassconsortium.org)
@@ -17,6 +17,10 @@ ActiPASS may not be used for any commercial purposes without written permission 
 Please acknowledge the Developers and NFA as the source of the Software in any publications by referring to [relevant publications](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References) about Acti4 /ActiPASS.
 
 ActiPASS is made possible by [these open source software](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS) and developers [acknowledge](https://github.com/Ergo-Tools/ActiPASS/wiki/acknowledgements) all who contributed in various means.
+
+### Report your work
+Please report any publications which implement ActiPASS [here](https://doit.medfarm.uu.se/bin/kurt3/kurt/8865977)
+
 
 ### ActiPASS graphical user interface
 
@@ -30,11 +34,14 @@ ActiPASS is made possible by [these open source software](https://github.com/Erg
 
 Please contact developers via email to receive a compiled executable version of ActiPASS if you agree to the [End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement).
 
+
 ### Links
 
 [**Citing ActiPASS**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References)
 
 [**Documentation**](https://github.com/Ergo-Tools/ActiPASS/wiki)
+
+[**Acti4**](https://github.com/motus-nfa/Acti4/)
 
 [**Open source contributions**](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS)
 
