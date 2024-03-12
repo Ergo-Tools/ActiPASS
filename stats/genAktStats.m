@@ -136,5 +136,5 @@ else
 end
 
 akt_NBrk = length(find(diff(Akt)==-1)); %for akt: number of breaks in given activity
-%length(Off) is not used, this would give one extra rise if interval is finished in sittting/lying position
+%length(Off) is not used, this would give one extra rise if interval is finished at the activity/behaviour concern
 end

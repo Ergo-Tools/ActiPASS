@@ -182,7 +182,12 @@ try
             % trim StdSum Vector
             StdSum=StdSum(activStart:activeEnd);
             % trim the Acc vectors.
-            Acc=Acc(smpls1S(activStart):(smpls1S(activeEnd)+Fs-1),:);
+            indActivStart=smpls1S(activStart);
+            indActivEnd=smpls1S(activeEnd)+Fs-1;
+            Acc=Acc(indActivStart:indActivEnd,:);
+            % save trim start/end indices of original Acc vector (for trimming other sensor data)
+            QCData.indActivStart=indActivStart;
+            QCData.indActivEnd=indActivEnd;
             % trim the smpls1S vector
             smpls1S=smpls1S(activStart:activeEnd)-smpls1S(activStart)+1;
             %trim the meanTemp vector if exist
@@ -532,16 +537,10 @@ try
     %% Final stage of QC-module 
     % if exMode is Warn or off assume default flips/rotations
     if ~strcmpi(exMode,'Force')
+        
+        % derive orientation form defOrientation (1=[0,0], 2=[0,1],3=[1,0], 4=[1,1]
+        Orientation=2*defOrientation(1)+defOrientation(2)+1; 
         % call ChangeAxes function to change the orientation
-        if defOrientation(1) && defOrientation(2)
-            Orientation=4; % both flipped and rotated
-        elseif  defOrientation(1) && ~defOrientation(2)
-            Orientation=3; % Rotated
-        elseif ~defOrientation(1) && defOrientation(2)
-            Orientation=2; % flipped
-        else
-            Orientation=1; % no flip or rotation
-        end
         Acc(:,2:4) = ChangeAxes(Acc(:,2:4),devType,Orientation);
     end
     
@@ -551,15 +550,9 @@ catch ME
     % if an exception occur and exMode is force assume default orientation
     % and correct Acc data s.t. activity detection works
     if ~strcmpi(status,'OK')
-        if defOrientation(1) && defOrientation(2)
-            Orientation=4; % both flipped and rotated
-        elseif  defOrientation(1) && ~defOrientation(2)
-            Orientation=3; % Rotated
-        elseif ~defOrientation(1) && defOrientation(2)
-            Orientation=2; % flipped
-        else
-            Orientation=1; % no flip or rotation
-        end
+        % derive orientation form defOrientation (1=[0,0], 2=[0,1],3=[1,0], 4=[1,1]
+        Orientation=2*defOrientation(1)+defOrientation(2)+1; 
+        % call ChangeAxes function to change the orientation
         Acc(:,2:4) = ChangeAxes(Acc(:,2:4),devType,Orientation);
     end
     status="QC Module crashed";

@@ -85,9 +85,7 @@ for itrEvent=1:numEvents
     rows_BT=evntPerSecT.Bedtime ==1; % find the seconds flagged as bedtime
     % call genVariables function
     eventTable=genVariables(eventTable,evntPerSecT.Activity,evntPerSecT.Steps,rows_SI,rows_BT,itrEvent,Settings);
-    
-    
-    
+   
     if uiPgDlg.CancelRequested
         status="Canceled";
         return;
