@@ -18,6 +18,10 @@ Please acknowledge the Developers and NFA as the source of the Software in any p
 
 ActiPASS is made possible by [these open source software](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS) and developers [acknowledge](https://github.com/Ergo-Tools/ActiPASS/wiki/acknowledgements) all who contributed in various means.
 
+### Report your work
+Please report any publications which implement ActiPASS [here](https://doit.medfarm.uu.se/bin/kurt3/kurt/8865977)
+
+
 ### ActiPASS graphical user interface
 
 <figure>
@@ -29,6 +33,7 @@ ActiPASS is made possible by [these open source software](https://github.com/Erg
 ### Download ActiPASS
 
 Please contact developers via email to receive a compiled executable version of ActiPASS if you agree to the [End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement).
+
 
 ### Links
 
