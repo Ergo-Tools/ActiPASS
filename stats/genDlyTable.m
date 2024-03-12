@@ -94,6 +94,7 @@ end
 
 workDays=false(numDays,1);% array to hold valid workday flag
 offDays=false(numDays,1);% array to hold valid leisure-day flag
+sickDays=false(numDays,1);% array to hold valid sickday flag
 
 %% Iterate through each day
 for itrDay=1:numDays
@@ -128,9 +129,17 @@ for itrDay=1:numDays
     
     if dmnStats
         if any(contains(dayPerSecT.Event,StatDomains,'IgnoreCase',true))
-            if UseDBedAsLeis
-                indsBed=matches(dayPerSecT.Event,["bed","bedtime","night"],'IgnoreCase',true);
-                dayPerSecT.Event(indsBed)="Leisure";
+            % How to treat diary defined bedtimes when StatDomains does not contain ["bed","bedtime","night"]
+            if UseDBedAsLeis 
+                % if the event is "sick" is defined anywhere during the day, night time is considered sick
+                if any(strcmpi(dayPerSecT.Event,"Sick"))
+                    indsBed=matches(dayPerSecT.Event,["bed","bedtime","night"],'IgnoreCase',true);
+                    dayPerSecT.Event(indsBed)="Sick";
+                else
+                    % otherwise night time is considered leusure
+                    indsBed=matches(dayPerSecT.Event,["bed","bedtime","night"],'IgnoreCase',true);
+                    dayPerSecT.Event(indsBed)="Leisure";
+                end
             end
             for itrDm=1:length(StatDomains)
                 
@@ -149,8 +158,12 @@ for itrDay=1:numDays
                 if contains(StatDomains(itrDm),"Work",'IgnoreCase',true) && dlyTblDmns{itrDm}.Duration(itrDay) >0
                     workDays(itrDay)=true;
                 end
-                if contains(StatDomains(itrDm),"Leisure",'IgnoreCase',true) && dlyTblDmns{itrDm}.Duration(itrDay)>0 &&...
+                if contains(StatDomains(itrDm),"Sick",'IgnoreCase',true) && dlyTblDmns{itrDm}.Duration(itrDay)>0 &&...
                         ~workDays(itrDay)
+                    sickDays(itrDay)=true;
+                end
+                if contains(StatDomains(itrDm),"Leisure",'IgnoreCase',true) && dlyTblDmns{itrDm}.Duration(itrDay)>0 &&...
+                        ~workDays(itrDay) && ~sickDays(itrDay)
                     offDays(itrDay)=true;
                 end
             end
@@ -169,9 +182,10 @@ end
 
 %% find daily DayType, QC-status and fill all QC-flags from metadata
 
-% asign WorkDay LeisureDay flag for each day
+% asign WorkDay, LeisureDay, SickDay flag for each day
 dlyTable.DayType(workDays)="Work";
 dlyTable.DayType(offDays)="DayOff";
+dlyTable.DayType(sickDays)="Sick";
 
 %find consecutive no-sleep-interval cases
 consecNoSlp=movsum(qcMeta.NoSleepInt,2);
@@ -179,10 +193,10 @@ if height(dlyTable)>1
     consecNoSlp(1)=consecNoSlp(2);
 end
 
-notEnoughValid = dlyTable.ValidDuration < (Settings.validDayHrs*60);
+notEnoughWear = dlyTable.ValidDuration < (Settings.validDayHrs*60);
 %fill in daily-QC flag for alldays
 Sensor_Errs_day=repmat(Sensor_Errs=="Yes",height(dlyTable),1); % consider file-level Sensor_Errs into account for each day
-dlyTable.Day_QC(notEnoughValid | (qcMeta.NoWlk & qcMeta.TooMuchOther) | (consecNoSlp>1) | (dlyTable.Awake==0))="NotOK";
+dlyTable.Day_QC(notEnoughWear | (qcMeta.NoWlk & qcMeta.TooMuchOther) | (consecNoSlp>1) | (dlyTable.Awake==0))="NotOK";
 dlyTable.Day_QC(ismissing(dlyTable.Day_QC ) & (qcMeta.TooMuchOther | qcMeta.TooMuchStair | qcMeta.NoWlk | Sensor_Errs_day))="Check";
 dlyTable.Day_QC(ismissing(dlyTable.Day_QC ))="OK";
 %fill daily QC flags from metadata file
@@ -214,7 +228,7 @@ end
 
 % How validDays are defined, only considering weartime (ValidDuration to be precise) or ProPASS  daily QC criteria
 if Settings.StatsVldD=="only wear-time"
-    validDays = ~notEnoughValid; % find days with enough valid duration
+    validDays = ~notEnoughWear; % find days with enough valid duration
 elseif Settings.StatsVldD=="ProPASS"
     validDays = dlyTable.Day_QC ~="NotOK";
 end

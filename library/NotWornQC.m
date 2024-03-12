@@ -2,7 +2,10 @@ function  [NotWornLogic,NightLogic,StdSum,warning] = NotWornQC(Acc,meanTEMP,diar
 
 % NotWornQC Estimation of periods of 'not-worn' for quality checking Acc data.
 % Based on the not-worn function in Acti4 with inclusion of temperature profiling.
-% (c) 2021, Pasan Hettiarachchi, Uppsala University
+% This function uses code from Acti4 non-wear algorithm. 
+% % Copyright (c) 2020, Jørgen Skotte
+% https://github.com/motus-nfa/Acti4/blob/main/Version%20July%202020/NotWorn.m
+
 % 
 % Input:
 % Acc [N,4]: Unfiltered accelerations evenly sampled
@@ -34,6 +37,8 @@ function  [NotWornLogic,NightLogic,StdSum,warning] = NotWornQC(Acc,meanTEMP,diar
 % is detection just before (within 10 sec.) and the orientaion deviates less than 5° from horizontal lying.
 % above notworn is further adjusted based on temperature profiling if Temperature data exist
 
+
+
 % Copyright (c) 2022, Pasan Hettiarachchi .
 % All rights reserved.
 %
@@ -59,6 +64,7 @@ function  [NotWornLogic,NightLogic,StdSum,warning] = NotWornQC(Acc,meanTEMP,diar
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
+
 
 
 filt_win= 2; % main time window for different types of filtering

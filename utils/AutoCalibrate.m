@@ -132,7 +132,9 @@ stdMeanAcc=movstd(Acc(:,2:4),FiltWin,1);
 stdMeanAcc=stdMeanAcc(smplsTS,:); % downsampling at t_step intervals
 
 smplsStill=sum(stdMeanAcc <= actThresh,2) == 3;
+
 movMeanAcc=movMeanAcc(smplsStill,:); % only select the mean values of still points
+%stdMeanAcc=sum(stdMeanAcc(smplsStill,:),2);
 
 SVM=sqrt(sum(movMeanAcc .^ 2, 2)); % VM of still periods
 dif_percn_10_90=prctile(SVM,90)-prctile(SVM,10);

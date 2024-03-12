@@ -1,9 +1,10 @@
 
-function  [status,diaryStrct,diary_file] = open_diary(diary_file,subjectIDs)
+function  [status,diaryStrct,diary_file] = open_diary(diary_file,subjectIDs,noDiary)
 % OPEN_DIARY Opens ActiPASS formatted diary and read information for given subject IDs.
 % Inputs:
 %  diary_file: [string] last diary file - used in file-opening-dialog; ex. set to %USERPROFILE% first time
 %  subjectIDs: [string][nx1]: String vector of subjectIDs
+%  noDiary: [logical] if noDiary==true, then proceed without trying to open a diary
 %
 % Outputs:
 %  status: [string] status of execution
@@ -57,14 +58,17 @@ try
     %intialise diary structure array
     diaryStrct(length(subjectIDs),1) = struct();
     %open the diary file in FMT format
-    if ~ispc, waitfor(msgbox('Select the diary in *.xls or *.xlsx format')); end
-    [file,path] = uigetfile({'*.xlsx;*.xls','Excel files'},'Select the diary in *.xls or *.xlsx format',diary_file);
-
+    if noDiary
+        file=0;
+    else
+        if ~ispc, waitfor(msgbox('Select the diary in *.xls or *.xlsx format')); end
+        [file,path] = uigetfile({'*.xlsx;*.xls','Excel files'},'Select the diary in *.xls or *.xlsx format',diary_file);
+    end
     if ~isnumeric(file)
         diary_file=fullfile(path,file);
 
         impOpt = detectImportOptions(diary_file);
-        if length (impOpt.VariableTypes) <4 || ~all(strcmpi(impOpt.VariableNames(1:4),varNamesOrig(1:4)))
+        if length (impOpt.VariableTypes) <4 || ~isequal(impOpt.VariableNames(1:4),varNamesOrig(1:4))
             for itr=1:length(subjectIDs)
                 %ID=str2double(subjectIDs(itr));
                 diaryStrct(itr).ID=subjectIDs(itr);

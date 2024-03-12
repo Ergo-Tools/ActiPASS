@@ -44,7 +44,12 @@ function statTable = genVariables(statTable,Activity,Steps,rows_SI,rows_BT,itrSe
 
 statVars=["Lie","Sit","SitLie","Stand","Move","StandMove","Walk","Run","Stair","Cycle","Upright","Other","INT1",...
     "INT2","INT2_Amb","INT3","INT4","INT34"];
-
+% check whether to use steps/min in intensity and walk_slow walk_fast calculations
+if Settings.CADPMIN
+    StepsInt=movmean(Steps,60); % calculate steps/min based on one minute window
+else
+    StepsInt=Steps; % use steps/sec as it is
+end
 %generate non repetitive (for each activity or energy-class) basic variables
 % statTable.Duration(itrSeg)=round(length(Activity)/60,Settings.prec_dig_min);
 % statTable.Excluded(itrSeg)=round(sum(Activity==-1)/60,Settings.prec_dig_min);
@@ -52,8 +57,8 @@ statTable.NonWear(itrSeg)=round(sum(Activity==0)/60,Settings.prec_dig_min);
 statTable.ValidDuration(itrSeg)=round(sum(Activity~=0 & Activity~=-1)/60,Settings.prec_dig_min);
 statTable.Awake(itrSeg)=round(sum(Activity~=0 & Activity~=-1 & ~rows_SI)/60,Settings.prec_dig_min); % wake-time in minutes
 statTable.AwakeNW(itrSeg)=round(sum(Activity==0 & ~rows_SI)/60,Settings.prec_dig_min); % non wear during awake times
-statTable.Walk_Slow(itrSeg)=round(sum(Activity==5 & ~rows_SI & Steps<Settings.Wlk_Slow_Cad/60)/60,Settings.prec_dig_min);
-statTable.Walk_Fast(itrSeg)=round(sum(Activity==5 & ~rows_SI & Steps>=Settings.Wlk_Slow_Cad/60)/60,Settings.prec_dig_min);
+statTable.Walk_Slow(itrSeg)=round(sum(Activity==5 & ~rows_SI & StepsInt<Settings.Wlk_Slow_Cad/60)/60,Settings.prec_dig_min);
+statTable.Walk_Fast(itrSeg)=round(sum(Activity==5 & ~rows_SI & StepsInt>=Settings.Wlk_Slow_Cad/60)/60,Settings.prec_dig_min);
 statTable.TotalTransitions(itrSeg)= sum(diff(~rows_SI.*Activity)~=0); % total transitions (this actually includes transitions to/from NW or excluded periods)
 statTable.Bedtime(itrSeg)= round(sum(Activity~=-1 & rows_BT)/60,Settings.prec_dig_min); % bedtime in minutes
 statTable.SleepInterval(itrSeg)=round(sum(Activity~=-1 & Activity~=0 & rows_SI)/60,Settings.prec_dig_min); % sleep-interval in minutes
@@ -67,11 +72,11 @@ dayTAI=Settings.MET_SI*(rows_SI & Activity~=-1 & Activity~=0)+... % sleep-interv
     Settings.MET_Sit*(~rows_SI & Activity==2)+... % sitting
     Settings.MET_Stand*(~rows_SI & Activity==3)+... % standing
     Settings.MET_Move*(~rows_SI & Activity==4)+... % moving
-    genMETWalk((~rows_SI & Activity==5),Steps*60,Settings)+... % walking
+    genMETWalk((~rows_SI & Activity==5),StepsInt*60,Settings)+... % walking
     Settings.MET_Running*(~rows_SI & Activity==6)+... %running
     Settings.MET_Stairs*(~rows_SI & Activity==7)+... % stair-walking
     Settings.MET_Cycle*(~rows_SI & Activity==8)+... & cycling
-    genMETOther(~rows_SI & Activity==9,Steps*60,Settings); % other
+    genMETOther(~rows_SI & Activity==9,StepsInt*60,Settings); % other
 % all remaining seconds (non-wear or excluded) are flagged as -1
 dayTAI(dayTAI==0)=-1;
 
@@ -103,7 +108,7 @@ dayPALevels = discretize(dayTAI,[Settings.PA_Slp,Settings.PA_SED,Settings.PA_LPA
 statTable.Sleep(itrSeg)=round(sum(Activity==10)/60,Settings.prec_dig_min); % total sleep both inbed and outbed in minutes
 statTable.SleepInBed(itrSeg)=round(sum(Activity==10)/60,Settings.prec_dig_min); % total sleep inbed  in minutes
 statTable.LieStill(itrSeg)=round(sum(Activity==11)/60,Settings.prec_dig_min); % total sleep  outbed in minutes
-statTable.NumSteps(itrSeg)=round(sum((~rows_SI & (Activity==5 |...
+statTable.NumSteps(itrSeg)=round(sum((~rows_SI & (Activity==4 | Activity==5 |...
     Activity==6 | Activity==7)).*Steps)); % number of steps outside sleep-interval in minutes
 statTable.NumStepsWalk(itrSeg)=round(sum((~rows_SI & Activity==5).*Steps)); % number of steps of walking outside sleep-interval in minutes
 statTable.NumStepsRun(itrSeg)=round(sum((~rows_SI & Activity==6).*Steps)); % number of steps of walking outside sleep-interval in minutes

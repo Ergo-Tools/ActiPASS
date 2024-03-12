@@ -55,10 +55,12 @@ Settings.prec_dig_hrs=4; % precision of results for variables in hrs
 % Settings.genAllBouts=true; not used anymore
 Settings.wlkHeight=170;  % the default height for curvilinear MET calculation based on cadence
 Settings.WalkMET=statStruct.WalkMET; % how to calculate MET values for walking- fixed cutoffs or cadence based regression? default - 'fixed'
+Settings.CADPMIN=statStruct.CADPMIN; % flag to calculate cadence per minute instead of per second (before slow/fast walking detection and INT classes)
 Settings.FilterTAI=statStruct.FilterTAI; % apply exponential smoothing on TAI options 'off' 'TC2' 'TC5', 'TC10' - default off
 Settings.genBouts=statStruct.genBouts; % enable/disable bouts generation
 Settings.boutThresh=statStruct.boutThresh; % bout threshold value
 Settings.boutBreak=statStruct.boutBreak; % bout break for all bouts except 1 min bout in seconds
+Settings.SAVETRNKD=statStruct.SAVETRNKD; % flag for saving trunk variables
 
 % activity to MET translation
 Settings.MET_SI=0.90;
@@ -181,7 +183,7 @@ try
         'Message','Loading Master QC Table...','Cancelable','on');
     %fPrgBar = waitbar(0,'Finding per_sec activity files...');
     %     perSecFs=dir(fullfile(Settings.projectDir,"*","*-Activity_per_s.csv"));
-  
+    
     if ~isfile(Settings.masterQCTblF)
         status="Master QC table not found";
         return;
@@ -216,7 +218,7 @@ try
     dlyGenStruct.uiPgDlg=uiPgDlg;
     dlyGenStruct.Settings=Settings;
     dlyGenStruct.totFiles=height(masterQCTbl);
-        
+    
     % create empty tables to hold data from daily stat generation process
     fnlPrPSTbl=[]; % empty variable to hold the final horizontal table
     fnlDlyTbl=[]; % empty variable to hold the final long format daily table
@@ -230,21 +232,31 @@ try
     
     % create empty table to hold data from stat generation process for events
     finalEvntTbl=[]; % empty variable to hold the final vertical table
+    % empty variables to hold final trunk data
+    if Settings.SAVETRNKD
+        finlTrnkET=[];
+        finlTrnkDT=[];
+    end
     
     for itrFil=1:height(masterQCTbl)
-       
+        
         if uiPgDlg.CancelRequested
             status="Canceled";
             return;
         end
         subjctID=masterQCTbl.SubjectID(itrFil);
+        % define locations of 1s data file and events metadata file
         perSecF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Activity_per_s.mat");
         metaF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Metadata.mat");
+        % define trunk daily and event data files if trunk data is saved
+        trunkDF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Daily_TrunkData.csv");
+        trunkEF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Event_TrunkData.csv");
+        
         
         uiPgDlg.Value=(itrFil-1)/height(masterQCTbl)+(1/height(masterQCTbl))*0.1;
         uiPgDlg.Message="Loading data: ID: "+subjctID+". File "+itrFil+" of "+height(masterQCTbl)+"..";
         
-        % find batch,  QC_Status and  Sensor_Errs of current file 
+        % find batch,  QC_Status and  Sensor_Errs of current file
         % Sensor_Errs is per file flag, but will be propagated into daily tables
         qcBatch=masterQCTbl.Batch(itrFil);
         QC_Status=masterQCTbl.QC_Status(itrFil);
@@ -252,30 +264,30 @@ try
         
         
         % now load real per-ssec data from binary mat file
-%         perSOBJ = matfile(perSecF); % without directly opening the mat file let's find variables contained
-%         if ismember("aktTbl",who(perSOBJ)) % if QC data found
-%             perSecT=perSOBJ.aktTbl;
-%         else
-%             status="Activity table not found for ID: "+subjctID;
-%             return;
-%         end
+        %         perSOBJ = matfile(perSecF); % without directly opening the mat file let's find variables contained
+        %         if ismember("aktTbl",who(perSOBJ)) % if QC data found
+        %             perSecT=perSOBJ.aktTbl;
+        %         else
+        %             status="Activity table not found for ID: "+subjctID;
+        %             return;
+        %         end
         
         perSOBJ = load(perSecF,'-mat');
         perSecT=perSOBJ.aktTbl;
-       
+        
         % now load metadata from binary mat file
-%        metaOBJ = matfile(metaF); % without directly opening the mat file let's find variables contained
+        %        metaOBJ = matfile(metaF); % without directly opening the mat file let's find variables contained
         metaOBJ = load(metaF,'-mat'); %load meta data directly
         if matches(Settings.TblFormat,["Daily","Daily+Events"],'IgnoreCase',true)
             
-%             if ismember("dlyQCT_meta",who(metaOBJ)) % if QC data found
-%                 qcMeta=metaOBJ.dlyQCT_meta;
-%             else
-%                status="Daily QC metadata not found for ID: "+subjctID;
-%                return;
-%             end
-
-            qcMeta=metaOBJ.dlyQCT_meta; 
+            %             if ismember("dlyQCT_meta",who(metaOBJ)) % if QC data found
+            %                 qcMeta=metaOBJ.dlyQCT_meta;
+            %             else
+            %                status="Daily QC metadata not found for ID: "+subjctID;
+            %                return;
+            %             end
+            
+            qcMeta=metaOBJ.dlyQCT_meta;
             % append data to dlyGenStruct relevant to this iteration of stat generation
             dlyGenStruct.itrFil=itrFil;
             dlyGenStruct.subjctID=subjctID;
@@ -290,32 +302,43 @@ try
             if status=="Canceled"
                 return;
             end
+            
+            % merge daily-trunk-data
+            if Settings.SAVETRNKD
+                tmpTrnkT=readtable(trunkDF,'TextType','string','DatetimeType','text','VariableNamingRule','preserve');
+                if isempty(finlTrnkDT)
+                    finlTrnkDT=tmpTrnkT(:,4:end);
+                else
+                    finlTrnkDT=vertcat(finlTrnkDT,tmpTrnkT(:,4:end));
+                end
+            end
+            
         end
         
         
         if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events"],'IgnoreCase',true)
-%             if ismember("eventMeta",who(metaOBJ)) % if QC data found
-%                 eventMeta=metaOBJ.eventMeta;
-%             else
-%                 status="Event metadata not found for ID: "+subjctID;
-%                 return;
-%             end
-            eventMeta=metaOBJ.eventMeta;
+            %             if ismember("evntMeta",who(metaOBJ)) % if QC data found
+            %                 evntMeta=metaOBJ.evntMeta;
+            %             else
+            %                 status="Event metadata not found for ID: "+subjctID;
+            %                 return;
+            %             end
+            evntMeta=metaOBJ.evntMeta;
             % remove midnight breaks in events
-            if strcmpi(Settings.TblFormat,"EventsNoBreak") && length(eventMeta.Names)>=2
-                indsRLE = [find(eventMeta.Names(1:end-1) ~= eventMeta.Names(2:end));length(eventMeta.Names)]; % find unique consecutive events
+            if strcmpi(Settings.TblFormat,"EventsNoBreak") && length(evntMeta.Names)>=2
+                indsRLE = [find(evntMeta.Names(1:end-1) ~= evntMeta.Names(2:end));length(evntMeta.Names)]; % find unique consecutive events
                 runL = diff([0;indsRLE ]); % run length of those events
-                indsDel=setdiff(1:length(eventMeta.Names),indsRLE); % the indices of events to delete
+                indsDel=setdiff(1:length(evntMeta.Names),indsRLE); % the indices of events to delete
                 % if any events should be deleted
                 if ~isempty(indsDel)
-                    eventMeta.StartTs(indsRLE,:)=eventMeta.StartTs(indsRLE-(runL-1),:); %adjust start time of the events if necessary 
-                    eventMeta.Indices(indsRLE,1)=eventMeta.Indices(indsRLE-(runL-1),1); % adjust index of main 1S vector for each event if necessary
+                    evntMeta.StartTs(indsRLE,:)=evntMeta.StartTs(indsRLE-(runL-1),:); %adjust start time of the events if necessary
+                    evntMeta.Indices(indsRLE,1)=evntMeta.Indices(indsRLE-(runL-1),1); % adjust index of main 1S vector for each event if necessary
                     % delete repeating events
-                    eventMeta.Names(indsDel,:)=[];
-                    eventMeta.StartTs(indsDel,:)=[];
-                    eventMeta.EndTs(indsDel,:)=[];
-                    eventMeta.Comments(indsDel,:)=[];
-                    eventMeta.Indices(indsDel,:)=[];
+                    evntMeta.Names(indsDel,:)=[];
+                    evntMeta.StartTs(indsDel,:)=[];
+                    evntMeta.EndTs(indsDel,:)=[];
+                    evntMeta.Comments(indsDel,:)=[];
+                    evntMeta.Indices(indsDel,:)=[];
                 end
                 
             end
@@ -324,16 +347,25 @@ try
             evntGenStruct.subjctID=subjctID;
             evntGenStruct.QC_Status=QC_Status;
             evntGenStruct.qcBatch=qcBatch;
-                        
+            
             % call genHorzTable function for this ID
-            [status,finalEvntTbl] = genEventTable(perSecT,eventMeta,finalEvntTbl,evntGenStruct);
+            [status,finalEvntTbl] = genEventTable(perSecT,evntMeta,finalEvntTbl,evntGenStruct);
             
             % give the user chance to cancel before next iteration
             if status=="Canceled"
                 return;
             end
+            % merge interval-based-trunk-data
+            if Settings.SAVETRNKD
+                tmpTrnkT=readtable(trunkEF,'TextType','string','DatetimeType','text','VariableNamingRule','preserve');
+                if isempty(finlTrnkET)
+                    finlTrnkET=tmpTrnkT(:,4:end);
+                else
+                    finlTrnkET=vertcat(finlTrnkET,tmpTrnkT(:,4:end));
+                end
+            end
         end
-       
+        
     end
     
     %% Saving daily and events table
@@ -348,7 +380,7 @@ try
         uiPgDlg.Message="Saving the final daily tables to disk..";
         %waitbar(0.85,fPrgBar,"Saving the final horizontal table to file..");
         % save wide-format ProPASS daily table to disk
-        if ~isempty(fnlPrPSTbl) 
+        if ~isempty(fnlPrPSTbl)
             %writetable(finalHozTbl,finalHorzTblF,'WriteMode','overwritesheet');
             % find the rows masterQCTbl with the same subjectIDs as current batch (only with non-missimng QC_status)
             if isfile(fnlPrPSTblF)
@@ -377,10 +409,14 @@ try
         end
         
         % save long format daily table to disk
-        if ~isempty(fnlDlyTbl) 
+        if ~isempty(fnlDlyTbl)
             %writetable(finalHozTbl,finalHorzTblF,'WriteMode','overwritesheet');
             % find the rows masterQCTbl with the same subjectIDs as current batch (only with non-missimng QC_status)
             fnlDlyTbl=movevars(fnlDlyTbl,"Sensor_Errs",'After',"Day_QC"); %move Sensor_Errs next to other daily QC flags (table looks nice this way)
+            % merge trunk-variables with thigh-variables
+            if Settings.SAVETRNKD
+                fnlDlyTbl=horzcat(fnlDlyTbl,finlTrnkDT);
+            end
             if isfile(fnlDlyTblF)
                 impOptDlyT=detectImportOptions(fnlDlyTblF,'VariableNamingRule',"preserve");
                 if isequal(impOptDlyT.VariableNames,fnlDlyTbl.Properties.VariableNames)
@@ -414,7 +450,12 @@ try
         fnlEvntTblF=fullfile(Settings.projectDir,Settings.evntMasterFile);
         uiPgDlg.Value=(itrFil-1)/height(masterQCTbl)+(0.9/height(masterQCTbl));
         uiPgDlg.Message="Saving the final events table to file..";
-        %waitbar(0.85,fPrgBar,"Saving the final horizontal table to file..");
+        
+        % merge trunk-variables with thigh-variables
+        if Settings.SAVETRNKD
+            finalEvntTbl=horzcat(finalEvntTbl,finlTrnkET);
+        end
+        
         if ~isempty(finalEvntTbl)
             %writetable(finalVerTbl,finalVertTblF,'WriteMode','overwritesheet');
             % find the rows masterQCTbl with the same subjectIDs as current batch (only with non-missimng QC_status)
