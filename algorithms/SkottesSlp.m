@@ -1,6 +1,5 @@
 function Sleep = SkottesSlp(Akt,opMode,Acc,SF,Position)
-
-% Estimation of sleep during lying or given times-of-bed.
+% SkottesSlp Estimation of sleep during lying or given times-of-bed.
 % Sleep is estimated in each second for lying periods longer than 15 minutes from thigh,
 % arm (preferable) or trunk accelerometer. 
 %

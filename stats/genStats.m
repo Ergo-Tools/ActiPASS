@@ -77,7 +77,7 @@ Settings.MET_Stairs=8;
 Settings.MET_Cycle=7;
 Settings.MET_Other=2; % "Other" with no periodicity falls into light physical activity
 
-% MET citoffs for intensity classes
+% MET cutoffs for intensity classes
 Settings.PA_Slp=0.0;
 Settings.PA_SED=0.95; %lieStill belongs to sedentary
 Settings.PA_LPA=1.5;
@@ -278,6 +278,8 @@ try
         % now load metadata from binary mat file
         %        metaOBJ = matfile(metaF); % without directly opening the mat file let's find variables contained
         metaOBJ = load(metaF,'-mat'); %load meta data directly
+        
+        % generating interval(events) based tables
         if matches(Settings.TblFormat,["Daily","Daily+Events"],'IgnoreCase',true)
             
             %             if ismember("dlyQCT_meta",who(metaOBJ)) % if QC data found
@@ -287,16 +289,16 @@ try
             %                return;
             %             end
             
-            qcMeta=metaOBJ.dlyQCT_meta;
+            
             % append data to dlyGenStruct relevant to this iteration of stat generation
             dlyGenStruct.itrFil=itrFil;
             dlyGenStruct.subjctID=subjctID;
             dlyGenStruct.QC_Status=QC_Status;
             dlyGenStruct.qcBatch=qcBatch;
-            dlyGenStruct.qcMeta=qcMeta;
+            dlyGenStruct.qcMeta=metaOBJ.dlyQCT_meta;
             dlyGenStruct.Sensor_Errs=Sensor_Errs;
             
-            % call genHorzTable function for this ID
+            % call genDlyTable function for this ID
             [status,fnlPrPSTbl,fnlDlyTbl] = genDlyTable(perSecT,fnlPrPSTbl,fnlDlyTbl,dlyGenStruct);
             % give the user chance to cancel before next iteration
             if status=="Canceled"
@@ -305,7 +307,14 @@ try
             
             % merge daily-trunk-data
             if Settings.SAVETRNKD
-                tmpTrnkT=readtable(trunkDF,'TextType','string','DatetimeType','text','VariableNamingRule','preserve');
+                % if a trunk-daily-data file exist reat it
+                if isfile(trunkDF)
+                    tmpTrnkT=readtable(trunkDF,'TextType','string','DatetimeType','text','VariableNamingRule','preserve');
+                    % otherwise create an empty table with correct number of rows
+                else
+                    tmpTrnkT=genEmptyTrunkT(length(metaOBJ.dlyQCT_meta.Start)); % create an empty table with correct height
+                end
+                % concatenate table for each ID
                 if isempty(finlTrnkDT)
                     finlTrnkDT=tmpTrnkT(:,4:end);
                 else
@@ -315,7 +324,7 @@ try
             
         end
         
-        
+        % generating interval(events) based tables
         if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events"],'IgnoreCase',true)
             %             if ismember("evntMeta",who(metaOBJ)) % if QC data found
             %                 evntMeta=metaOBJ.evntMeta;
@@ -357,7 +366,14 @@ try
             end
             % merge interval-based-trunk-data
             if Settings.SAVETRNKD
-                tmpTrnkT=readtable(trunkEF,'TextType','string','DatetimeType','text','VariableNamingRule','preserve');
+                % if a trunk-daily-data file exist reat it
+                if isfile(trunkEF)
+                    tmpTrnkT=readtable(trunkEF,'TextType','string','DatetimeType','text','VariableNamingRule','preserve');
+                    % otherwise create an empty table with correct number of rows
+                else
+                    tmpTrnkT=genEmptyTrunkT(length(evntMeta.StartTs)); % create an empty table with correct height
+                end
+                % concatenate table for each ID
                 if isempty(finlTrnkET)
                     finlTrnkET=tmpTrnkT(:,4:end);
                 else
