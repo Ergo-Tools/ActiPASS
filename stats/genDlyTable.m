@@ -44,7 +44,7 @@ qcBatch=dlyGenStruct.qcBatch;
 QC_Status=dlyGenStruct.QC_Status;
 Sensor_Errs=dlyGenStruct.Sensor_Errs;
 qcMeta=dlyGenStruct.qcMeta;
-varN_DlyQC=["NotEnoughWear","NoWlk","TooMuchOther","TooMuchStair","NoSleepInt","NumPrimaryBDs","NumExtraBDs"];
+varN_DlyQC=["refPosInfo","NotEnoughWear","NoWlk","TooMuchOther","TooMuchStair","NoSleepInt","NumPrimaryBDs","NumExtraBDs"];
 
 
 

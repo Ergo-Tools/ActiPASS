@@ -150,10 +150,10 @@ varN_MVPA=["INT34","INT34_"+[varN_Akt,varN_Bouts]];
 %% define variable names specific to horizontal table
 
 % variables specific for each day in horizontal table
-varN_Dly1=["Date","Day","Weekend","DayType","DayStart","DayStop","Day_QC","NotEnoughWear","NoWlk",...
+varN_Dly1=["Date","Day","Weekend","DayType","DayStart","DayStop","Day_QC","refPosInfo","NotEnoughWear","NoWlk",...
     "TooMuchOther","TooMuchStair","NoSleepInt","NumPrimaryBDs","NumExtraBDs","Excluded"];
 
-varT_Dly1=["string","string","logical","string","string","string","string","logical",...
+varT_Dly1=["string","string","logical","string","string","string","string","string","logical",...
     "logical","logical","logical","logical","double","double","double"];
 
 varN_Smry=["NumDays","NumValidDays","NumWorkDays","NumLeisureDays",];
@@ -332,7 +332,17 @@ try
             %                 status="Event metadata not found for ID: "+subjctID;
             %                 return;
             %             end
-            evntMeta=metaOBJ.evntMeta;
+            if itrFil==1
+                if isfield(metaOBJ,"eventMeta") % if QC data found
+                    evntMetaN="eventMeta";
+                elseif isfield(metaOBJ,"evntMeta")  % if QC data found
+                    evntMetaN="evntMeta";
+                else
+                    evntMetaN="evntMeta";
+                end
+                
+            end
+            evntMeta=metaOBJ.(evntMetaN);
             % remove midnight breaks in events
             if strcmpi(Settings.TblFormat,"EventsNoBreak") && length(evntMeta.Names)>=2
                 indsRLE = [find(evntMeta.Names(1:end-1) ~= evntMeta.Names(2:end));length(evntMeta.Names)]; % find unique consecutive events
