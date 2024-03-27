@@ -1,6 +1,6 @@
 
-function status=genTrnkVariables(Akt,vTrnkRot,dlyMeta,evntMeta,saveDir,ID,Settings)
-%genVariables generate variables for given activity of a given segment(a day or an Event)
+function [status,trnkDTbl,trnkETbl]=genTrnkVariables(Akt,vTrnkRot,dlyMeta,evntMeta,saveDir,ID,Settings)
+% genTrnkVariables generate daily and interval bbased trunk-variables and save them to files
 % INPUTS:
 % Akt [N,1] - a vector representing an activity or behaviour for each second
 % vTrnkRot [Fs*N,3] - trunk angles (after reference-positions (rotation))
@@ -40,7 +40,7 @@ function status=genTrnkVariables(Akt,vTrnkRot,dlyMeta,evntMeta,saveDir,ID,Settin
 
 
 Fs=25; % The resample frequency
-baseVars=["StartT","EndT","Interval","NW_Trnk","Valid_Trnk","VrefTrunkAP","VrefTrunkLat"]; % basic information
+baseVars=["StartT","EndT","Interval","RefPosStr","NW_Trnk","Valid_Trnk","VrefTrunkAP","VrefTrunkLat"]; % basic information
 angTres=["20","30","60","90"]; % thresholds for the variables below
 thrshTrnk=str2double(angTres)*pi/180; % the same angles above as numbers
 prec=2; % precision of minute variables
@@ -54,7 +54,10 @@ otherVars="IncTrunkWalk"; % only one variable so far
 % combine all variables in to one vector
 trnkVarNs=[baseVars,reshape(append(incVars',angTres).',1,[]),maxVars,otherVars];
 % variable types for all variables
-trnkVarTs=["string","string","string",repmat("double",1,length(trnkVarNs)-3)];
+trnkVarTs=["string","string","string","string",repmat("double",1,length(trnkVarNs)-4)];
+% the daily and interval based trunk variables
+trnkDTbl=[];
+trnkETbl=[];
 
 try
     % remove midnight breaks in events
@@ -86,7 +89,8 @@ try
     if any(badDlyEndIs)
         dlyMeta.Indices(badDlyEndIs,2)=dlyMeta.Indices(badDlyEndIs,2)-1;
     end
-    % process data daily
+    
+    %% process data daily
     for itrD=1:length(dlyMeta.StartTs)
         % find start/end indices of full 1s data for this day
         dStrtIndx=dlyMeta.Indices(itrD,1);
@@ -104,15 +108,16 @@ try
         % trunk ref-position
         trnkDTbl.VrefTrunkAP(itrD)=dlyMeta.VrefTrnk(itrD,1);
         trnkDTbl.VrefTrunkLat(itrD)=dlyMeta.VrefTrnk(itrD,2);
+        trnkDTbl.RefPosStr(itrD)=dlyMeta.RefPosStr(itrD);
         
         % start the calculation
         IpositiveU = vTrnkD(:,2)>=0;
-        InotLie = ~reshape(repmat(AktD==1|AktD==0,Fs,1),1,[])'; %Indices for not lying (in order to exclude lying on the belly)
+        InotLie = ~repelem(AktD==1|AktD==0,Fs)'; %Indices for not lying (in order to exclude lying on the belly)
         %added 7/12-12: not lying must not include Akt==0 (if Akt==0 activity state is undefined)
         IforwardInc =  InotLie & IpositiveU;
-        IsitFwd = reshape(repmat(AktD==2,Fs,1),1,[])' & IforwardInc; %Indices for sitting and forward inclined
-        IstandmoveFwd = reshape(repmat(AktD==3|AktD==4,Fs,1),1,[])' & IforwardInc; %Indices for stand/move and forward inclined
-        IuprightFwd = reshape(repmat(3<=AktD&AktD<=7,Fs,1),1,[])' & IforwardInc; %Indices for stand/move/walk/run/stair and forward inclined (oct13)
+        IsitFwd = repelem(AktD==2,Fs)' & IforwardInc; %Indices for sitting and forward inclined
+        IstandmoveFwd = repelem(AktD==3 | AktD==4,Fs)' & IforwardInc; %Indices for stand/move and forward inclined
+        IuprightFwd = repelem(AktD >=3 & AktD<=7,Fs)' & IforwardInc; %Indices for stand/move/walk/run/stair and forward inclined (oct13)
         for ith = 1:length(thrshTrnk)
             IncTrunk = sum(vTrnkD(:,1) >= thrshTrnk(ith));
             trnkDTbl.("IncTrunk"+angTres(ith))(itrD)=round(IncTrunk/Fs/60,prec);
@@ -137,12 +142,15 @@ try
         
     end
     
+    %% process data interval-wise
+    
     % do a quality check of daily indices and correct end-index if end-index is equalent to start-index of next day.
     badEvntEndIs=eq(evntMeta.Indices(1:end-1,2),evntMeta.Indices(2:end,1));
     if any(badEvntEndIs)
         evntMeta.Indices(badEvntEndIs,2)=evntMeta.Indices(badEvntEndIs,2)-1;
     end
-    % process data daily
+    
+    % loop through events (intervals)
     for itrE=1:length(evntMeta.StartTs)
         % get event start and end indices from structure
         eStrtIndx=evntMeta.Indices(itrE,1);
@@ -165,15 +173,16 @@ try
         % trunk ref-position
         trnkETbl.VrefTrunkAP(itrE)=dlyMeta.VrefTrnk(dayN,1);
         trnkETbl.VrefTrunkLat(itrE)=dlyMeta.VrefTrnk(dayN,2);
+        trnkETbl.RefPosStr(itrE)=dlyMeta.RefPosStr(dayN);
         
         % start the calculation
         IpositiveU = vTrnkE(:,2)>=0;
-        InotLie = ~reshape(repmat(AktE==1|AktE==0,Fs,1),1,[])'; %Indices for not lying (in order to exclude lying on the belly)
+        InotLie = ~repelem(AktE==1|AktE==0,Fs)'; %Indices for not lying (in order to exclude lying on the belly)
         %added 7/12-12: not lying must not include Akt==0 (if Akt==0 activity state is undefined)
         IforwardInc =  InotLie & IpositiveU;
-        IsitFwd = reshape(repmat(AktE==2,Fs,1),1,[])' & IforwardInc; %Indices for sitting and forward inclined
-        IstandmoveFwd = reshape(repmat(AktE==3|AktE==4,Fs,1),1,[])' & IforwardInc; %Indices for stand/move and forward inclined
-        IuprightFwd = reshape(repmat(3<=AktE&AktE<=7,Fs,1),1,[])' & IforwardInc; %Indices for stand/move/walk/run/stair and forward inclined (oct13)
+        IsitFwd = repelem(AktE==2,Fs)' & IforwardInc; %Indices for sitting and forward inclined
+        IstandmoveFwd = repelem(AktE==3|AktE==4,Fs)' & IforwardInc; %Indices for stand/move and forward inclined
+        IuprightFwd = repelem(AktE>=3 & AktE<=7,Fs)' & IforwardInc; %Indices for stand/move/walk/run/stair and forward inclined (oct13)
         for ith = 1:length(thrshTrnk)
             IncTrunk = sum(vTrnkE(:,1) >= thrshTrnk(ith));
             trnkETbl.("IncTrunk"+angTres(ith))(itrE)=round(IncTrunk/Fs/60,prec);
