@@ -108,13 +108,13 @@ dayPALevels = discretize(dayTAI,[Settings.PA_Slp,Settings.PA_SED,Settings.PA_LPA
 
 %% generate daily basic activity times
 
-statTable.Sleep(itrSeg)=round(sum(Activity==10)/60,prec); % total sleep both inbed and outbed in minutes
-statTable.SleepInBed(itrSeg)=round(sum(Activity==10)/60,prec); % total sleep inbed  in minutes
-statTable.LieStill(itrSeg)=round(sum(Activity==11)/60,prec); % total sleep  outbed in minutes
+statTable.Sleep(itrSeg)=round(sum(Activity==10)/60,prec); % total sleep both in-bed and out-bed in minutes
+statTable.SleepInBed(itrSeg)=round(sum(Activity==10)/60,prec); % total sleep in-bed  in minutes
+statTable.LieStill(itrSeg)=round(sum(Activity==11)/60,prec); % total sleep  out-bed in minutes
 statTable.NumSteps(itrSeg)=round(sum((~rows_SI & (Activity==4 | Activity==5 |...
-    Activity==6 | Activity==7)).*Steps)); % number of steps outside sleep-interval in minutes
-statTable.NumStepsWalk(itrSeg)=round(sum((~rows_SI & Activity==5).*Steps)); % number of steps of walking outside sleep-interval in minutes
-statTable.NumStepsRun(itrSeg)=round(sum((~rows_SI & Activity==6).*Steps)); % number of steps of walking outside sleep-interval in minutes
+    Activity==6 | Activity==7)).*Steps)); % number of steps outside sleep-interval 
+statTable.NumStepsWalk(itrSeg)=round(sum((~rows_SI & Activity==5).*Steps)); % number of steps of walking outside sleep-interval 
+statTable.NumStepsRun(itrSeg)=round(sum((~rows_SI & Activity==6).*Steps)); % number of steps of walking outside sleep-interval 
 
 
 %% generate descriptive parameters part 2
