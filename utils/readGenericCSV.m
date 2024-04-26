@@ -21,14 +21,14 @@ function [Data, SF, deviceID] = readGenericCSV(PATH)
 %               x, y, z
 %               
 %               Remarks:
-%               1. To improve performance and to reduce file sizes a seperate time colun is excluded. 
+%               1. To improve performance and to reduce file sizes a seperate time column is excluded. 
 %               2. Consequently, only supports data which are resampled to a fixed sampling frequency.
 %
 %
 %   Output:
 %       Data          [Nx4]  datetime (Matlab datenum format) and 3D acceleration data
 %       SF            [double] the sample frequency
-%       deviceID      [string] the device ID
+%       deviceID      [double] the device ID
 
 % Copyright (c) 2024, Claas Lendt & Pasan Hettiarachchi
 % All rights reserved.
