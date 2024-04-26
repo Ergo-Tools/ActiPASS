@@ -47,6 +47,7 @@ statVars=["Lie","Sit","SitLie","Stand","Move","StandMove","Walk","Run","Stair","
 % check whether to use steps/min in intensity and walk_slow walk_fast calculations
 if Settings.CADPMIN
     Steps60=movmean(Steps,60); % calculate steps/min based on one minute window
+    Steps60(Steps==0)=0;
     %Steps60=movmean(Steps,[0,60],'SamplePoints',1:60:length(Steps));
 else
     Steps60=Steps; % use steps/sec as it is
@@ -85,11 +86,7 @@ dayTAI(dayTAI==0)=-1;
 
 % filter TAI if needed
 if ~strcmpi(Settings.FilterTAI,"off")
-    if strcmpi(Settings.FilterTAI,"TC2")
-        taiTC=2;
-    elseif strcmpi(Settings.FilterTAI,"TC5")
-        taiTC=5;
-    elseif  strcmpi(Settings.FilterTAI,"TC10")
+    if strcmpi(Settings.FilterTAI,"TC10")
         taiTC=10;
     elseif  strcmpi(Settings.FilterTAI,"TC20")
         taiTC=20;
@@ -97,6 +94,10 @@ if ~strcmpi(Settings.FilterTAI,"off")
         taiTC=30;
     elseif  strcmpi(Settings.FilterTAI,"TC60")
         taiTC=60;
+    elseif  strcmpi(Settings.FilterTAI,"TC90")
+        taiTC=90;
+    elseif  strcmpi(Settings.FilterTAI,"TC120")
+        taiTC=120;
     end
     alpha = 1-exp(-1/taiTC);
     dayTAI=filter(alpha, [1 alpha-1], dayTAI);
@@ -158,7 +159,7 @@ for itrVarN=1:length(statVars)
         case "INT34"
             rowsVarN= (dayPALevels=="VPA" | dayPALevels=="MPA");
     end
-    statTable.(statVars(itrVarN))(itrSeg)=round(sum(rowsVarN)/60,prec); % sitting and lying time outside sleep-interval in minutes
+    statTable.(statVars(itrVarN))(itrSeg)=round(sum(rowsVarN)/60,prec); % total duration of selected activity or intensity-class
     % call the stat generation function
     
     if strcmpi(Settings.genBouts,"on")
