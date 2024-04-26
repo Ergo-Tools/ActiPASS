@@ -50,7 +50,7 @@ trnk_files=[];
 if ~ispc
     
     fTypes=["*.cwa","Axivity AX3/AX6 CWA Files";"*.wav","Axivity AX3/AX6 WAV Files";"*.datx;*.dat","ActivPAL 3 DATX Files";....
-        "*.csv","ActivPAL CSV files";"*.csv","Actigraph CSV Files";"*.bin","SENS Motion BIN file";"*.xlsx","List of Acc Files"];
+        "*.csv","ActivPAL CSV files";"*.csv","Actigraph CSV Files";"*.bin","SENS Motion BIN file";"*.csv","Generic ActiPASS CSV file";"*.xlsx","List of Acc Files"];
     indFT=menu("Select Acc data file type to open a maximum of "+maxfiles+" Axivity, ActivPAL, Actigraph or SENS Files.",fTypes(:,2));
     ftype=indFT; % filetype index will be used in main script
     if indFT~=0 % if menu dialog is not closed by clicking x
@@ -65,7 +65,7 @@ if ~ispc
 else
     [files,path,ftype] = uigetfile(["*.cwa","Axivity AX3/AX6 CWA Files";"*.wav","Axivity AX3/AX6 WAV Files";...
         "*.datx;*.dat","ActivPAL 3 DATX Files";"*.csv;","ActivPAL CSV files";...
-        "*.csv","Actigraph CSV Files";"*.bin","SENS Motion BIN Files";"*.xlsx","List of Acc Files"],...
+        "*.csv","Actigraph CSV Files";"*.bin","SENS Motion BIN Files";"*.csv","Generic ActiPASS CSV file";"*.xlsx","List of Acc Files"],...
         ("Select a maximum of "+maxfiles+" Axivity, ActivPAL, Actigraph or SENS Files."),'MultiSelect', 'on',rootfolder );
 end
 
@@ -81,7 +81,7 @@ else % One or more file selected
     files=string(files);
     rootfolder=path;
     % the seventh option is a list of filenames in an Excel file.
-    if ftype==7
+    if ftype==8
         imptOpt=detectImportOptions(fullfile(path,files)); % detect the import options of the excel file
         % check whether the file is a single column worksheet with the column name 'Filenames'
         if (length(imptOpt.VariableNames)==1 && strcmpi(imptOpt.VariableNames(1),"Filenames")) || ...
@@ -130,8 +130,10 @@ else % One or more file selected
                         fclose(fidTmp);
                         if contains(headLines,"ActiGraph",'IgnoreCase',true)
                             ftype=5;
-                        elseif contains(headLines,"sep=;",'IgnoreCase',true)
+                        elseif startsWith(headLines,"sep=;",'IgnoreCase',true)
                             ftype=4;
+                        elseif startsWith(headLines,"ID=;",'IgnoreCase',true)
+                            ftype=7;    
                         else
                             acc_filenames=string([]);
                             acc_files=string([]);

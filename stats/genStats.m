@@ -61,6 +61,7 @@ Settings.genBouts=statStruct.genBouts; % enable/disable bouts generation
 Settings.boutThresh=statStruct.boutThresh; % bout threshold value
 Settings.boutBreak=statStruct.boutBreak; % bout break for all bouts except 1 min bout in seconds
 Settings.SAVETRNKD=statStruct.SAVETRNKD; % flag for saving trunk variables
+Settings.TRUNKPOS=statStruct.TRUNKPOS; % flag for saving trunk variables
 
 % activity to MET translation
 Settings.MET_SI=0.90;
@@ -207,6 +208,12 @@ try
         masterQCTbl=masterQCTbl(~ismissing(masterQCTbl.QC_Status),:);
     end
     
+    % after deselecting invalid cases check whether there is any valid cases left
+    if height(masterQCTbl)==0
+        status="No valid data found for stats generation";
+        return;
+    end
+    
     %% Horizontal table generation
     
     % create dlyGenStruct with parameters needed for horizontal table generation
@@ -233,7 +240,7 @@ try
     % create empty table to hold data from stat generation process for events
     finalEvntTbl=[]; % empty variable to hold the final vertical table
     % empty variables to hold final trunk data
-    if Settings.SAVETRNKD
+    if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD
         finlTrnkET=[];
         finlTrnkDT=[];
     end
@@ -306,10 +313,12 @@ try
             end
             
             % merge daily-trunk-data
-            if Settings.SAVETRNKD
+            if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD
                 % if a trunk-daily-data file exist reat it
                 if isfile(trunkDF)
-                    tmpTrnkT=readtable(trunkDF,'TextType','string','DatetimeType','text','VariableNamingRule','preserve');
+                    opt_trnk=detectImportOptions(trunkDF,'VariableNamingRule','preserve');
+                    opt_trnk=setvartype(opt_trnk,"string");
+                    tmpTrnkT=readtable(trunkDF,opt_trnk);
                     % otherwise create an empty table with correct number of rows
                 else
                     tmpTrnkT=genEmptyTrunkT(length(metaOBJ.dlyQCT_meta.Start)); % create an empty table with correct height
@@ -375,10 +384,12 @@ try
                 return;
             end
             % merge interval-based-trunk-data
-            if Settings.SAVETRNKD
+            if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD
                 % if a trunk-daily-data file exist reat it
                 if isfile(trunkEF)
-                    tmpTrnkT=readtable(trunkEF,'TextType','string','DatetimeType','text','VariableNamingRule','preserve');
+                    opt_trnk2=detectImportOptions(trunkEF,'VariableNamingRule','preserve');
+                    opt_trnk2=setvartype(opt_trnk2,"string");
+                    tmpTrnkT=readtable(trunkEF,opt_trnk2);
                     % otherwise create an empty table with correct number of rows
                 else
                     tmpTrnkT=genEmptyTrunkT(length(evntMeta.StartTs)); % create an empty table with correct height

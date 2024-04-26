@@ -68,7 +68,7 @@ try
         diary_file=fullfile(path,file);
 
         impOpt = detectImportOptions(diary_file);
-        if length (impOpt.VariableTypes) <4 || ~isequal(impOpt.VariableNames(1:4),varNamesOrig(1:4))
+        if length (impOpt.VariableTypes) <4 || ~all(strcmpi(impOpt.VariableNames(1:4),varNamesOrig(1:4)))
             for itr=1:length(subjectIDs)
                 %ID=str2double(subjectIDs(itr));
                 diaryStrct(itr).ID=subjectIDs(itr);

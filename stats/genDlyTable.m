@@ -200,6 +200,7 @@ dlyTable.Day_QC(notEnoughWear | (qcMeta.NoWlk & qcMeta.TooMuchOther) | (consecNo
 dlyTable.Day_QC(ismissing(dlyTable.Day_QC ) & (qcMeta.TooMuchOther | qcMeta.TooMuchStair | qcMeta.NoWlk | Sensor_Errs_day))="Check";
 dlyTable.Day_QC(ismissing(dlyTable.Day_QC ))="OK";
 %fill daily QC flags from metadata file
+varN_DlyQC=intersect(varN_DlyQC,qcMeta.Properties.VariableNames); % find the quality check variables which actually exists
 dlyTable(:,varN_DlyQC)=qcMeta(:,varN_DlyQC);
 
 %% merge dlyTable and  domain-specific table dlyTblDmns to mgdLngDlyTbl

@@ -42,7 +42,7 @@ function  Acc = ChangeAxes(Acc,Type,Orientation)
 % POSSIBILITY OF SUCH DAMAGE. 
 % ************************************************************************************
 
-if  strcmp(Type,'ActiGraph') || strcmp(Type,'Axivity') || strcmp(Type,'ActivPAL') || strcmp(Type,'SENS')
+if  strcmp(Type,'ActiGraph') || strcmp(Type,'Axivity') || strcmp(Type,'ActivPAL') || strcmp(Type,'SENS') || strcmp(Type,'Generic')
    if Orientation == 1 %no shift
       Acc = -Acc; 
    end
