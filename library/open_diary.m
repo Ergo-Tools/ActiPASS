@@ -1,10 +1,13 @@
 
-function  [status,diaryStrct,diary_file] = open_diary(diary_file,subjectIDs,noDiary)
+function  [status,diaryStrct,diary_file] = open_diary(diary_file,subjectIDs,exMODE)
 % OPEN_DIARY Opens ActiPASS formatted diary and read information for given subject IDs.
 % Inputs:
 %  diary_file: [string] last diary file - used in file-opening-dialog; ex. set to %USERPROFILE% first time
 %  subjectIDs: [string][nx1]: String vector of subjectIDs
-%  noDiary: [logical] if noDiary==true, then proceed without trying to open a diary
+%  exMODE: [double] 
+%     if exMODE==0, then proceed without trying to open a diary
+%     if exMODE==2, directly open diary_file without file-opening dialog
+%     if exMODE==1, then open file-open dialog with diary_file set as default
 %
 % Outputs:
 %  status: [string] status of execution
@@ -58,11 +61,18 @@ try
     %intialise diary structure array
     diaryStrct(length(subjectIDs),1) = struct();
     %open the diary file in FMT format
-    if noDiary
+    if exMODE==0
         file=0;
-    else
+    elseif exMODE==1
         if ~ispc, waitfor(msgbox('Select the diary in *.xls or *.xlsx format')); end
         [file,path] = uigetfile({'*.xlsx;*.xls','Excel files'},'Select the diary in *.xls or *.xlsx format',diary_file);
+    elseif exMODE==2 
+        if isfile(diary_file)
+            [path,fname,fext] = fileparts(diary_file);
+            file=string(fname)+string(fext);
+        else
+            file=0;
+        end
     end
     if ~isnumeric(file)
         diary_file=fullfile(path,file);

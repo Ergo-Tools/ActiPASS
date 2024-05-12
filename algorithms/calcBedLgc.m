@@ -1,5 +1,5 @@
 function runLsBL=calcBedLgc(aktFull,timeFull,lenAktFilt,lenLieFilt,VLongSitBt)
-% CALCBEDLGC Calculate bedtime logic using by filtering the activities
+% CALCBEDLGC Calculate times-of-bed logic by filtering the activities
 %
 % %% Inputs %%%%%%%%%%%%%%%%%
 % aktFull [double-n] - Full Activity vector given at 1s epoch for all days
@@ -111,8 +111,8 @@ for itr=1:length(indsRunSitLie)
     runL_FD=runLs{2}(goFwdI);
     
     % do not count NW bouts shorter than lenAktFilt (make the run-length zero)
-    zeroBK=runLs{1}(goBackI)==0 & runL_BK<lenAktFilt;
-    zeroFD=runLs{1}(goFwdI)==0 & runL_FD<lenAktFilt;
+    zeroBK=runLs{1}(goBackI)==0 & runL_BK<5*deltaT; % 2024-04-27 previously lenAktFilt used instead of 5*deltaT
+    zeroFD=runLs{1}(goFwdI)==0 & runL_FD<5*deltaT;  % 2024-04-27 previously lenAktFilt used instead of 5*deltaT
     
     % do not count sit bouts larger than MinSitBt
     zeroBK=zeroBK | (runLs{1}(goBackI)==2 & runL_BK>MinSitBt);
@@ -133,8 +133,8 @@ for itr=1:length(indsRunSitLie)
     cumSum_FD=cumsum(runL_FD);
     
     %  stop the search when sum of upright, short-sit or short-NW time reach lenAktFilt and stop at sit, lie only
-    numBts_BK=find(cumSum_BK<lenAktFilt & runL_BK==0,1,'last');
-    numBts_FD=find(cumSum_FD<lenAktFilt & runL_FD==0,1,'last');
+    numBts_BK=find(cumSum_BK<5*deltaT & runL_BK==0,1,'last'); % 2024-04-27 previously lenAktFilt used instead of 5*deltaT
+    numBts_FD=find(cumSum_FD<5*deltaT & runL_FD==0,1,'last'); % 2024-04-27 previously lenAktFilt used instead of 5*deltaT
     
     %     % find the edge of forward and backward searches (can only be a Lie bout or a large-sit or NW bout)
     %     numBts_BK=find(runL_BK(1:numBts_BK)==0,1,'last');

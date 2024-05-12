@@ -1,5 +1,5 @@
  function VrefThigh = EstimateRefThigh1(Acc,Vthigh,VrefThighOld,VrefThighDef,SF,SettingsAkt) 
-% VrefThigh Estimation of reference angle for leg accelerometer.
+% VrefThigh Estimation of reference angle for thigh accelerometer.
 
 % Input:
 % 
