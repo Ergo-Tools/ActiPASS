@@ -83,9 +83,6 @@ actvtColors={'Gray','Lavender','Yellow', 'LimeGreen', 'DarkGreen', 'DarkOrange',
 %    'HotPink','LightPink','DarkOrange','DarkSLateBlue','DeepSkyBlue'};
 
 
-%evaluation version text
-evalWTxt=" - ActiPASS Beta v"+Settings.Version+ " - for Evaluation purpose only";
-
 try
     %convert datenum times to datetime
     timeFlDT=datetime(timeFull,'ConvertFrom','datenum');
@@ -102,8 +99,6 @@ try
         actvtColMap=cellfun(@rgb,actvtColors,'UniformOutput',false);
         actvtColMap=cell2mat(actvtColMap');
         
-        
-        
         % Create a figure title using SubjectID and date
         figTitle=subjectID+ " - Bedtime ("+ string(timeFlDT(1),"yy/MM/dd")+" - "+string(timeFlDT(end),"yy/MM/dd")+")";
         % create a figure with given width and height (figW,figH)
@@ -113,6 +108,8 @@ try
         if ~Settings.EVALV
             sgtitle(figSlpAkt,figTitle,'FontSize',14,'Color','Blue');
         else
+            %evaluation version text
+            evalWTxt=" - ActiPASS Beta v"+Settings.Version+ " - for Evaluation purpose only";
             sgtitle(figSlpAkt,figTitle+evalWTxt,'FontSize',13,'Color','Blue');
         end
     end
@@ -126,7 +123,6 @@ try
     iBdEnds=iBdStarts+1;
     %but if for some reason end of bedtime is not defined the end is considered to be the end of file
     if isempty(iBdStarts)
-        
         bdDEnds=datetime([],[],[]);
     elseif length(diaryStrct.Ticks)>=iBdEnds(end)
         bdDEnds=diaryStrct.Ticks(iBdEnds);
@@ -280,7 +276,7 @@ try
             Sleep = SkottesSlp(aktFull(indBDS),2,Acc(indBdStartAcc:indBdEndAcc,2:4),Fs,'Thigh');
             aktFull(indBDS(Sleep==0))=10;
         elseif strcmpi(Settings.SLEEPALG,"diary") && strcmpi(Settings.BEDTIME,"diary")
-             aktFull(indBDS)=10;
+            aktFull(indBDS)=10;
         end
         
         bdAkt=aktFull(indBDS); % Crop the activity vector to current bedtime limits
@@ -353,7 +349,7 @@ try
         % use a moving-mode filter to reduce the resolution of activity vector (for faster plotting)
         
         aktFullVis = modefilt(aktFull+1,[1,2*floor(visStep/2)+1],'replicate');
-               
+        
         % find the indices of activity transitions
         diffAkts=[find(diff([0,aktFullVis])~=0),length(aktFullVis)];
         % find the number of activity bouts (consecutive periods of the same activity)
@@ -381,7 +377,7 @@ try
         axComb.XGrid = 'on';
         axComb.XMinorGrid = 'on';
         
-      
+        
         %plot diary-bedtimes (if auto bedtime selected) and finalize figure with legends, ticks and labels
         
         if matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)
@@ -425,12 +421,16 @@ try
         
         % save bedtime figure
         % set(figSlpAkt, 'Color', 'w');
-        exportgraphics(figSlpAkt,fullfile(saveDir,subjectID+" - bedtime.png"));
+        if isfolder(saveDir)
+            exportgraphics(figSlpAkt,fullfile(saveDir,subjectID+" - bedtime.png"));
+        end
         % export_fig(figSlpAkt,fullfile(saveDir,subjectID+" - bedtime"),'-png','-r150','-p0.01');
         close(figSlpAkt);
     end
     % Save output to files
-    writetable(tblBedtime,fullfile(saveDir,subjectID+" - bedtime.csv"));
+    if isfolder(saveDir)
+        writetable(tblBedtime,fullfile(saveDir,subjectID+" - bedtime.csv"));
+    end
     status='OK';
 catch ME
     % if an exception occur assign status with error details

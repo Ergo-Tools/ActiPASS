@@ -103,6 +103,13 @@ else
     Settings.ADVOPTIONS=logical(Settings.ADVOPTIONS);
 end
 
+% the flag for enabling experimental features
+if ~isfield(Settings,'LAB')
+    Settings.LAB=false;
+else
+    Settings.LAB=logical(Settings.LAB);
+end
+
 % load file and folder paths (In order to save and load last used files/folders)
 if ispc
     if ~isfield(Settings,'thighAccDir') || isnumeric(Settings.thighAccDir),Settings.thighAccDir = getenv('USERPROFILE');end

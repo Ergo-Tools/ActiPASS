@@ -3,19 +3,17 @@ function  [acc_files,subjectIDs,acc_filenames,rootfolder,ftype,trnk_files,status
 % open_accfiles Open accelerometer files using uigetfile and returns their information.
 
 % Inputs:
-%  rootfolder: [string] last accelerometer data folder - used in file-opening-dialog; ex. set to %USERPROFILE% first time
-%  maxfiles: [double] maximum number of files allowed in a batch
-%  IDInfo: [struct] structure with info about how to derive IDs from filenames
+%     rootfolder: [string] last accelerometer data folder - used in file-opening-dialog; tip. set to %USERPROFILE% first time
+%     maxfiles: [double] maximum number of files allowed in a batch
+%     IDInfo: [struct] structure with info about how to derive IDs from filenames
 %
 % Outputs:
-%  status: [string] status of execution
-%  diaryStrct: [struct][n x 1] a structure array containing diary data for given subjectIDs. See the source for more details
 %     acc_files[n] accelerometer files full path
 %     subjectIDs[n] IDs of the selected accelerometer files
-%     acc_filenames[n] only filenames of selected accelerometer files
+%     acc_filenames[n] only filenames of selected accelerometer files (including file-extension)
 %     rootfolder- accelerometer data folder actually selected
 %     ftype - accelerometer file type (brand)
-%     trnk_files[n] - if a list of accelerometer files with trunk-acc-files were selected, return the full path to them
+%     trnk_files[n] - if a list of files with also trunk-files were selected, return the full path to them
 %     status - execution status of the function
 
 
@@ -45,10 +43,13 @@ function  [acc_files,subjectIDs,acc_filenames,rootfolder,ftype,trnk_files,status
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
 
-status='';
+% intialise variables 
+status="";
 trnk_files=[];
+
+% show appropriate file-opening dialog depending on OS
 if ~ispc
-    
+    % for MacOS file opening dialog does not contain a title and file-type selection. Therefore display a seperate menu 
     fTypes=["*.cwa","Axivity AX3/AX6 CWA Files";"*.wav","Axivity AX3/AX6 WAV Files";"*.datx;*.dat","ActivPAL 3 DATX Files";....
         "*.csv","ActivPAL CSV files";"*.csv","Actigraph CSV Files";"*.bin","SENS Motion BIN file";"*.csv","Generic ActiPASS CSV file";"*.xlsx","List of Acc Files"];
     indFT=menu("Select Acc data file type to open a maximum of "+maxfiles+" Axivity, ActivPAL, Actigraph or SENS Files.",fTypes(:,2));
@@ -59,7 +60,7 @@ if ~ispc
         acc_filenames=string([]);
         acc_files=string([]);
         subjectIDs="";
-        status='No File(s) selected';
+        status="No File(s) selected";
         return;
     end
 else
@@ -69,13 +70,11 @@ else
         ("Select a maximum of "+maxfiles+" Axivity, ActivPAL, Actigraph or SENS Files."),'MultiSelect', 'on',rootfolder );
 end
 
-
-
 if isnumeric(files) % if no files selected (Cancel button pressed)
     acc_filenames=string([]);
     acc_files=string([]);
     subjectIDs="";
-    status='No File(s) selected';
+    status="No File(s) selected";
     return;
 else % One or more file selected
     files=string(files);
@@ -95,29 +94,31 @@ else % One or more file selected
                 acc_filenames=string([]);
                 acc_files=string([]);
                 subjectIDs="";
-                status='No valid file(s) defined';
+                status="No valid file(s) defined";
                 return;
             else
                 % check whether there are more than 'maxfiles' files
                 if length(listFsT.Filenames)>maxfiles
-                    status=['Too many files selected. Only the first ',num2str(maxfiles),' will be loaded.'];
+                    status="Too many files selected. Only the first "+num2str(maxfiles)+" will be loaded.";
                     listFsT=listFsT(1:maxfiles,:); % only take first 'maxfiles' files
                 end
                 
                 
                 % seperate filenames into filename and extension
-                [~,acc_filenames,acc_filexts] = fileparts(listFsT.Filenames);
-                acc_filenames=acc_filenames+acc_filexts; % add extension back to filename
+                [~,fnameonly,acc_filexts] = fileparts(listFsT.Filenames);
+                acc_filenames=fnameonly+acc_filexts; % add extension back to filename
                 % if there are different file types do not continue
                 if length(unique(acc_filexts))>1
                     acc_filenames=string([]);
                     acc_files=string([]);
                     subjectIDs="";
-                    status='Different types of accelerometer files given';
+                    status="Different types of accelerometer files given";
                     return;
                 else
-                    % depending on the extension define 'ftype'
+                    % acc_files iis the full file-path given in the table
                     acc_files=listFsT.Filenames;
+                    
+                    % depending on the extension define 'ftype'
                     if strcmpi(acc_filexts(1),".cwa")
                         ftype=1;
                     elseif strcmpi(acc_filexts(1),".wav")
@@ -132,37 +133,45 @@ else % One or more file selected
                             ftype=5;
                         elseif startsWith(headLines,"sep=;",'IgnoreCase',true)
                             ftype=4;
-                        elseif startsWith(headLines,"ID=;",'IgnoreCase',true)
+                        elseif startsWith(headLines,"ID=",'IgnoreCase',true)
                             ftype=7;    
                         else
                             acc_filenames=string([]);
                             acc_files=string([]);
                             subjectIDs="";
-                            status='Unknown CSV filetype. Only ActivPAL or ActiGraph CSV files supported';
+                            status="Unknown CSV filetype. Only ActivPAL, ActiGraph or Generic CSV files supported";
                             return;
                         end
                     elseif strcmpi(acc_filexts(1),".npy")
                         ftype=4;
-                    elseif strcmpi(acc_filexts(1),".bin")
+                    elseif strcmpi(acc_filexts(1),".bin") || strcmpi(acc_filexts(1),".hex")
                         ftype=6;
                     else
                         acc_filenames=string([]);
                         acc_files=string([]);
                         subjectIDs="";
-                        status='Unknown filetype. Only CWA, WAV, DAT, DATX, CSV, NPY or BIN files supported';
+                        status="Unknown filetype. Only CWA, WAV, DAT, DATX, CSV, NPY or BIN files supported";
                         return;
                     end
-                    
-                    if width(listFsT)>=2
+                    % if the file list also contains the SubjectIDs we do not need to find them from filenames
+                    % if the table has 
+                    if ismember("ID",imptOpt.VariableNames)
                         subjectIDs=listFsT.ID;% find subjectIDs from the table, no need to analyse filenames
                         % also check for trunk filenames and load if they exist
                         if ismember("TrunkFilenames",imptOpt.VariableNames)
                             trnk_files=listFsT.TrunkFilenames;
                         end
+                        % if duplicate SubjectIDs exist only select first unique cases
+                        [~,iUnq]=unique(subjectIDs);
+                        if length(iUnq)<length(subjectIDs) % if duplicates exist
+                            subjectIDs=subjectIDs(iUnq); % only unique IDs
+                            acc_filenames=acc_filenames(iUnq);
+                            acc_files=acc_files(iUnq);
+                            status="Duplicate IDs found. Only "+length(iUnq)+" unique IDs selected";
+                        end
                         return;
                     end
-                    
-                    
+             
                 end
             end
         else
@@ -170,14 +179,14 @@ else % One or more file selected
             acc_filenames=string([]);
             acc_files=string([]);
             subjectIDs="";
-            status='Invalid table of list of Acc filenames';
+            status="Invalid table of list of Acc filenames";
             return;
         end
     else
-        % for ftype=1 to 5, the files are selected directly using the path and files returned
+        % for ftype=1 to 7, the files are selected directly using the path and files returned
         % from uigetfile multi-select
         if length(files)>maxfiles
-            status=['Too many files selected. Only the first ',num2str(maxfiles),' will be loaded.'];
+            status="Too many files selected. Only the first "+num2str(maxfiles)+" will be loaded.";
             files=files(1:maxfiles);
         end
         % convert filenames to strings. This works for a single file or
@@ -188,8 +197,8 @@ else % One or more file selected
         acc_files=string(fullfile(path,files))';
     end
     
-    
-    [~,~,acc_ext]=fileparts(acc_filenames(1));
+    % derive SubjectID from selected acc_files
+    [~,~,acc_ext]=fileparts(acc_filenames(1)); % get the file extension of the first acc file
     extLength=strlength(acc_ext);
     if strcmpi(IDInfo.mode,"full-filename")
         subjectIDs = extractBetween(acc_filenames,1,strlength(acc_filenames)-extLength);
@@ -206,7 +215,7 @@ else % One or more file selected
             [~,FileName,ext] = fileparts(acc_filenames(itr));
             
             if any(strcmpi(ext,[".dat",".datx",".csv",".npy"]))
-                
+                % parse ActivPAL filenames and find SubjectIDs
                 patSN_ID = (textBoundary|"-")+alphanumericsPattern+"-AP" + digitsPattern(6) + whitespaceBoundary;
                 textSN_ID=extract(FileName,patSN_ID);
                 if ~isempty(textSN_ID)
@@ -234,7 +243,7 @@ else % One or more file selected
         [count,~,iCount]=histcounts(iU,length(iA));
         iNU=count(iCount)>1; %The indices of duplicate items
         subjectIDs(iNU)=extractBetween(acc_filenames(iNU),1,strlength(acc_filenames(iNU))-extLength); % replace the SUbjectIDs with full filename for duplicates
-        status=sprintf('%s Filename is used instead of SubjectID for duplicate SubjectIDs',status);
+        status=status+" Filename is used instead of SubjectID for duplicate SubjectIDs";
     end
 end
 end

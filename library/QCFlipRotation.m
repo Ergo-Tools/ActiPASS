@@ -1,4 +1,4 @@
-function  [QCData,Acc,meanTEMP,status,warnings] = QCFlipRotation(Acc,TEMP,diaryStrct,devType,exMode,defOrientation,nwTRIM)
+function  [QCData,Acc,meanTEMP,status,warnings] = QCFlipRotation(Acc,TEMP,diaryStrct,devType,Settings,nwTrimMode)
 
 % QCFlipRotation Finds whether thigh accelerometer is incorrectly placed, return corrected data, and 
 % trim non-wear in the begining and at the end
@@ -12,13 +12,16 @@ function  [QCData,Acc,meanTEMP,status,warnings] = QCFlipRotation(Acc,TEMP,diaryS
 % Inputs:
 %   ACC [N,4] Evenly sampled Acc data
 %   TEMP [M,2] Temperature data (not necesserarily evenly sampled)
-%   exMode [string] - two options: 'Warn' or 'Full' 
-%       'Warn' - Only find flips/rotations but returns original Acc data,
-%       'Full'- find flips/rotations and return corrected Acc data
+
 %   diaryStrct [struct] - structure containing diary data (forced NW and bed/night in diary are considered to improve NW)
 %   devType: "Axivity", "ActivPAL" etc passed on to ChangeAxes
-%   defaultOrientation [boolean,boolean] Rotated or Flipped according to Acti4 default orientation
-%   nwTRIM: [struct] Settings for cropping NW at Start/End
+%   Settings [struct] main ActiPASS Settings structure
+%       following fields are used from Settings structure
+%       Settings.FLIPROTATIONS [string] - two options: 'Warn' or 'Full' 
+%         'Warn' - Only find flips/rotations but returns original Acc data,
+%         'Full'- find flips/rotations and return corrected Acc data
+%       [Settings.Rotated, Settings.Flipped] [boolean,boolean] Rotated or Flipped according to ActiPASS default orientation
+%   nwTrimMode: [boolean,boolean] flags for cropping NW at Start/End respectively
 %
 % Outputs:
 %
@@ -82,9 +85,9 @@ twin_filt= 2; % main time window for different types of filtering
 tshort_sit = 20; % time in seconds for filtering out shorter sit periods
 twin_medfilt=8; % the time window for median filtering angles and VMs (in seconds)
 twin_wlk = 10; % define the time window for walking detection using FFT profile
-maxNWWin = nwTRIM.NWSHORTLIM*3600; % maximum accepted continuous NW window within active period before triming (in s)
-minActiveWin= nwTRIM.NWTRIMACTLIM*3600; % minimum accepted continuous active window for trimming NW (in s)
-trimBuffer=nwTRIM.NWTRIMBUF*3600; % 0; % time buffer before and after active periods when cropping NW
+maxNWWin = Settings.NWSHORTLIM*3600; % maximum accepted continuous NW window within active period before triming (in s)
+minActiveWin= Settings.NWTRIMACTLIM*3600; % minimum accepted continuous active window for trimming NW (in s)
+trimBuffer=Settings.NWTRIMBUF*3600; % 0; % time buffer before and after active periods when cropping NW
 minWornT=60; % the minimum duration of an active segment to be considered worn, to be used later in NW detection
 minSitT=120; % the minimum duration of Sitting (per 4h segment) to satisfy sit condition, to be used later in flip detection
 minSitTPD=1800; % the minimum duration of Sitting (per 4h segment) to satisfy sit condition, to be used later in flip detection
@@ -94,17 +97,21 @@ warnings=string([]); % any warnings generated
 QCData=struct; % the structure to hold multiple results
 meanTEMP=[]; % filtered and evenly sampled temperature if exist
 
-if defOrientation(1)
+% asign default orinetation from Settings
+if Settings.Rotated
     defRotation=-1;
 else
     defRotation=1;
 end
-if defOrientation(2)
+
+if Settings.Flipped
     defFlip=-1;
 else
     defFlip=1;
 end
 
+% asign execution mode from settings
+exMode=Settings.FLIPROTATIONS;
 
 try
     %% Initialising
@@ -140,11 +147,11 @@ try
     
     %% Trim the data based on the NW
     % nwTRIM.mode indicates whether to trim NW from start, end or both ex [1,0],[0,1] or [1,1]
-    if any(nwTRIM.mode)
+    if any(nwTrimMode)
         NWFilt=bwareaopen(NotWornLogic ,maxNWWin);
         NWFilt=~bwareaopen(~NWFilt,minActiveWin);
         if ~all(NWFilt)
-            if nwTRIM.mode(1)
+            if nwTrimMode(1)
                 activStart=find(~NWFilt,1,'first'); % find the index of start time of first active period
                 indxStartDay=find(Acc(smpls1S,1)>=floor(Acc(smpls1S(activStart),1)),1,'first'); % find the index of start of above day
                 % find the index of start of active period on the same day, but with seconds trimBuffer prior
@@ -152,7 +159,7 @@ try
             else
                 activStart=1;
             end
-            if nwTRIM.mode(2)
+            if nwTrimMode(2)
                 activeEnd=find(~NWFilt,1,'last'); % find the end time of last active period
                 indxEndDay=find(Acc(smpls1S,1)<ceil(Acc(smpls1S(activeEnd),1)),1,'last'); % find the index of end of above day
                 % find the index of end of active period on the same day, but with seconds trimBuffer added
@@ -538,8 +545,8 @@ try
     % if exMode is Warn or off assume default flips/rotations
     if ~strcmpi(exMode,'Force')
         
-        % derive orientation form defOrientation (1=[0,0], 2=[0,1],3=[1,0], 4=[1,1]
-        Orientation=2*defOrientation(1)+defOrientation(2)+1; 
+        % derive orientation form [Settings.Rotated, Settings.Flipped] (1=[0,0], 2=[0,1],3=[1,0], 4=[1,1]
+        Orientation=2*Settings.Rotated+Settings.Flipped+1; 
         % call ChangeAxes function to change the orientation
         Acc(:,2:4) = ChangeAxes(Acc(:,2:4),devType,Orientation);
     end
@@ -550,8 +557,8 @@ catch ME
     % if an exception occur and exMode is force assume default orientation
     % and correct Acc data s.t. activity detection works
     if ~strcmpi(status,'OK')
-        % derive orientation form defOrientation (1=[0,0], 2=[0,1],3=[1,0], 4=[1,1]
-        Orientation=2*defOrientation(1)+defOrientation(2)+1; 
+        % derive orientation form [Settings.Rotated, Settings.Flipped]. (1=[0,0], 2=[0,1],3=[1,0], 4=[1,1]
+        Orientation=2*Settings.Rotated+Settings.Flipped+1; 
         % call ChangeAxes function to change the orientation
         Acc(:,2:4) = ChangeAxes(Acc(:,2:4),devType,Orientation);
     end

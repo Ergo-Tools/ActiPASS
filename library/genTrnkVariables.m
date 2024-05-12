@@ -54,7 +54,7 @@ otherVars="IncTrunkWalk"; % only one variable so far
 % combine all variables in to one vector
 trnkVarNs=[baseVars,reshape(append(incVars',angTres).',1,[]),maxVars,otherVars];
 % variable types for all variables
-trnkVarTs=["string","string","string","string",repmat("double",1,length(trnkVarNs)-4)];
+trnkVarTs=repmat("string",1,length(trnkVarNs));
 % the daily and interval based trunk variables
 trnkDTbl=[];
 trnkETbl=[];

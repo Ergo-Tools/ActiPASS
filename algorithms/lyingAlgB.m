@@ -1,4 +1,4 @@
-function Akt = lyingAlgB(AccFilt,StdMax,VrefThigh,Akt,Fs,Tid,saveDirP)
+function Akt = lyingAlgB(AccFilt,StdMax,VrefThigh,Akt,Fs)
 % lyingAlgB find Lie periods using thigh rotation during Sit/Lie bouts
 
 % Based ON
