@@ -51,7 +51,7 @@ trnk_files=[];
 if ~ispc
     % for MacOS file opening dialog does not contain a title and file-type selection. Therefore display a seperate menu 
     fTypes=["*.cwa","Axivity AX3/AX6 CWA Files";"*.wav","Axivity AX3/AX6 WAV Files";"*.datx;*.dat","ActivPAL 3 DATX Files";....
-        "*.csv","ActivPAL CSV files";"*.csv","Actigraph CSV Files";"*.bin","SENS Motion BIN file";"*.csv","Generic ActiPASS CSV file";"*.xlsx","List of Acc Files"];
+        "*.csv","ActivPAL CSV files";"*.csv","Actigraph CSV Files";"*.bin;*.hex","SENS Motion BIN or HEX file";"*.csv","Generic ActiPASS CSV file";"*.xlsx","List of Acc Files"];
     indFT=menu("Select Acc data file type to open a maximum of "+maxfiles+" Axivity, ActivPAL, Actigraph or SENS Files.",fTypes(:,2));
     ftype=indFT; % filetype index will be used in main script
     if indFT~=0 % if menu dialog is not closed by clicking x
@@ -66,7 +66,7 @@ if ~ispc
 else
     [files,path,ftype] = uigetfile(["*.cwa","Axivity AX3/AX6 CWA Files";"*.wav","Axivity AX3/AX6 WAV Files";...
         "*.datx;*.dat","ActivPAL 3 DATX Files";"*.csv;","ActivPAL CSV files";...
-        "*.csv","Actigraph CSV Files";"*.bin","SENS Motion BIN Files";"*.csv","Generic ActiPASS CSV file";"*.xlsx","List of Acc Files"],...
+        "*.csv","Actigraph CSV Files";"*.bin;*.hex","SENS Motion BIN or HEX Files";"*.csv","Generic ActiPASS CSV file";"*.xlsx","List of Acc Files"],...
         ("Select a maximum of "+maxfiles+" Axivity, ActivPAL, Actigraph or SENS Files."),'MultiSelect', 'on',rootfolder );
 end
 
@@ -146,11 +146,13 @@ else % One or more file selected
                         ftype=4;
                     elseif strcmpi(acc_filexts(1),".bin") || strcmpi(acc_filexts(1),".hex")
                         ftype=6;
+                    elseif strcmpi(acc_filexts(1),".xml") 
+                        ftype=9;
                     else
                         acc_filenames=string([]);
                         acc_files=string([]);
                         subjectIDs="";
-                        status="Unknown filetype. Only CWA, WAV, DAT, DATX, CSV, NPY or BIN files supported";
+                        status="Unknown filetype. Only CWA, WAV, DAT, DATX, CSV, NPY, BIN or XML files supported";
                         return;
                     end
                     % if the file list also contains the SubjectIDs we do not need to find them from filenames
