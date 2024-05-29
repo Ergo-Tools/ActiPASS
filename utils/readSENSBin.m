@@ -57,7 +57,7 @@ try
     patEndID = "_acc-"+wildcardPattern+textBoundary;
     deviceID=extractBetween(f_name,patStartID,patEndID); % find the device-ID string
     % check whether the iD_string have the correct format
-    if ~matches(deviceID,textBoundary+alphanumericsPattern(2)+"-"+alphanumericsPattern(2)+"."+alphanumericsPattern(2)+textBoundary)
+    if isempty(deviceID) || ~matches(deviceID,textBoundary+alphanumericsPattern(2)+"-"+alphanumericsPattern(2)+"."+alphanumericsPattern(2)+textBoundary)
         deviceID=NaN;
     else
         try
