@@ -1,5 +1,5 @@
 
-function [Data, SF, deviceID] = readGenericCSV(PATH)
+function [Data, SF, deviceID, devType] = readGenericCSV(PATH)
 % readGenericCSV Read generic CSV files with specified format and ISO8601 timestamp
 % 
 % 
@@ -13,22 +13,34 @@ function [Data, SF, deviceID] = readGenericCSV(PATH)
 %               The acceleration axis must conform to the standard ActiPASS AX3
 %               orientation (i.e. x-axis pointing down, z-axis inwards towards skin).
 %
-%               The first four lines in the CSV file must contain the
-%               deviceID (only numeric), the sampling frequency, start-time and the column names.
-%               ID=<numeric devideID>  (e.g. 'ID=34567850')
-%               SF=<sampling frequency> (e.g. 'SF=50')
-%               START=<start time in ISO8601 format> (e.g. 'START=20240301T154517.250')
-%               x, y, z
+%               The first lines in the CSV file must contain the:
+%               * deviceID (only numeric)
+%               * the sampling frequency (numeric)
+%               * start-time (ISO8601 format)
+%               * optional device-type. Allow device-type specific changes to algorithms. See supported device-types below
+%               * and the column names x, y, and z.
+%
+%               See example header lines and first data line below
+%
+%               ID=34567850
+%               DevType=Axivity
+%               SF=50
+%               START=20240301T154517.250
+%               x,y,z
 %               
 %               Remarks:
 %               1. To improve performance and to reduce file sizes a seperate time column is excluded. 
 %               2. Consequently, only supports data which are resampled to a fixed sampling frequency.
+%               
+%               Supported Device type strings:
+%               Axivity, ActivPAL3, ActivPAL4, Actigraph, SENS, Movisens
 %
 %
 %   Output:
 %       Data          [Nx4]  datetime (Matlab datenum format) and 3D acceleration data
 %       SF            [double] the sample frequency
 %       deviceID      [double] the device ID
+%       devType       [string] the device type. Set to "Generic" if not specified in CSV file
 
 % Copyright (c) 2024, Claas Lendt & Pasan Hettiarachchi
 % All rights reserved.
@@ -59,31 +71,55 @@ function [Data, SF, deviceID] = readGenericCSV(PATH)
 Data = [];
 SF = NaN;
 deviceID = NaN;
+devType="";
 
 try
+    
     % Open the file once and keep it open for reading both metadata and data
     fileID = fopen(PATH, 'r');
     
-    % Read the first three lines for metadata and start-time
-    idLine = fgetl(fileID);
-    sfLine = fgetl(fileID);
-    startLine = fgetl(fileID);
+    % a string array to store header lines
+    headLs=strings(10,1);
+    headerFound=false;
     
-    % read the column header line
-    headL=fgetl(fileID);
+    % Read first few (max 10) lines for metadata and start-time (read max 10 lines)
+    for itr=1:10
+        headLs(itr)=fgetl(fileID);
+        % if the axes header line is found we have reached end of header lines
+        if matches(headLs(itr),["x,y,z","x, y, z"],'IgnoreCase',true)
+           headerFound=true;
+           break; 
+        end
+    end
     
-    % Extract ID and SF values using correct indexing
-    deviceID = extractBetween(idLine,textBoundary+"ID=",textBoundary);
-    SF = extractBetween(sfLine,textBoundary+"SF=",textBoundary);
+    if ~headerFound
+       error("unrecognized generic CSV format");
+    end
+   
+    row_DevID = startsWith(headLs,"ID=",'IgnoreCase',true);
+    row_SF = startsWith(headLs,"SF=",'IgnoreCase',true);
+    row_startT = startsWith(headLs,"START=",'IgnoreCase',true);
+    row_devtype = startsWith(headLs,"DevType=",'IgnoreCase',true);
     
-    % find the start time. If this fails function will return
-    startT=datenum(extractBetween(startLine,textBoundary+"START=",textBoundary),'yyyymmddTHHMMSS.FFF');
-    
-    % check for file-validity by checking for DeviceID and SF
-    if isempty(deviceID) || isempty(SF) || isempty(startT) || ~matches(headL,["x,y,z","x, y, z"],'IgnoreCase',true)
+     % check for file-validity by checking for DeviceID and SF
+    if isempty(headLs(row_DevID)) || isempty(headLs(row_SF)) || isempty(headLs(row_startT)) 
         error("unrecognized generic CSV format");
     end
     
+    % if a device-type header line found use it, otherwise set devType to "generic"
+    if ~isempty(headLs(row_devtype))
+        devType=extractBetween(headLs(row_devtype),textBoundary+"DevType=",textBoundary);
+    else
+        devType="Generic";
+    end
+    
+    % Extract ID and SF values using correct indexing
+    deviceID = extractBetween(headLs(row_DevID),textBoundary+"ID=",textBoundary);
+    SF = extractBetween(headLs(row_SF),textBoundary+"SF=",textBoundary);
+    
+    % find the start time. If this fails function will return
+    startT=datenum(extractBetween(headLs(row_startT),textBoundary+"START=",textBoundary),'yyyymmddTHHMMSS.FFF');
+           
     % convert SF and DeviceID to numbers (ActiPASS only supports numeric device serial-numbers)
     SF=str2double(SF);
     deviceID=str2double(deviceID);
