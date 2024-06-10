@@ -81,14 +81,14 @@ try
     % a string array to store header lines
     headLs=strings(10,1);
     headerFound=false;
-    
+    numLs=0; % iteration of lines read
     % Read first few (max 10) lines for metadata and start-time (read max 10 lines)
-    for itr=1:10
-        headLs(itr)=fgetl(fileID);
+    while ~feof(fileID) && numLs <=10
+        numLs=numLs+1;
+        headLs(numLs)=fgetl(fileID);
         % if the axes header line is found we have reached end of header lines
-        if matches(headLs(itr),["x,y,z","x, y, z"],'IgnoreCase',true)
+        if matches(headLs(numLs),["x,y,z","x, y, z"],'IgnoreCase',true)
            headerFound=true;
-           break; 
         end
     end
     
