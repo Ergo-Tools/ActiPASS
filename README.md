@@ -11,7 +11,7 @@ at Occupational and Environmental Medicine, Department of Medical Sciences, Upps
 ActiPASS is based on: [Acti4 thigh accelerometer activity detection algorithm](https://github.com/motus-nfa/Acti4/) developed by Jørgen Skotte 
 at the National Research Centre for the Working Environment (NFA), Copenhagen, Denmark. Lead: [[Andreas Holtermann](mailto:aho@nfa.dk)]
 
-The development of ActiPASS has partly been funded by [ProPASS Consortium](https://www.propassconsortium.org) and [FORTE](https://forte.se/), the Swedish Research Council for Health, Working Life and Welfare [project 2021–01561](https://www.vr.se/swecris#/project/2021-01561_Forte)
+The development of ActiPASS has partly been funded by [ProPASS Consortium](https://www.propassconsortium.org) and [FORTE](https://forte.se/), the Swedish Research Council for Health, Working Life and Welfare [project 2021–01561.](https://www.vr.se/swecris#/project/2021-01561_Forte)
 
 ActiPASS may not be used for any commercial purposes without written permission from the developers.
 Please acknowledge the Developers and NFA as the source of the Software in any publications by referring to [relevant publications](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References) about Acti4 /ActiPASS.
