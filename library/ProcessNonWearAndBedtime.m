@@ -99,11 +99,11 @@ for itrEvnt=1:length(eventIndices)-1
         end
     elseif  any(strcmpi(currEvent,["NW","MNW","FNW","ForcedNW"]),'all') %different types of NW keywords coming from diary
         NWForce(EventIndcs)=true;
-    elseif ~isempty(Akt) && strcmpi(Settings.NWCORRECTION,"lying") && any(strcmpi(Settings.LIEALG,["algA","algB"]))
-        
+    
+    elseif ~isempty(Akt) && any(strcmpi(Settings.NWCORRECTION,["lying","extra"])) && any(strcmpi(Settings.LIEALG,["algA","algB"]))
         NightLogic(EventIndcs(bedLgc(EventIndcs)))=true;
         
-    elseif strcmpi(currEvent,"NE") || strcmpi(currEvent,"leisure") 
+    elseif strcmpi(currEvent,"NE") || contains(currEvent,"leisure",'IgnoreCase',true) 
         T = rem(Tid(EventIndcs),1);
         NightStart = 22/24;
         NightEnd = 8/24;
@@ -126,9 +126,15 @@ else
     lenNight=zeros(length(InightS),1);
     for i=1:length(InightS)
         lenNight(i) = InightE(i)-InightS(i)+1;
-        %If Off-time in night periods is < 50%, no Off-time at all:
-        if sum(NW(InightS(i):InightE(i))==1)/lenNight(i) < 0.5
+        
+        if strcmpi(Settings.NWCORRECTION,"extra")
+            % if NWCORRECTION is set to "extra" ignore detected NW during night times
             NW(InightS(i):InightE(i)) = false;
+        else
+            %If Off-time in night periods is < 50%, no Off-time at all:
+            if sum(NW(InightS(i):InightE(i))==1)/lenNight(i) < 0.5
+                NW(InightS(i):InightE(i)) = false;
+            end
         end
     end
     NW=NW | NWForce;

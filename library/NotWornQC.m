@@ -207,7 +207,7 @@ for itrEvnt=1:length(eventIndices)-1
     elseif any(strcmpi(currEvent,["NW","MNW","FNW","ForcedNW"]),'all') %different types of NW keywords coming from diary
         NWForce(EventIndcs)=true;
     
-    elseif  strcmpi(currEvent,"NE") || strcmpi(currEvent,"leisure") 
+    elseif  strcmpi(currEvent,"NE") || contains(currEvent,"leisure",'IgnoreCase',true) 
         T = rem(smplTimes(EventIndcs),1);
         NightStart = 22/24; % end of night at 22:00 when no diary night/bed exist
         NightEnd = 7/24; % wakeup at 07:00 when no diary night/bed exist
@@ -228,6 +228,7 @@ else
     lenNight=zeros(length(InightS),1);
     for i=1:length(InightS)
         lenNight(i) = InightE(i)-InightS(i)+1;
+        
         %If Off-time in night periods is < 50%, no Off-time at all:
         if sum(NotWornLogic(InightS(i):InightE(i))==1)/lenNight(i) < 0.5
             NotWornLogic(InightS(i):InightE(i)) = false;

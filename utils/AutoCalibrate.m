@@ -131,10 +131,23 @@ movMeanAcc=movMeanAcc(smplsTS,:); % downsampling at t_step intervals
 stdMeanAcc=movstd(Acc(:,2:4),FiltWin,1);
 stdMeanAcc=stdMeanAcc(smplsTS,:); % downsampling at t_step intervals
 
-smplsStill=sum(stdMeanAcc <= actThresh,2) == 3;
 
-movMeanAcc=movMeanAcc(smplsStill,:); % only select the mean values of still points
-%stdMeanAcc=sum(stdMeanAcc(smplsStill,:),2);
+% find still-sample-points 
+smplsStill=find(sum(stdMeanAcc <= actThresh,2) == 3);
+
+% find times of still data points
+t_Still=Acc(smplsTS(smplsStill),1);
+
+% create matrix containing sum of stdMeanAcc accross all axes and day number
+sumStdMean=[sum(stdMeanAcc(smplsStill,:),2),floor(t_Still)];
+% sort this matrix first by sumStdMean and then by day
+[~,iSort]=sortrows(sumStdMean,[1,2]);
+
+% rearrange still samples such that we have sorted data points first by most-still and then by day
+smplsStill=smplsStill(iSort);
+
+% only select the mean values of still points
+movMeanAcc=movMeanAcc(smplsStill,:); 
 
 SVM=sqrt(sum(movMeanAcc .^ 2, 2)); % VM of still periods
 dif_percn_10_90=prctile(SVM,90)-prctile(SVM,10);
@@ -154,6 +167,7 @@ ptsNegValidX=find(movMeanAcc(:,1)<= -0.3);
 ptsNegValidY=find(movMeanAcc(:,2)<= -0.3);
 ptsNegValidZ=find(movMeanAcc(:,3)<= -0.3);
 
+
 % finding the number of such points for each axes for each polarity
 lNegX=length(ptsNegValidX);
 lPosX=length(ptsPosValidX);
@@ -168,22 +182,25 @@ validZ= lNegZ > 1 && lPosZ > 1; % Valid pts in Z-axis?
 
 if validX && validY && validZ % at least one valid point for each axis for each polarity
     
-    % randomize those valid points. this is done to pick enough data points spreaded throughout the data
-    ptsPosValidX=ptsPosValidX(randperm(lPosX));
-    ptsNegValidX=ptsNegValidX(randperm(lNegX));
-    ptsPosValidY=ptsPosValidY(randperm(lPosY));
-    ptsNegValidY=ptsNegValidY(randperm(lNegY));
-    ptsPosValidZ=ptsPosValidZ(randperm(lPosZ));
-    ptsNegValidZ=ptsNegValidZ(randperm(lNegZ));
+    %rearrange data points such that we pick up most still data points from each day
     
+    % randomize those valid points. this is done to pick enough data points spreaded throughout the data
+%     ptsPosValidX=ptsPosValidX(randperm(lPosX));
+%     ptsNegValidX=ptsNegValidX(randperm(lNegX));
+%     ptsPosValidY=ptsPosValidY(randperm(lPosY));
+%     ptsNegValidY=ptsNegValidY(randperm(lNegY));
+%     ptsPosValidZ=ptsPosValidZ(randperm(lPosZ));
+%     ptsNegValidZ=ptsNegValidZ(randperm(lNegZ));
+    
+       
     % only select 'ptsPAxis' number of (default 500) points for each axes for each
     % polarity. If there are not enough points select all of them
-    ptsPosValidX=ptsPosValidX(1:min(ptsPAxis,lPosX));
-    ptsNegValidX=ptsNegValidX(1:min(ptsPAxis,lNegX));
-    ptsPosValidY=ptsPosValidY(1:min(ptsPAxis,lPosY));
-    ptsNegValidY=ptsNegValidY(1:min(ptsPAxis,lNegY));
-    ptsPosValidZ=ptsPosValidZ(1:min(ptsPAxis,lPosZ));
-    ptsNegValidZ=ptsNegValidZ(1:min(ptsPAxis,lNegZ));
+    ptsPosValidX=ptsPosValidX(1:min(lPosX,ptsPAxis));
+    ptsNegValidX=ptsNegValidX(1:min(lNegX,ptsPAxis));
+    ptsPosValidY=ptsPosValidY(1:min(lPosY,ptsPAxis));
+    ptsNegValidY=ptsNegValidY(1:min(lNegY,ptsPAxis));
+    ptsPosValidZ=ptsPosValidZ(1:min(lPosZ,ptsPAxis));
+    ptsNegValidZ=ptsNegValidZ(1:min(lNegZ,ptsPAxis));
     
     % concatenate all valid points of each axis for both polarities in to
     % one vector
