@@ -48,6 +48,8 @@ if isfile(AktConfig)
     SettingsAkt=table2struct(readtable(AktConfig,'FileType','text'));
 else
     % otherwise use default settings
+    
+    % Acti4 algorithm related settings
     SettingsAkt = struct;
     SettingsAkt.Bout_cycle = 15;
     SettingsAkt.Bout_lie = 5;
@@ -64,6 +66,9 @@ else
     SettingsAkt.Threshold_walkrun = 0.72;
     SettingsAkt.Threshold_slowfastwalk = 100;
     
+    % transport algorithm related settings
+    SettingsAkt.Threshold_HF_energy = 0.1;
+    SettingsAkt.Threshold_SDMax_Acc = 0.015;
 end
 
 
@@ -74,7 +79,7 @@ if isfile(ActiPASSConfig)
     strVarNames=["TRUNKSUFFIX","TRUNKPREFIX","TRUNKPOS","REFPOSTRNK","CALMETHOD","CADALG","LIEALG","SLEEPALG",...
         "IDMODE","TRIMMODE","FLIPROTATIONS","REFPOSTHIGH","BEDTIME","NWCORRECTION","VISUALIZE","CheckSlpInt",...
         "STATDOMAINS","statsIgnoreQC","StatMtchMode","statSlctDays","StatsVldD","WalkMET","FilterTAI","TblFormat",...
-        "genBouts","thighAccDir","diary_file","trunkAccDir","out_folder","cal_file"];
+        "TRANSPORT","genBouts","thighAccDir","diary_file","trunkAccDir","out_folder","cal_file"];
     
     varTypesOrig=string(imptOpt.VariableTypes);
     [~,idStrVars,~]=intersect(varNamesOrig,strVarNames);
@@ -209,17 +214,23 @@ end
 
 % NW correction using bedtime based on lying
 if ~isfield(Settings,'NWCORRECTION')|| ismissing(Settings.NWCORRECTION) ||...
-        ~matches(Settings.NWCORRECTION,["lying","fixed"])% alternatives (fixed,lying)
+        ~matches(Settings.NWCORRECTION,["lying","fixed","extra"])% alternatives (fixed,lying)
     Settings.NWCORRECTION="lying";
 end
 
 
-%% Load cadence, lying, bedtime and sleep related settings
+%% Load cadence, seated-transport lying, bedtime and sleep related settings
 
 % the flag for cadence detection algorithm
 if ~isfield(Settings,'CADALG')|| ismissing(Settings.CADALG) ||...
         ~matches(Settings.CADALG,["FFT","Wavelet1","Wavelet2"])
     Settings.CADALG="FFT";% alternatives ("FFT","Wavelet1","Wavelet2")
+end
+
+% enable or disable seated transport detection'
+if ~isfield(Settings,'TRANSPORT')|| ismissing( Settings.TRANSPORT)||...
+        ~matches(Settings.TRANSPORT,["on","off"])
+    Settings.TRANSPORT="off";   % alternatives 'on', 'off'
 end
 
 % different lying algorithms to find lying periods
