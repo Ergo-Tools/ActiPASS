@@ -44,6 +44,7 @@ Settings.statNumDays=statStruct.statNumDays; % the number of days to report. Mis
 Settings.validDayHrs=statStruct.minValidDur; % minimum duration in hrs for a valid day
 Settings.StatsVldD=statStruct.StatsVldD; %daily validity criteria (only wear time or ProPASS mode)
 Settings.projectDir=statStruct.projectDir; % analysis directory
+Settings.backupDir=statStruct.backupDir; % the backup directory for creating table backups
 
 Settings.Batch=statStruct.Batch; % the selected batch
 Settings.indvDirOut=statStruct.indvDirOut; % the directory name of individual output
@@ -432,12 +433,12 @@ try
                     fnlPrPSTbl=sortrows(fnlPrPSTbl,"SubjectID"); % sort the table first by ID
                 else
                     %save the existing incompatiable horizontal table
-                    [oldPrPSTDir,oldPrPSTFName,oldPrPSTExt]=fileparts(fnlPrPSTblF);
+                    [~,oldPrPSTFName,oldPrPSTExt]=fileparts(fnlPrPSTblF);
                     oldPrPSTblF=oldPrPSTFName+"_Renamed_Old_"+datestr(now,'yyyymmdd HHMMSS')+oldPrPSTExt;
                     
                     uialert(uiFig,"Incompatiable ProPASS table found. Old table is saved as: "+oldPrPSTblF,"Stats Warning",...
                         "Icon","warning");
-                    copyfile(fnlPrPSTblF,fullfile(oldPrPSTDir,oldPrPSTblF));
+                    copyfile(fnlPrPSTblF,fullfile(Settings.backupDir,oldPrPSTblF));
                 end
             end
             writetable(fnlPrPSTbl,fnlPrPSTblF,'WriteMode','overwrite');
@@ -466,12 +467,12 @@ try
                     fnlDlyTbl=sortrows(fnlDlyTbl,["SubjectID","Date"]); % sort the table first by ID and then by date
                 else
                     %save the existing incompatiable horizontal table
-                    [oldDlyTDir,oldDlyTFName,oldDlyTExt]=fileparts(fnlDlyTblF);
+                    [~,oldDlyTFName,oldDlyTExt]=fileparts(fnlDlyTblF);
                     oldDlyTblF=oldDlyTFName+"_Renamed_Old_"+datestr(now,'yyyymmdd HHMMSS')+oldDlyTExt;
                     
                     uialert(uiFig,"Incompatiable long format daily table found. Old table is saved as: "+oldDlyTblF,"Stats Warning",...
                         "Icon","warning");
-                    copyfile(fnlDlyTblF,fullfile(oldDlyTDir,oldDlyTblF));
+                    copyfile(fnlDlyTblF,fullfile(Settings.backupDir,oldDlyTblF));
                 end
             end
             writetable(fnlDlyTbl,fnlDlyTblF,'WriteMode','overwrite');
@@ -508,12 +509,12 @@ try
                     finalEvntTbl=sortrows(finalEvntTbl,1); % sort the table first by ID
                 else
                     %save the existing incompatiable horizontal table
-                    [oldVertTDir,oldVertFName,oldVertTExt]=fileparts(fnlEvntTblF);
+                    [~,oldVertFName,oldVertTExt]=fileparts(fnlEvntTblF);
                     oldVertTblF=oldVertFName+"_Renamed_Old_"+datestr(now,'yyyymmdd HHMMSS')+oldVertTExt;
                     
                     uialert(uiFig,"Incompatiable Events table found. Old table is saved as: "+oldVertTblF,"Stats Warning",...
                         "Icon","warning");
-                    copyfile(fnlEvntTblF,fullfile(oldVertTDir,oldVertTblF));
+                    copyfile(fnlEvntTblF,fullfile(Settings.backupDir,oldVertTblF));
                 end
             end
             writetable(finalEvntTbl,fnlEvntTblF,'WriteMode','overwrite');
