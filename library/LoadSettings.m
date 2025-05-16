@@ -45,7 +45,8 @@ end
 
 % if activity config file exists load config data
 if isfile(AktConfig)
-    SettingsAkt=table2struct(readtable(AktConfig,'FileType','text'));
+    
+    SettingsAkt=readstruct(AktConfig,FileType="json");
 else
     % otherwise use default settings
     
@@ -64,32 +65,65 @@ else
     SettingsAkt.Threshold_staircycle = 40;
     SettingsAkt.Threshold_standmove = 0.1;
     SettingsAkt.Threshold_walkrun = 0.72;
-    SettingsAkt.Threshold_slowfastwalk = 100;
     
+    % cadance cutoffs for slow/fast and fast/very_fast walking (used both in batch process and stats generation)
+    SettingsAkt.Threshold_slowfastwalk = 100;
+    SettingsAkt.Threshold_veryfastwalk = 135;
+
     % transport algorithm related settings
     SettingsAkt.Threshold_HF_energy = 0.1;
     SettingsAkt.Threshold_SDMax_Acc = 0.015;
+    
+    % stat generation MET cutoffs for behaviours
+    SettingsAkt.MET_SI=0.90;
+    SettingsAkt.MET_LieStill=0.95;
+    SettingsAkt.MET_Lie=1.0;
+    SettingsAkt.MET_Sit=1.3;
+    SettingsAkt.MET_Stand=1.55; % 2022-07-05 standing falls into light physical activity class (changed from 1.4)
+    SettingsAkt.MET_Move=2.0;
+    SettingsAkt.Wlk_Low_MET=2;
+    SettingsAkt.Wlk_Fast_MET=4;
+    SettingsAkt.Wlk_VFast_MET=7;
+    SettingsAkt.MET_Running=10;
+    SettingsAkt.MET_Stairs=8;
+    SettingsAkt.MET_Cycle=7;
+    SettingsAkt.MET_Other=2; % "Other" with no periodicity falls into light physical activity
+
+    % stat generation MET cutoffs for intensity classes
+    SettingsAkt.PA_Slp=0.0;
+    SettingsAkt.PA_SED=0.95; %lieStill belongs to sedentary
+    SettingsAkt.PA_LPA=1.5;
+    SettingsAkt.PA_LPA_Amb=1.6; %introduce another called LPA_ambulatory to seperate standing from other LPA activities
+    SettingsAkt.PA_MPA=3.0;
+    SettingsAkt.PA_VPA=6.0;
 end
 
 
 %% check if the main config file exist and load last settings
-if isfile(ActiPASSConfig)
-    imptOpt=detectImportOptions(ActiPASSConfig,'FileType','text');
-    varNamesOrig=string(imptOpt.VariableNames);
-    strVarNames=["TRUNKSUFFIX","TRUNKPREFIX","TRUNKPOS","REFPOSTRNK","CALMETHOD","CADALG","LIEALG","SLEEPALG",...
-        "IDMODE","TRIMMODE","FLIPROTATIONS","REFPOSTHIGH","BEDTIME","NWCORRECTION","VISUALIZE","CheckSlpInt",...
-        "STATDOMAINS","statsIgnoreQC","StatMtchMode","statSlctDays","StatsVldD","WalkMET","FilterTAI","TblFormat",...
-        "TRANSPORT","genBouts","thighAccDir","diary_file","trunkAccDir","out_folder","cal_file"];
-    
-    varTypesOrig=string(imptOpt.VariableTypes);
-    [~,idStrVars,~]=intersect(varNamesOrig,strVarNames);
-    varTypesOrig(idStrVars)="string";
-    imptOpt.VariableTypes=varTypesOrig;
-    Settings=table2struct(readtable(ActiPASSConfig,imptOpt));
-else
-    % otherwise create an empty Settings structure
-    Settings = struct;
-end
+
+ % create an empty Settings structure
+ Settings = struct;
+
+ if isfile(ActiPASSConfig)
+     % imptOpt=detectImportOptions(ActiPASSConfig,'FileType','text');
+     % varNamesOrig=string(imptOpt.VariableNames);
+     % strVarNames=["TRUNKSUFFIX","TRUNKPREFIX","TRUNKPOS","REFPOSTRNK","CALMETHOD","CADALG","LIEALG","SLEEPALG",...
+     %     "IDMODE","TRIMMODE","FLIPROTATIONS","REFPOSTHIGH","BEDTIME","NWCORRECTION","VISUALIZE","CheckSlpInt",...
+     %     "STATDOMAINS","statsIgnoreQC","StatMtchMode","statSlctDays","StatsVldD","WalkMET","FilterTAI","TblFormat",...
+     %     "TRANSPORT","genBouts","thighAccDir","diary_file","trunkAccDir","out_folder","cal_file"];
+     %
+     % varTypesOrig=string(imptOpt.VariableTypes);
+     % [~,idStrVars,~]=intersect(varNamesOrig,strVarNames);
+     % varTypesOrig(idStrVars)="string";
+     % imptOpt.VariableTypes=varTypesOrig;
+     % Settings=table2struct(readtable(ActiPASSConfig,imptOpt));
+
+
+
+     try
+         Settings=readstruct(ActiPASSConfig,FileType="json");
+     end
+ end
 
 
 %% %% main ActiPASS options like file-paths etc
