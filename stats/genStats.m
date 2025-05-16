@@ -65,32 +65,32 @@ Settings.SAVETRNKD=statStruct.SAVETRNKD; % flag for saving trunk variables
 Settings.TRUNKPOS=statStruct.TRUNKPOS; % flag for saving trunk variables
 
 % activity to MET translation
-Settings.MET_SI=0.90;
-Settings.MET_LieStill=0.95;
-Settings.MET_Lie=1.0;
-Settings.MET_Sit=1.3;
-Settings.MET_Stand=1.55; % 2022-07-05 standing falls into light physical activity class (changed from 1.4)
-Settings.MET_Move=2.0;
-Settings.Wlk_Low_MET=2;
-Settings.Wlk_Fast_MET=4;
-Settings.Wlk_VFast_MET=7;
-Settings.MET_Running=10;
-Settings.MET_Stairs=8;
-Settings.MET_Cycle=7;
-Settings.MET_Other=2; % "Other" with no periodicity falls into light physical activity
+Settings.MET_SI = statStruct.SettingsAkt.MET_SI; %  0.90;
+Settings.MET_LieStill = statStruct.SettingsAkt.MET_LieStill; % 0.95;
+Settings.MET_Lie = statStruct.SettingsAkt.MET_Lie; % 1.0;
+Settings.MET_Sit = statStruct.SettingsAkt.MET_Sit; % 1.3;
+Settings.MET_Stand = statStruct.SettingsAkt.MET_Stand; % 1.55; % 2022-07-05 standing falls into light physical activity class (changed from 1.4)
+Settings.MET_Move = statStruct.SettingsAkt.MET_Move; % 2.0;
+Settings.Wlk_Low_MET = statStruct.SettingsAkt.Wlk_Low_MET; % 2;
+Settings.Wlk_Fast_MET = statStruct.SettingsAkt.Wlk_Fast_MET; % 4;
+Settings.Wlk_VFast_MET = statStruct.SettingsAkt.Wlk_VFast_MET; % 7;
+Settings.MET_Running = statStruct.SettingsAkt.MET_Running; % 10;
+Settings.MET_Stairs = statStruct.SettingsAkt.MET_Stairs; % 8;
+Settings.MET_Cycle = statStruct.SettingsAkt.MET_Cycle; % 7;
+Settings.MET_Other = statStruct.SettingsAkt.MET_Other; % 2; % "Other" with no periodicity falls into light physical activity
 
 % MET cutoffs for intensity classes
-Settings.PA_Slp=0.0;
-Settings.PA_SED=0.95; %lieStill belongs to sedentary
-Settings.PA_LPA=1.5;
-Settings.PA_LPA_Amb=1.6; %introduce another called LPA_ambulatory to seperate standing from other LPA activities
-Settings.PA_MPA=3.0;
-Settings.PA_VPA=6.0;
+Settings.PA_Slp= statStruct.SettingsAkt.PA_Slp; % 0.0;
+Settings.PA_SED = statStruct.SettingsAkt.PA_SED; % 0.95; %lieStill belongs to sedentary
+Settings.PA_LPA = statStruct.SettingsAkt.PA_LPA; % 1.5;
+Settings.PA_LPA_Amb = statStruct.SettingsAkt.PA_LPA_Amb; % 1.6; %introduce another called LPA_ambulatory to seperate standing from other LPA activities
+Settings.PA_MPA = statStruct.SettingsAkt.PA_MPA; % 3.0;
+Settings.PA_VPA = statStruct.SettingsAkt.PA_VPA; % 6.0;
 
 %cadence cutoffs for walk-slow, walk-fast and walk-very-fast
-Settings.Wlk_Slow_Cad=100;
+Settings.Wlk_Slow_Cad = statStruct.SettingsAkt.Threshold_slowfastwalk; %100;
 %2022-08-26 From ActiPASS version 1.42 Wlk_VFast_Cad=135, previously it was 130 (Myles O'Brien <Myles.OBrien@dal.ca>)
-Settings.Wlk_VFast_Cad=135; %prior versions: Wlk_VFast_Cad=130
+Settings.Wlk_VFast_Cad = statStruct.SettingsAkt.Threshold_veryfastwalk; % 135; %prior versions: Wlk_VFast_Cad=130
 
 % the domains to calculate seperate decriptive stats
 Settings.StatDomains=statStruct.StatDomains; % domain string is splitted into a vector
