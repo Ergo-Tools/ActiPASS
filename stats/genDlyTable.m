@@ -44,7 +44,7 @@ qcBatch=dlyGenStruct.qcBatch;
 QC_Status=dlyGenStruct.QC_Status;
 Sensor_Errs=dlyGenStruct.Sensor_Errs;
 qcMeta=dlyGenStruct.qcMeta;
-varN_DlyQC=["refPosInfo","NotEnoughWear","NoWlk","TooMuchOther","TooMuchStair","NoSleepInt","NumPrimaryBDs","NumExtraBDs"];
+varN_DlyQC=dlyGenStruct.varN_DlyQC;
 
 
 
@@ -89,7 +89,7 @@ if dmnStats
             dlyVarTypes((NumVarDly+1):end),'VariableNames',dlyVarNames((NumVarDly+1):end));
         dlyTblDmns{itrDm}{:,:}=NaN;%fill table with NaN
     end
-    
+
 end
 
 workDays=false(numDays,1);% array to hold valid workday flag
@@ -108,29 +108,29 @@ for itrDay=1:numDays
     rowsDay=find((dateTimeDT>=analysDays(itrDay)) & (dateTimeDT<analysDays(itrDay)+days(1)));
     dayDT=dateTimeDT(rowsDay);
     dayPerSecT=perSecT(rowsDay,:);
-    
+
     % fill information related to current day
     dlyTable.Date(itrDay)=string(analysDays(itrDay),"yyyy-MM-dd");
     dlyTable.Day(itrDay)= day(analysDays(itrDay),"name");
     dlyTable.Weekend(itrDay)=isweekend(analysDays(itrDay));
     dlyTable.DayStart(itrDay)=string(dayDT(1),"HH:mm:ss");
     dlyTable.DayStop(itrDay)=string(dayDT(end),"HH:mm:ss");
-    
+
     %find excluded seconds and total time of excluded
     dayRowsExcld=strcmpi(dayPerSecT.Event,"X");
     dlyTable.Duration(itrDay)=round(height(dayPerSecT)/60,Settings.prec_dig_min);
     dlyTable.Excluded(itrDay)=round(sum(dayRowsExcld)/60,Settings.prec_dig_min);
-    
+
     dayPerSecT.Activity(dayRowsExcld)=-1; % reclassify all seconds flagged as 'X' from diary as new activity -1
     rows_SI=dayPerSecT.SleepInterval ==1; % find the seconds flagged as sleep-interval
     rows_BT=dayPerSecT.Bedtime ==1; % find the seconds flagged as bedtime
     % call genVariables function
     dlyTable=genVariables(dlyTable,dayPerSecT.Activity,dayPerSecT.Steps,rows_SI,rows_BT,itrDay,Settings);
-    
+
     if dmnStats
         if any(contains(dayPerSecT.Event,StatDomains,'IgnoreCase',true))
             % How to treat diary defined bedtimes when StatDomains does not contain ["bed","bedtime","night"]
-            if UseDBedAsLeis 
+            if UseDBedAsLeis
                 % if the event is "sick" is defined anywhere during the day, night time is considered sick
                 if any(strcmpi(dayPerSecT.Event,"Sick"))
                     indsBed=matches(dayPerSecT.Event,["bed","bedtime","night"],'IgnoreCase',true);
@@ -142,7 +142,7 @@ for itrDay=1:numDays
                 end
             end
             for itrDm=1:length(StatDomains)
-                
+
                 %actDomain(~strcmpi(StatDomains(itrDm),dayPerSecT.Event))=-1;% match only exact stat-domain names (work, Leisure etc)
                 if strcmpi(Settings.StatMtchMode,"Inclusive")
                     % loosely match any event containing the stat-domain names (WorkFromHome, LeisureCommute etc)
@@ -172,7 +172,7 @@ for itrDay=1:numDays
                 dlyTblDmns{itrDm}{itrDay,:}=NaN;
             end
         end
-        
+
         if uiPgDlg.CancelRequested
             status="Canceled";
             return;
@@ -193,11 +193,22 @@ if height(dlyTable)>1
     consecNoSlp(1)=consecNoSlp(2);
 end
 
+% check calf related QC flags
+if strcmpi(Settings.CALFPOS,"on")
+    KneelQC=qcMeta.TooMuchKneel;
+    Calf_Errs_day=repmat(strcmpi(dlyGenStruct.Calf_Errs,"Yes"),height(dlyTable),1); % consider file-level Sensor_Errs into account for each day
+    Calf_Errs=dlyGenStruct.Calf_Errs;
+else
+    KneelQC=false(height(dlyTable),1);
+    Calf_Errs_day=false(height(dlyTable),1);
+    Calf_Errs=[];
+end
+
 notEnoughWear = dlyTable.ValidDuration < (Settings.validDayHrs*60);
 %fill in daily-QC flag for alldays
 Sensor_Errs_day=repmat(Sensor_Errs=="Yes",height(dlyTable),1); % consider file-level Sensor_Errs into account for each day
-dlyTable.Day_QC(notEnoughWear | (qcMeta.NoWlk & qcMeta.TooMuchOther) | (consecNoSlp>1) | (dlyTable.Awake==0))="NotOK";
-dlyTable.Day_QC(ismissing(dlyTable.Day_QC ) & (qcMeta.TooMuchOther | qcMeta.TooMuchStair | qcMeta.NoWlk | Sensor_Errs_day))="Check";
+dlyTable.Day_QC(notEnoughWear | (qcMeta.NoWlk & qcMeta.TooMuchOther) | (consecNoSlp>1) | (dlyTable.Awake==0) | Calf_Errs_day)="NotOK";
+dlyTable.Day_QC(ismissing(dlyTable.Day_QC ) & (qcMeta.TooMuchOther | qcMeta.TooMuchStair | qcMeta.NoWlk | Sensor_Errs_day | KneelQC))="Check";
 dlyTable.Day_QC(ismissing(dlyTable.Day_QC ))="OK";
 %fill daily QC flags from metadata file
 varN_DlyQC=intersect(varN_DlyQC,qcMeta.Properties.VariableNames); % find the quality check variables which actually exists
@@ -206,7 +217,7 @@ dlyTable(:,varN_DlyQC)=qcMeta(:,varN_DlyQC);
 %% merge dlyTable and  domain-specific table dlyTblDmns to mgdLngDlyTbl
 
 % create a table with subject-related info which are the same for all days
-subjctTLng=array2table(repmat([subjctID,QC_Status,qcBatch,Sensor_Errs],[height(dlyTable),1]),'VariableNames',sbjctVarNames);
+subjctTLng=array2table(repmat([subjctID,QC_Status,qcBatch,Sensor_Errs,Calf_Errs],[height(dlyTable),1]),'VariableNames',sbjctVarNames);
 
 mgdLngDlyTbl=horzcat(subjctTLng,dlyTable);
 % if stat-domains defined merge domain specific tables with daily table
@@ -247,14 +258,14 @@ elseif strcmp(Settings.statSlctDays,"first valid days")
     finValidDays=valDNs(1:Settings.statNumDays);
 elseif strcmp(Settings.statSlctDays,"pick days: optimal work/leisure")
     % calculate required work days (try to find at least this many work days if possible)
-    
+
     finValidDays=[];
     % if any work days existe append upto reqdWkDays of them to  finValidDays
     if any(validWorkDays)
         finValidDays=find(validWorkDays);
         finValidDays=finValidDays(1:min(reqdWkDays,length(finValidDays)));
     end
-    
+
     % if there are any leisure days append them to the finValidDays upto a maximum of Settings.statNumDays
     if any(validLeisureDays)
         selLesDays=find(validLeisureDays);
@@ -265,7 +276,7 @@ elseif strcmp(Settings.statSlctDays,"pick days: optimal work/leisure")
         otherDays=find(validOtherDays);
         finValidDays=[finValidDays;otherDays(1:min(Settings.statNumDays-length(finValidDays),length(otherDays)))];
     end
-    
+
     % sort the days in acending order
     finValidDays=sort(finValidDays);
 elseif strcmp(Settings.statSlctDays,"pick window: optimal work/leisure")
@@ -274,7 +285,7 @@ elseif strcmp(Settings.statSlctDays,"pick window: optimal work/leisure")
     % use a moving window of Settings.statNumDays numExtraDs times and calculate work and leisure days
     posWkDNs=zeros(numExtraDs,1);
     posLesDNs=zeros(numExtraDs,1);
-    
+
     %move the window numExtraDs times and find work and leisure days for each option
     for itrExD=1:numExtraDs
         posWkDNs(itrExD)=sum(workDays(valDNs(itrExD:(itrExD+Settings.statNumDays-1))));
@@ -298,7 +309,7 @@ elseif strcmp(Settings.statSlctDays,"pick window: optimal work/leisure")
         % if no work or leisure days available for any case, just use the first valid statNumDays
         finValidDays=valDNs(1:Settings.statNumDays);
     end
-    
+
 end
 
 %% create ProPASS table
@@ -311,14 +322,14 @@ mgdDlyTble=[];
 % iterate through final valid days
 for itrVDay=1:numValidDays
     dayN=finValidDays(itrVDay);
-    
+
     tempTbl=dlyTable(dayN,:);
     tempTbl.Properties.VariableNames=tempTbl.Properties.VariableNames+"_"+itrVDay;
     mgdDlyTble=horzcat(mgdDlyTble,tempTbl);
     if dmnStats
         for itrDm=1:length(StatDomains)
             tempTbl=dlyTblDmns{itrDm}(dayN,:);
-            
+
             tempTbl.Properties.VariableNames=StatDomains(itrDm)+"_"+tempTbl.Properties.VariableNames+"_"+itrVDay;
             mgdDlyTble=horzcat(mgdDlyTble,tempTbl);
         end
@@ -344,10 +355,13 @@ if numValidDays<Settings.statNumDays && numValidDays >=1
 end
 
 if  numValidDays >=1
-    
-    subjctT=table(subjctID,QC_Status,qcBatch,Sensor_Errs,'VariableNames',sbjctVarNames);
+    if strcmpi(Settings.CALFPOS,"on")
+        subjctT=table(subjctID,QC_Status,qcBatch,Sensor_Errs,Calf_Errs,'VariableNames',sbjctVarNames);
+    else
+        subjctT=table(subjctID,QC_Status,qcBatch,Sensor_Errs,'VariableNames',sbjctVarNames);
+    end
     smmryT=table(numDays,numValidDays,sum(workDays(finValidDays)),sum(offDays(finValidDays)),'VariableNames',varN_Smry);
-    
+
     % generate average tables
     avgDlyVals=round(mean(dlyTable{finValidDays,(NumVarDly+1):end},1,'omitnan'),Settings.prec_dig_min);
     avgDlyTbl=array2table(avgDlyVals,'VariableNames',dlyVarNames((NumVarDly+1):end)+"_Avg");

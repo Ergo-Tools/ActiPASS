@@ -40,10 +40,11 @@ function statTable = genVariables(statTable,Activity,Steps,rows_SI,rows_BT,itrSe
 
 %% generate variables: here we go
 % The activity types and corresponding numbers are:
-% NonWear=0, Lie=1, Sit=2, Stand=3, Move=4, Walk=5, Run=6, Stair=7, Cycle=8, Other=9, Sleep=10, LieStill=11
+% NonWear=0, Lie=1, Sit=2, Stand=3, Move=4, Walk=5, Run=6, Stair=7, Cycle=8, Other=9, Sleep=10, LieStill=11, Kneel=12
 
-statVars=["Lie","Sit","SitLie","Stand","Move","StandMove","Walk","Run","Stair","Cycle","Upright","Other","INT1",...
-    "INT2","INT2_Amb","INT3","INT4","INT34"];
+% selected variable names for statistics generation
+statVars=Settings.statVars;
+
 % check whether to use steps/min in intensity and walk_slow walk_fast calculations
 if Settings.CADPMIN
     Steps60=movmean(Steps,60); % calculate steps/min based on one minute window
@@ -104,7 +105,7 @@ if ~strcmpi(Settings.FilterTAI,"off")
 end
 
 %discretaize TAI to intensity classes
-dayPALevels = discretize(dayTAI,[Settings.PA_Slp,Settings.PA_SED,Settings.PA_LPA,Settings.PA_LPA_Amb,Settings.PA_MPA,Settings.PA_VPA, inf],...
+dayPALevels = discretize(dayTAI,[Settings.MET_INT_Slp,Settings.MET_INT_SED,Settings.MET_INT_LPA,Settings.MET_INT_LPA_Amb,Settings.MET_INT_MPA,Settings.MET_INT_VPA, inf],...
     'categorical',{'Slp','SED','LPA','LPA_Amb','MPA','VPA'});
 
 %% generate daily basic activity times
@@ -146,6 +147,8 @@ for itrVarN=1:length(statVars)
             rowsVarN=~rows_SI & (Activity==3 | Activity==4 | Activity==5 | Activity==6 | Activity==7);
         case "Other"
             rowsVarN=~rows_SI &(Activity==9);
+        case "Kneel"
+            rowsVarN=~rows_SI &(Activity==12);
         case "INT1"
             rowsVarN= dayPALevels=="SED";
         case "INT2"
@@ -160,9 +163,10 @@ for itrVarN=1:length(statVars)
             rowsVarN= (dayPALevels=="VPA" | dayPALevels=="MPA");
     end
     statTable.(statVars(itrVarN))(itrSeg)=round(sum(rowsVarN)/60,prec); % total duration of selected activity or intensity-class
-    % call the stat generation function
     
-    if strcmpi(Settings.genBouts,"on")
+    % call the bouts and segment-time percentile generation function
+    
+    if strcmpi(Settings.genBouts,"on") && matches(statVars(itrVarN),Settings.VarsBout)
         % call the stat generation function with seconds flagged with a given activity, combined-activity or intensity class
         [statTable.(statVars(itrVarN)+"_Tmax")(itrSeg),statTable.(statVars(itrVarN)+"_P50")(itrSeg),...
             statTable.(statVars(itrVarN)+"_T50")(itrSeg),statTable.(statVars(itrVarN)+"_P10")(itrSeg),...
@@ -184,13 +188,7 @@ for itrVarN=1:length(statVars)
             statTable.(statVars(itrVarN)+"_3min_freq_L")(itrSeg),statTable.(statVars(itrVarN)+"_4min_freq_L")(itrSeg),...
             statTable.(statVars(itrVarN)+"_5min_freq_L")(itrSeg),statTable.(statVars(itrVarN)+"_10min_freq_L")(itrSeg),...
             statTable.(statVars(itrVarN)+"_30min_freq_L")(itrSeg),statTable.(statVars(itrVarN)+"_60min_freq_L")(itrSeg)] = genAktStats(rowsVarN',Settings); 
-    else
-        % call the stat generation function with seconds flagged with a given activity, combined-activity or intensity class
-        % use only percentile variables
-        [statTable.(statVars(itrVarN)+"_Tmax")(itrSeg),statTable.(statVars(itrVarN)+"_P50")(itrSeg),...
-            statTable.(statVars(itrVarN)+"_T50")(itrSeg),statTable.(statVars(itrVarN)+"_P10")(itrSeg),...
-            statTable.(statVars(itrVarN)+"_P90")(itrSeg),statTable.(statVars(itrVarN)+"_T30min")(itrSeg),...
-            statTable.(statVars(itrVarN)+"_N30min")(itrSeg), statTable.(statVars(itrVarN)+"_NBreaks")(itrSeg)]=genAktStats(rowsVarN',Settings); % call the stat generation function with seconds flagged with Sit or Lie
+   
     end
 end
 

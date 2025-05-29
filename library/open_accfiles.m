@@ -1,5 +1,5 @@
 
-function  [acc_files,subjectIDs,acc_filenames,rootfolder,ftype,trnk_files,status] = open_accfiles(rootfolder,maxfiles,IDInfo)
+function  [acc_files,subjectIDs,acc_filenames,rootfolder,ftype,trnk_files,calf_files,status] = open_accfiles(rootfolder,maxfiles,IDInfo)
 % open_accfiles Open accelerometer files using uigetfile and returns their information.
 
 % Inputs:
@@ -46,6 +46,7 @@ function  [acc_files,subjectIDs,acc_filenames,rootfolder,ftype,trnk_files,status
 % intialise variables 
 status="";
 trnk_files=[];
+calf_files=[];
 
 % show appropriate file-opening dialog depending on OS
 if ~ispc
@@ -83,7 +84,7 @@ else % One or more file selected
     if ftype==8
         imptOpt=detectImportOptions(fullfile(path,files)); % detect the import options of the excel file
         % check whether the file is a single column worksheet with the column name 'Filenames'
-        if (length(imptOpt.VariableNames)==1 && strcmpi(imptOpt.VariableNames(1),"Filenames")) || ...
+        if (isscalar(imptOpt.VariableNames) && strcmpi(imptOpt.VariableNames(1),"Filenames")) || ...
                 (length(imptOpt.VariableNames)>=2 && all(ismember(["ID","Filenames"],imptOpt.VariableNames)))
             imptOpt.VariableTypes(:)={'string'};
             
@@ -163,12 +164,23 @@ else % One or more file selected
                         if ismember("TrunkFilenames",imptOpt.VariableNames)
                             trnk_files=listFsT.TrunkFilenames;
                         end
+                        if ismember("CalfFilenames",imptOpt.VariableNames)
+                            calf_files=listFsT.CalfFilenames;
+                        end
                         % if duplicate SubjectIDs exist only select first unique cases
                         [~,iUnq]=unique(subjectIDs);
                         if length(iUnq)<length(subjectIDs) % if duplicates exist
                             subjectIDs=subjectIDs(iUnq); % only unique IDs
                             acc_filenames=acc_filenames(iUnq);
                             acc_files=acc_files(iUnq);
+                            % unique trunk files
+                            if ~isempty(trnk_files)
+                                trnk_files=trnk_files(iUnq);
+                            end
+                            % unique calf files
+                            if ~isempty(calf_files)
+                                calf_files=calf_files(iUnq);
+                            end
                             status="Duplicate IDs found. Only "+length(iUnq)+" unique IDs selected";
                         end
                         return;
