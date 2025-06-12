@@ -1,4 +1,4 @@
-function [Settings,SettingsAkt] = LoadSettings(ActiPASSConfig,AktConfig)
+function [Settings,ParamsAP] = LoadSettings(ActiPASSConfig,ParamsConfig)
 %LOADSETTINGS Load settings related to ActiPASS-GUI, Workflow and algorithms
 
 % Input:
@@ -8,122 +8,146 @@ function [Settings,SettingsAkt] = LoadSettings(ActiPASSConfig,AktConfig)
 % Output:
 %   Settings: A structure with loaded UI, workflow, and Statssettings.
 %             If empty ActiPASSConfig is given, default settings are returned
-%   SettingsAkt: A structure with loaded activity-detection settings.  
+%   SettingsAkt: A structure with loaded activity-detection settings.
 %                If empty ActiPASSConfig is given, default settings are returned
 
 % Copyright (c) 2021, Pasan Hettiarachchi .
 % All rights reserved.
-% 
-% Redistribution and use in source and binary forms, with or without 
-% modification, are permitted provided that the following conditions are met: 
-% 1. Redistributions of source code must retain the above copyright notice, 
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+% 1. Redistributions of source code must retain the above copyright notice,
 %    this list of conditions and the following disclaimer.
-% 2. Redistributions in binary form must reproduce the above copyright notice, 
-%    this list of conditions and the following disclaimer in the documentation 
+% 2. Redistributions in binary form must reproduce the above copyright notice,
+%    this list of conditions and the following disclaimer in the documentation
 %    and/or other materials provided with the distribution.
 % 3. Neither the name of the copyright holder nor the names of its contributors
 %    may be used to endorse or promote products derived from this software without
 %    specific prior written permission.
-% 
-% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
-% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-% POSSIBILITY OF SUCH DAMAGE. 
+%
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+% POSSIBILITY OF SUCH DAMAGE.
 
-% check whether the config folder exists, if not create it
+%% check whether the config folder exists, if not create it
 [configDir,~,~] = fileparts(ActiPASSConfig);
 if configDir~="" && ~isfolder(configDir)
     mkdir(configDir);
 end
 
-% if activity config file exists load config data
-if isfile(AktConfig)
-    
-    SettingsAkt=readstruct(AktConfig,FileType="json");
-else
-    % otherwise use default settings
-    
+%% Define or load default algorithm parameters and thresholds
+% intialize parameters structure as an empty structure
+ParamsAP = struct;
+
+% define all parameter names
+paramNms=["Fs","Fc","VrefThighMin","VrefThighMax","VrefThighDef","VrefTrunkMin","VrefTrunkMax","VrefBackDef",...
+    "VrefChestDef","VrefCalfMin","VrefCalfMax","VrefCalfDef","Bout_cycle","Bout_lie","Bout_move","Bout_row",...
+    "Bout_run","Bout_sit","Bout_stair","Bout_stand","Bout_walk","Threshold_sitstand","Threshold_staircycle",...
+    "Threshold_standmove","Threshold_walkrun","Threshold_slowfastwalk","Threshold_veryfastwalk","Threshold_kneel",...
+    "Threshold_HF_energy","Threshold_SDMax_Acc","MET_SI","MET_LieStill","MET_Lie","MET_Sit","MET_Stand",...
+    "MET_Move","Wlk_Low_MET","Wlk_Fast_MET","Wlk_VFast_MET","MET_Running","MET_Stairs","MET_Cycle","MET_Other",...
+    "MET_INT_Slp","MET_INT_SED","MET_INT_LPA","MET_INT_LPA_Amb","MET_INT_MPA","MET_INT_VPA","VarsBout"];
+
+% if parametrs config file exists and all parameters are defined load config data
+if isfile(ParamsConfig)
+    try
+        % try loading algorithm parameters if the parameters file exist
+        ParamsAP=readstruct(ParamsConfig,FileType="json");
+    end
+end
+
+% if SettingsAkt is empty or not all expected parameters are found use default settings
+if isempty(ParamsAP) || ~all(matches(paramNms,fieldnames(ParamsAP)))
+
+    % resampling and filtering of raw accelerometer data
+    ParamsAP.Fs=25; % The resample frequency for raw accelerometer data
+    ParamsAP.Fc=2; % the cutoff frequency for angle and vector-magnitude finding (primary filter)
+
     % Acti4 algorithm related settings
-    SettingsAkt = struct;
-    SettingsAkt.Bout_cycle = 15;
-    SettingsAkt.Bout_lie = 5;
-    SettingsAkt.Bout_move = 2;
-    SettingsAkt.Bout_row = 15;
-    SettingsAkt.Bout_run = 2;
-    SettingsAkt.Bout_sit = 5;
-    SettingsAkt.Bout_stair = 5;
-    SettingsAkt.Bout_stand = 2;
-    SettingsAkt.Bout_walk = 2;
-    SettingsAkt.Threshold_sitstand = 45;
-    SettingsAkt.Threshold_staircycle = 40;
-    SettingsAkt.Threshold_standmove = 0.1;
-    SettingsAkt.Threshold_walkrun = 0.72;
-    
+    ParamsAP.Bout_cycle = 15;
+    ParamsAP.Bout_lie = 5;
+    ParamsAP.Bout_move = 2;
+    ParamsAP.Bout_row = 15;
+    ParamsAP.Bout_run = 2;
+    ParamsAP.Bout_sit = 5;
+    ParamsAP.Bout_stair = 5;
+    ParamsAP.Bout_stand = 2;
+    ParamsAP.Bout_walk = 2;
+    ParamsAP.Threshold_sitstand = 45;
+    ParamsAP.Threshold_staircycle = 40;
+    ParamsAP.Threshold_standmove = 0.1;
+    ParamsAP.Threshold_walkrun = 0.72;
+    ParamsAP.Threshold_kneel=75;
+
     % cadance cutoffs for slow/fast and fast/very_fast walking (used both in batch process and stats generation)
-    SettingsAkt.Threshold_slowfastwalk = 100;
-    SettingsAkt.Threshold_veryfastwalk = 135;
+    ParamsAP.Threshold_slowfastwalk = 100;
+    ParamsAP.Threshold_veryfastwalk = 135;
 
     % transport algorithm related settings
-    SettingsAkt.Threshold_HF_energy = 0.1;
-    SettingsAkt.Threshold_SDMax_Acc = 0.015;
-    
+    ParamsAP.Threshold_HF_energy = 0.1;
+    ParamsAP.Threshold_SDMax_Acc = 0.015;
+
+    % stat generation: behaviours/int-classes for which bouts/percentiles are generated
+    ParamsAP.VarsBout=["SitLie","Upright","INT34"];
+
     % stat generation MET cutoffs for behaviours
-    SettingsAkt.MET_SI=0.90;
-    SettingsAkt.MET_LieStill=0.95;
-    SettingsAkt.MET_Lie=1.0;
-    SettingsAkt.MET_Sit=1.3;
-    SettingsAkt.MET_Stand=1.55; % 2022-07-05 standing falls into light physical activity class (changed from 1.4)
-    SettingsAkt.MET_Move=2.0;
-    SettingsAkt.Wlk_Low_MET=2;
-    SettingsAkt.Wlk_Fast_MET=4;
-    SettingsAkt.Wlk_VFast_MET=7;
-    SettingsAkt.MET_Running=10;
-    SettingsAkt.MET_Stairs=8;
-    SettingsAkt.MET_Cycle=7;
-    SettingsAkt.MET_Other=2; % "Other" with no periodicity falls into light physical activity
+    ParamsAP.MET_SI=0.90;
+    ParamsAP.MET_LieStill=0.95;
+    ParamsAP.MET_Lie=1.0;
+    ParamsAP.MET_Sit=1.3;
+    ParamsAP.MET_Stand=1.55; % 2022-07-05 standing falls into light physical activity class (changed from 1.4)
+    ParamsAP.MET_Move=2.0;
+    ParamsAP.Wlk_Low_MET=2;
+    ParamsAP.Wlk_Fast_MET=4;
+    ParamsAP.Wlk_VFast_MET=7;
+    ParamsAP.MET_Running=10;
+    ParamsAP.MET_Stairs=8;
+    ParamsAP.MET_Cycle=7;
+    ParamsAP.MET_Other=2; % "Other" with no periodicity falls into light physical activity
 
     % stat generation MET cutoffs for intensity classes
-    SettingsAkt.PA_Slp=0.0;
-    SettingsAkt.PA_SED=0.95; %lieStill belongs to sedentary
-    SettingsAkt.PA_LPA=1.5;
-    SettingsAkt.PA_LPA_Amb=1.6; %introduce another called LPA_ambulatory to seperate standing from other LPA activities
-    SettingsAkt.PA_MPA=3.0;
-    SettingsAkt.PA_VPA=6.0;
+    ParamsAP.MET_INT_Slp=0.0;
+    ParamsAP.MET_INT_SED=0.95; %lieStill belongs to sedentary
+    ParamsAP.MET_INT_LPA=1.5;
+    ParamsAP.MET_INT_LPA_Amb=1.6; %introduce another called LPA_ambulatory to seperate standing from other LPA activities
+    ParamsAP.MET_INT_MPA=3.0;
+    ParamsAP.MET_INT_VPA=6.0;
+
+    % individual reference position values for thigh min, max and defaults
+    ParamsAP.VrefThighMin = [0,-32,-15];
+    ParamsAP.VrefThighMax = [32,0,15];
+    ParamsAP.VrefThighDef = [16,-16,0];
+
+    % individual reference position values for trunk min, max and defaults
+    ParamsAP.VrefTrunkMin = [0,5,-15];
+    ParamsAP.VrefTrunkMax = [53,50,15];
+    ParamsAP.VrefBackDef = [27,27,0]; % for back accelerometer
+    ParamsAP.VrefChestDef = [10,10,0]; % for chest accelerometer
+
+    % individual reference position values for calf min, max and defaults
+    ParamsAP.VrefCalfMin = [0,-15,-15];
+    ParamsAP.VrefCalfMax = [15,15,15];
+    ParamsAP.VrefCalfDef = [0,0,0];
 end
 
 
 %% check if the main config file exist and load last settings
+% create an empty Settings structure
+Settings = struct;
 
- % create an empty Settings structure
- Settings = struct;
-
- if isfile(ActiPASSConfig)
-     % imptOpt=detectImportOptions(ActiPASSConfig,'FileType','text');
-     % varNamesOrig=string(imptOpt.VariableNames);
-     % strVarNames=["TRUNKSUFFIX","TRUNKPREFIX","TRUNKPOS","REFPOSTRNK","CALMETHOD","CADALG","LIEALG","SLEEPALG",...
-     %     "IDMODE","TRIMMODE","FLIPROTATIONS","REFPOSTHIGH","BEDTIME","NWCORRECTION","VISUALIZE","CheckSlpInt",...
-     %     "STATDOMAINS","statsIgnoreQC","StatMtchMode","statSlctDays","StatsVldD","WalkMET","FilterTAI","TblFormat",...
-     %     "TRANSPORT","genBouts","thighAccDir","diary_file","trunkAccDir","out_folder","cal_file"];
-     %
-     % varTypesOrig=string(imptOpt.VariableTypes);
-     % [~,idStrVars,~]=intersect(varNamesOrig,strVarNames);
-     % varTypesOrig(idStrVars)="string";
-     % imptOpt.VariableTypes=varTypesOrig;
-     % Settings=table2struct(readtable(ActiPASSConfig,imptOpt));
-
-
-
-     try
-         Settings=readstruct(ActiPASSConfig,FileType="json");
-     end
- end
+if isfile(ActiPASSConfig)
+    try
+        Settings=readstruct(ActiPASSConfig,FileType="json");
+    end
+end
 
 
 %% %% main ActiPASS options like file-paths etc
@@ -153,12 +177,14 @@ end
 if ispc
     if ~isfield(Settings,'thighAccDir') || isnumeric(Settings.thighAccDir),Settings.thighAccDir = getenv('USERPROFILE');end
     if ~isfield(Settings,'trunkAccDir') || isnumeric(Settings.trunkAccDir),Settings.trunkAccDir = getenv('USERPROFILE');end
+    if ~isfield(Settings,'calfAccDir') || isnumeric(Settings.calfAccDir),Settings.calfAccDir = getenv('USERPROFILE');end
     if ~isfield(Settings,'diary_file') || isnumeric(Settings.diary_file),Settings.diary_file = getenv('USERPROFILE');end
     if ~isfield(Settings,'cal_file') || isnumeric(Settings.cal_file),Settings.cal_file = fullfile(getenv('USERPROFILE'),'DeviceCal.csv');end
     if ~isfield(Settings,'out_folder') || isnumeric(Settings.out_folder),Settings.out_folder = getenv('USERPROFILE');end
 else
     if ~isfield(Settings,'thighAccDir') || isnumeric(Settings.thighAccDir),Settings.thighAccDir = getenv('HOME');end
     if ~isfield(Settings,'trunkAccDir') || isnumeric(Settings.trunkAccDir),Settings.trunkAccDir = getenv('HOME');end
+    if ~isfield(Settings,'calfAccDir') || isnumeric(Settings.calfAccDir),Settings.calfAccDir = getenv('HOME');end
     if ~isfield(Settings,'diary_file') || isnumeric(Settings.diary_file),Settings.diary_file = getenv('HOME');end
     if ~isfield(Settings,'cal_file') || isnumeric(Settings.cal_file),Settings.cal_file = fullfile(getenv('HOME'),'DeviceCal.csv');end
     if ~isfield(Settings,'out_folder') || isnumeric(Settings.out_folder),Settings.out_folder = getenv('HOME');end
@@ -241,9 +267,9 @@ if ~isfield(Settings,'NWTRIMBUF')
     Settings.NWTRIMBUF=1;
 end
 
-% min length of Active consecutive active period to consider for processing in hrs
+% min length of consecutive wear period to consider for trimming data
 if ~isfield(Settings,'NWTRIMACTLIM')
-    Settings.NWTRIMACTLIM=48; % the number of numerals denoting the subject-ID in fiename
+    Settings.NWTRIMACTLIM=24; 
 end
 
 % NW correction using bedtime based on lying
@@ -381,6 +407,69 @@ else
     Settings.FLIPROTTRNK=logical(Settings.FLIPROTTRNK);
 end
 
+%% load settings related to calf accelerometer
+% The calf accelerometer position  and also enable it
+if ~isfield(Settings,'CALFPOS')|| ismissing( Settings.CALFPOS)||...
+        ~any(strcmpi(["off","on"],Settings.CALFPOS))
+    % alternatives (off,on)
+    Settings.CALFPOS="off";
+end
+
+% The calf accelerometer filename suffix:
+if ~isfield(Settings,'CALFSUFFIX') || ismissing(Settings.CALFSUFFIX)
+    Settings.CALFSUFFIX="";
+end
+
+% flag for flipped (inside-out) orientation
+if ~isfield(Settings,'CALFFLIP')
+    Settings.CALFFLIP=false; %default false
+else
+    Settings.CALFFLIP=logical(Settings.CALFFLIP);
+end
+
+% flag for rotated (upside-down) orientation
+if ~isfield(Settings,'CALFROT')
+    Settings.CALFROT=false; %default false
+else
+    Settings.CALFROT=logical(Settings.CALFROT);
+end
+
+% flag for force-synchronization with thigh
+if ~isfield(Settings,'FORCESYNCCALF')
+    Settings.FORCESYNCCALF=true;
+else
+    Settings.FORCESYNCCALF=logical(Settings.FORCESYNCCALF);
+end
+
+% The calf accelerometer filename prefix:
+if ~isfield(Settings,'CALFPREFIX')|| ismissing( Settings.CALFPREFIX)
+    Settings.CALFPREFIX="";
+end
+
+% Keep the calf accelerometer NW as NW in the final result:
+if ~isfield(Settings,'KEEPCALFNW')
+    Settings.KEEPCALFNW=true;
+else
+    Settings.KEEPCALFNW=logical(Settings.KEEPCALFNW);
+end
+
+% flags for reference position finding method
+if ~isfield(Settings,'REFPOSCALF')|| ismissing( Settings.REFPOSCALF)||...
+        ~matches(Settings.REFPOSCALF,["default","diary"])
+    Settings.REFPOSCALF="default";  % alternatives: 'diary', 'default'
+end
+
+% attempt calf orientation correction
+if ~isfield(Settings,'FLIPROTCALF')
+    Settings.FLIPROTCALF=false;
+else
+    Settings.FLIPROTCALF=logical(Settings.FLIPROTCALF);
+end
+
+% max kneeling minutes per day before flagging
+if ~isfield(Settings,'maxKneelDur')
+    Settings.maxKneelDur=60;
+end
 %% load settings related to stage1 outputs and visualizations
 
 % the flag for saving the 1Hz activity and steps data
@@ -425,7 +514,7 @@ end
 
 % ignoring bad or problematic files in stats gen module
 if ~isfield(Settings,'statsIgnoreQC') || ismissing(Settings.statsIgnoreQC) || isnumeric(Settings.statsIgnoreQC) || ...
-       ~matches(Settings.statsIgnoreQC,["NotOK","NotOK+Check","None"])
+        ~matches(Settings.statsIgnoreQC,["NotOK","NotOK+Check","None"])
     Settings.statsIgnoreQC="NotOK";
 end
 
@@ -435,7 +524,7 @@ if ~isfield(Settings,'STATDOMAINS') || ismissing(Settings.STATDOMAINS)
 end
 
 
-% how stat domains are compared with diary events 
+% how stat domains are compared with diary events
 if ~isfield(Settings,'StatMtchMode')|| ismissing( Settings.StatMtchMode)||...
         ~matches(Settings.StatMtchMode,["Inclusive","Strict"])
     Settings.StatMtchMode="Inclusive";   % alternatives ('inclusive' or 'strict')
@@ -461,14 +550,14 @@ if ~isfield(Settings,'statSlctDays') || ismissing( Settings.statSlctDays) || ...
         ~matches(Settings.statSlctDays,["first valid days", "pick window: optimal work/leisure",...
         "pick days: optimal work/leisure"])
     % alternatives: 'first valid days', 'pick valid work/leisure days, no gaps','pick valid work/leisure days, allow gaps'
-    Settings.statSlctDays="first valid days";   
+    Settings.statSlctDays="first valid days";
 
 end
 
 % criteria for daily validity
 if ~isfield(Settings,"StatsVldD") || ismissing( Settings.StatsVldD) || ~matches(Settings.StatsVldD,["ProPASS", "only wear-time"])
     % alternatives: 'ProPASS', 'only wear-time'
-    Settings.StatsVldD="ProPASS";   
+    Settings.StatsVldD="ProPASS";
 end
 
 % minimum walking seconds before flagging as no-walking
@@ -479,11 +568,11 @@ end
 if ~isfield(Settings,'maxOtherDur')
     Settings.maxOtherDur=30;
 end
+
 % max stair walking minutes per day before flagging
 if ~isfield(Settings,'maxStairDur')
     Settings.maxStairDur=120;
 end
-
 
 % enable or disable bouts generation'
 if ~isfield(Settings,'genBouts')|| ismissing( Settings.genBouts)||...
@@ -521,12 +610,10 @@ end
 
 % load stat-generation table format options
 if ~isfield(Settings,'TblFormat')|| ismissing( Settings.TblFormat) || ...
-        ~matches(Settings.TblFormat,["Daily","Events","EventsNoBreak","Daily+Events"])
+        ~matches(Settings.TblFormat,["Daily","Events","EventsNoBreak","Daily+Events","Hourly"])
     % output table format of stat generation - default- Horizontal
-    Settings.TblFormat="Daily";  
+    Settings.TblFormat="Daily";
 end
-
-
 
 end
 

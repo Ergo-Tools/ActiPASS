@@ -1,4 +1,4 @@
-function [Comb,Time,FB,Std] = ActivityDetect(Acc,SF,T,VrefThigh,SETTINGS)
+function [Comb,Time,FB,Std] = ActivityDetect(Acc,SF,T,VrefThigh,ParamsAP)
 
 % ActivityDetect Calculates activities (Sit,Stand,Move,Walk,Run,Stair,Cycle,Row) by acceleration data at the thigh.
 %
@@ -7,7 +7,7 @@ function [Comb,Time,FB,Std] = ActivityDetect(Acc,SF,T,VrefThigh,SETTINGS)
 %   SF: Sample frequency (N=SF*n)
 %   T [N]: Time scale (datenum values)
 %   VrefThigh [3]: Reference angle for AG thigh (unit: radians)
-%   SETTINGS: The parameters structure (passed from main batch process)
+%   ParamsAP: The parameters structure (passed from main batch process)
 %
 % Output:
 %   Comb [n]: Combined activity by a 1 sec. time scale (Time), values are
@@ -54,10 +54,10 @@ function [Comb,Time,FB,Std] = ActivityDetect(Acc,SF,T,VrefThigh,SETTINGS)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
 
-Ath = SETTINGS.Threshold_standmove; % acceleration threshold for moving activities (G)
-WRth = SETTINGS.Threshold_walkrun; % walk/run acceleration threshold (G)
-STth = SETTINGS.Threshold_sitstand; %sit/stand inclination threshold (°)
-SCth = SETTINGS.Threshold_staircycle; % stair/cycle forward/backwards threshold (°) (24° used before rotation of AG axis was included)
+Ath = ParamsAP.Threshold_standmove; % acceleration threshold for moving activities (G)
+WRth = ParamsAP.Threshold_walkrun; % walk/run acceleration threshold (G)
+STth = ParamsAP.Threshold_sitstand; %sit/stand inclination threshold (°)
+SCth = ParamsAP.Threshold_staircycle; % stair/cycle forward/backwards threshold (°) (24° used before rotation of AG axis was included)
 
 
 N = length(Acc);
@@ -84,7 +84,7 @@ AccL = filter(Bl,Al,AccRot);
 Std=movstd(AccL,SF*2,0,1);% moving standard deviation of 2s window taken at dim 1 with no-normalization
 Std=Std(1:SF:end,:); % standard deviation of 2 sec. intervals given at each second
 %Correction for SENS accelerometer, 20/4-20 (acti4), 2024-02-29(ActiPASS)
-if SETTINGS.ftype==6 
+if ParamsAP.ftype==6 
    Std = 0.18*Std.^2 +1.03*Std;
 end
 % moving mean of 2s window taken at dim 1
@@ -103,29 +103,29 @@ Vstair = Th+median(FB(.25<Std(:,1) & Std(:,1)<WRth & FB<25)); % walk/stair thres
 [Row,Cycle,Stair,Run,Walk,Sit,Stand] = deal(zeros(size(Inc)));
 
 Row(90<Inc & Ath<Std(:,1)) = 1;
-Row = medfilt1(Row,2*SETTINGS.Bout_row-1);
-Row = medfilt1(Row,2*SETTINGS.Bout_row-1);
+Row = medfilt1(Row,2*ParamsAP.Bout_row-1);
+Row = medfilt1(Row,2*ParamsAP.Bout_row-1);
 Etter = Row; % in every step 'Etter' is 1 if the activity is already detected in one of the preceedings steps
 
 %Cycle(SCth<FB & Inc<90 & Ath<Std(:,1)) = 1;
 MaybeCycle = zeros(size(Cycle));
 MaybeCycle(SCth-15<FB & Inc<90 & Ath<Std(:,1)) = 1; %der undersøges for cykling for FB værdier ned til 30 lavere værdier end førhen,
 Cycle = CalcCycle(MaybeCycle,SCth,FB,Acc,SF);       %dvs for en mere "lodret" benvinkel (jan19)
-Cycle = medfilt1(Cycle,2*SETTINGS.Bout_cycle-1);
-Cycle = medfilt1(Cycle,2*SETTINGS.Bout_cycle-1);
+Cycle = medfilt1(Cycle,2*ParamsAP.Bout_cycle-1);
+Cycle = medfilt1(Cycle,2*ParamsAP.Bout_cycle-1);
 Cycle = Cycle .* ~Etter;
 Etter = Cycle + Etter;
 
 Stair(Vstair<FB & FB<SCth & Ath<Std(:,1) & Std(:,1)<WRth & Inc<STth) = 1;  %Inc<STth added 6/1-14
-Stair = medfilt1(Stair,2*SETTINGS.Bout_stair-1);
-Stair = medfilt1(Stair,2*SETTINGS.Bout_stair-1);
+Stair = medfilt1(Stair,2*ParamsAP.Bout_stair-1);
+Stair = medfilt1(Stair,2*ParamsAP.Bout_stair-1);
 Stair = Stair .* ~Etter;
 Etter = Stair + Etter;
 
 %Run(Std(:,1)>WRth & FB<Vstair & Inc<STth) = 1; %Inc<STth added 6/1-14
 Run(Std(:,1)>WRth & Inc<STth) = 1; %changed on 2020-06-30 fix for underestimation of 'Run'
-Run = medfilt1(Run,2*SETTINGS.Bout_run-1);
-Run = medfilt1(Run,2*SETTINGS.Bout_run-1);
+Run = medfilt1(Run,2*ParamsAP.Bout_run-1);
+Run = medfilt1(Run,2*ParamsAP.Bout_run-1);
 Run = Run .* ~Etter;
 Etter = Run + Etter;
 % very slow/quiet running could sometimes be misclassified as walk;
@@ -135,20 +135,20 @@ Etter = Run + Etter;
 Walk(Ath<Std(:,1) & Std(:,1)<WRth & FB<Vstair & Inc<STth) = 1; %Inc<STth added 6/1-14
 % In Stair, run and walk 'Inc<STth' was added because spurious movement when lying at the side (FB small) could be classified as ex. walk,
 % this was first recognized when Nmedfilt was decreased from 9 to 3.
-Walk = medfilt1(Walk,2*SETTINGS.Bout_walk-1);
-Walk = medfilt1(Walk,2*SETTINGS.Bout_walk-1);
+Walk = medfilt1(Walk,2*ParamsAP.Bout_walk-1);
+Walk = medfilt1(Walk,2*ParamsAP.Bout_walk-1);
 Walk = Walk .* ~Etter;
 Etter = Walk + Etter;
 
 Stand(Inc<STth & STD<Ath) = 1; %stand still
-Stand = medfilt1(Stand,2*SETTINGS.Bout_stand-1);
-Stand = medfilt1(Stand,2*SETTINGS.Bout_stand-1);
+Stand = medfilt1(Stand,2*ParamsAP.Bout_stand-1);
+Stand = medfilt1(Stand,2*ParamsAP.Bout_stand-1);
 Stand = Stand .* ~Etter;
 Etter = Stand + Etter;
 
 Sit(Inc>STth) = 1; %no movement critera included, 6/1-14, version 14xx
-Sit = medfilt1(Sit,2*SETTINGS.Bout_sit-1);
-Sit = medfilt1(Sit,2*SETTINGS.Bout_sit-1);
+Sit = medfilt1(Sit,2*ParamsAP.Bout_sit-1);
+Sit = medfilt1(Sit,2*ParamsAP.Bout_sit-1);
 Sit = Sit .* ~Etter;
 Etter = Sit + Etter;
 
@@ -156,21 +156,21 @@ Move = ~Etter;
 Comb = (2*Sit+3*Stand+4*Move+5*Walk+6*Run+7*Stair+8*Cycle+9*Row)';
 
 %To completely remove short bouts, especially 'move' has not been filtered above
-Comb = AktFilt(Comb,'row',SETTINGS);
-Comb = AktFilt(Comb,'cycle',SETTINGS);
-Comb = AktFilt(Comb,'stair',SETTINGS);
-Comb = AktFilt(Comb,'run',SETTINGS);
-Comb = AktFilt(Comb,'walk',SETTINGS);
-Comb = AktFilt(Comb,'move',SETTINGS);
-Comb = AktFilt(Comb,'stand',SETTINGS);
-Comb = AktFilt(Comb,'sit',SETTINGS);
+Comb = AktFilt(Comb,'row',ParamsAP);
+Comb = AktFilt(Comb,'cycle',ParamsAP);
+Comb = AktFilt(Comb,'stair',ParamsAP);
+Comb = AktFilt(Comb,'run',ParamsAP);
+Comb = AktFilt(Comb,'walk',ParamsAP);
+Comb = AktFilt(Comb,'move',ParamsAP);
+Comb = AktFilt(Comb,'stand',ParamsAP);
+Comb = AktFilt(Comb,'sit',ParamsAP);
 
 function Cycle = CalcCycle(MaybeCycle,SCth,FB,Acc,SF)
-%Forbedret skelnen mellem cykling og trappegang (7/1-19):
-%Der beregnes en lavpas- (<1Hz) og en højpasfiltreret (>1Hz) udgave af den laterale acceleration og
-%forholdet mellem gennemsnitlig (abs) højpas- og lavpasfiltreret værdi bestemmes.
-%For cykelintervaller er forholdet <0.5 , for trappegang >0.5.
-%Data fra DKjem_setup_Validation_B3B4samlet.xls benyttet til 'kalibrering'.
+%Improved distinction between cycling and stair climbing (7/1-19):
+%A low-pass (<1Hz) and a high-pass filtered (>1Hz) version of the lateral acceleration is calculated and
+%the ratio between average (abs) high-pass and low-pass filtered value is determined.
+%For cycling intervals the ratio is <0.5, for stair climbing >0.5.
+%Data from DKjem_setup_Validation_B3B4samlet.xls used for 'calibration'.
 [Bh,Ah] = butter(3,1/(SF/2),'high');
 AccH = filtfilt(Bh,Ah,double(Acc(:,3))); %
 [Bl,Al] = butter(3,1/(SF/2));

@@ -59,38 +59,41 @@ Settings.WalkMET=statStruct.WalkMET; % how to calculate MET values for walking- 
 Settings.CADPMIN=statStruct.CADPMIN; % flag to calculate cadence per minute instead of per second (before slow/fast walking detection and INT classes)
 Settings.FilterTAI=statStruct.FilterTAI; % apply exponential smoothing on TAI options 'off' 'TC2' 'TC5', 'TC10' - default off
 Settings.genBouts=statStruct.genBouts; % enable/disable bouts generation
+Settings.VarsBout=statStruct.ParamsAP.VarsBout; % behaviours/int-classes for which bouts/percentiles are generated
 Settings.boutThresh=statStruct.boutThresh; % bout threshold value
 Settings.boutBreak=statStruct.boutBreak; % bout break for all bouts except 1 min bout in seconds
 Settings.SAVETRNKD=statStruct.SAVETRNKD; % flag for saving trunk variables
-Settings.TRUNKPOS=statStruct.TRUNKPOS; % flag for saving trunk variables
+Settings.TRUNKPOS=statStruct.TRUNKPOS; % indicate whether trunk acc is used
+Settings.CALFPOS=statStruct.CALFPOS; % indicate whether calf acc is used
+
 
 % activity to MET translation
-Settings.MET_SI = statStruct.SettingsAkt.MET_SI; %  0.90;
-Settings.MET_LieStill = statStruct.SettingsAkt.MET_LieStill; % 0.95;
-Settings.MET_Lie = statStruct.SettingsAkt.MET_Lie; % 1.0;
-Settings.MET_Sit = statStruct.SettingsAkt.MET_Sit; % 1.3;
-Settings.MET_Stand = statStruct.SettingsAkt.MET_Stand; % 1.55; % 2022-07-05 standing falls into light physical activity class (changed from 1.4)
-Settings.MET_Move = statStruct.SettingsAkt.MET_Move; % 2.0;
-Settings.Wlk_Low_MET = statStruct.SettingsAkt.Wlk_Low_MET; % 2;
-Settings.Wlk_Fast_MET = statStruct.SettingsAkt.Wlk_Fast_MET; % 4;
-Settings.Wlk_VFast_MET = statStruct.SettingsAkt.Wlk_VFast_MET; % 7;
-Settings.MET_Running = statStruct.SettingsAkt.MET_Running; % 10;
-Settings.MET_Stairs = statStruct.SettingsAkt.MET_Stairs; % 8;
-Settings.MET_Cycle = statStruct.SettingsAkt.MET_Cycle; % 7;
-Settings.MET_Other = statStruct.SettingsAkt.MET_Other; % 2; % "Other" with no periodicity falls into light physical activity
+Settings.MET_SI = statStruct.ParamsAP.MET_SI; %  0.90;
+Settings.MET_LieStill = statStruct.ParamsAP.MET_LieStill; % 0.95;
+Settings.MET_Lie = statStruct.ParamsAP.MET_Lie; % 1.0;
+Settings.MET_Sit = statStruct.ParamsAP.MET_Sit; % 1.3;
+Settings.MET_Stand = statStruct.ParamsAP.MET_Stand; % 1.55; % 2022-07-05 standing falls into light physical activity class (changed from 1.4)
+Settings.MET_Move = statStruct.ParamsAP.MET_Move; % 2.0;
+Settings.Wlk_Low_MET = statStruct.ParamsAP.Wlk_Low_MET; % 2;
+Settings.Wlk_Fast_MET = statStruct.ParamsAP.Wlk_Fast_MET; % 4;
+Settings.Wlk_VFast_MET = statStruct.ParamsAP.Wlk_VFast_MET; % 7;
+Settings.MET_Running = statStruct.ParamsAP.MET_Running; % 10;
+Settings.MET_Stairs = statStruct.ParamsAP.MET_Stairs; % 8;
+Settings.MET_Cycle = statStruct.ParamsAP.MET_Cycle; % 7;
+Settings.MET_Other = statStruct.ParamsAP.MET_Other; % 2; % "Other" with no periodicity falls into light physical activity
 
 % MET cutoffs for intensity classes
-Settings.PA_Slp= statStruct.SettingsAkt.PA_Slp; % 0.0;
-Settings.PA_SED = statStruct.SettingsAkt.PA_SED; % 0.95; %lieStill belongs to sedentary
-Settings.PA_LPA = statStruct.SettingsAkt.PA_LPA; % 1.5;
-Settings.PA_LPA_Amb = statStruct.SettingsAkt.PA_LPA_Amb; % 1.6; %introduce another called LPA_ambulatory to seperate standing from other LPA activities
-Settings.PA_MPA = statStruct.SettingsAkt.PA_MPA; % 3.0;
-Settings.PA_VPA = statStruct.SettingsAkt.PA_VPA; % 6.0;
+Settings.MET_INT_Slp= statStruct.ParamsAP.MET_INT_Slp; % 0.0;
+Settings.MET_INT_SED = statStruct.ParamsAP.MET_INT_SED; % 0.95; %lieStill belongs to sedentary
+Settings.MET_INT_LPA = statStruct.ParamsAP.MET_INT_LPA; % 1.5;
+Settings.MET_INT_LPA_Amb = statStruct.ParamsAP.MET_INT_LPA_Amb; % 1.6; %introduce LPA_ambulatory to seperate standing from other LPA activities
+Settings.MET_INT_MPA = statStruct.ParamsAP.MET_INT_MPA; % 3.0;
+Settings.MET_INT_VPA = statStruct.ParamsAP.MET_INT_VPA; % 6.0;
 
 %cadence cutoffs for walk-slow, walk-fast and walk-very-fast
-Settings.Wlk_Slow_Cad = statStruct.SettingsAkt.Threshold_slowfastwalk; %100;
+Settings.Wlk_Slow_Cad = statStruct.ParamsAP.Threshold_slowfastwalk; %100;
 %2022-08-26 From ActiPASS version 1.42 Wlk_VFast_Cad=135, previously it was 130 (Myles O'Brien <Myles.OBrien@dal.ca>)
-Settings.Wlk_VFast_Cad = statStruct.SettingsAkt.Threshold_veryfastwalk; % 135; %prior versions: Wlk_VFast_Cad=130
+Settings.Wlk_VFast_Cad = statStruct.ParamsAP.Threshold_veryfastwalk; % 135; %prior versions: Wlk_VFast_Cad=130
 
 % the domains to calculate seperate decriptive stats
 Settings.StatDomains=statStruct.StatDomains; % domain string is splitted into a vector
@@ -112,59 +115,67 @@ varN_Sbjct_evnt=["SubjectID","QC_Status","Batch"];
 varN_Comm=["Duration","NonWear","AwakeNW","SlpIntNW","ValidDuration","Awake","SleepInterval","Bedtime",...
     "Sleep","SleepInBed","LieStill","Walk_Slow","Walk_Fast","NumSteps","NumStepsWalk","NumStepsRun","TotalTransitions"];
 
-% define variables commmon to each activity or intensity class
-varN_Akt=["P50","T50","P10","P90","T30min","N30min","Tmax","NBreaks"];
-
-%define bout variables for all activity/intensity classes
-bout_durs=["1min","2min","3min","4min","5min","10min","30min","60min"];
-varN_Bouts_TH=[bout_durs+"_bouts_TH",bout_durs+"_freq_H"];
-varN_Bouts_TL=[bout_durs+"_bouts_TL",bout_durs+"_freq_L"];
-% check whether bout-generation is turned on and create variables oly if necessary
-if strcmpi(Settings.genBouts,"on")
-    varN_Bouts=[varN_Bouts_TH,varN_Bouts_TL];
+% check whether Calf Acc. is enabled and if so add the behaviour Kneel
+if strcmpi(Settings.CALFPOS,"on")
+    varN_Kneel="Kneel";
+    varN_QCKneel=["TooMuchKneel","AngleCalfWalk"];
+    varT_QCKneel=["logical","double"];
+    varN_Sbjct=[varN_Sbjct,"Calf_Errs"];
 else
-    varN_Bouts=[];
+
+    varN_Kneel=[];
+    varN_QCKneel=[];
+    varT_QCKneel=[];
 end
 
-% define variable names for each activity or intensity class
-varN_SitLie=["SitLie","SitLie_"+[varN_Akt,varN_Bouts]];
-varN_Sit=["Sit","Sit_"+[varN_Akt,varN_Bouts]];
-varN_Lie=["Lie","Lie_"+[varN_Akt,varN_Bouts]];
-varN_Stand=["Stand","Stand_"+[varN_Akt,varN_Bouts]];
-varN_Move=["Move","Move_"+[varN_Akt,varN_Bouts]];
-varN_StandMove=["StandMove","StandMove_"+[varN_Akt,varN_Bouts]];
-varN_Walk=["Walk","Walk_"+[varN_Akt,varN_Bouts]];
-varN_Run=["Run","Run_"+[varN_Akt,varN_Bouts]];
-varN_Stair=["Stair","Stair_"+[varN_Akt,varN_Bouts]];
-varN_Cycle=["Cycle","Cycle_"+[varN_Akt,varN_Bouts]];
-varN_Upright=["Upright","Upright_"+[varN_Akt,varN_Bouts]];
-varN_Other=["Other","Other_"+[varN_Akt,varN_Bouts]];
+% define variable names of each behaviour and intensity classes
+% NonWear=0, Lie=1, Sit=2, Stand=3, Move=4, Walk=5, Run=6, Stair=7, Cycle=8, Other=9, Sleep=10, LieStill=11, Kneel=12
+varN_Behvs_Classes=["Lie","Sit","SitLie","Stand","Move","StandMove","Walk","Run","Stair","Cycle",varN_Kneel,"Upright","Other","INT1","INT2","INT2_Amb","INT3","INT4","INT34"];
 
-%intensity classes are named INT1, INT2, INT3, INT4 and INT34 (corresponding to SED, LPA, MPA, MVPA)
-varN_SED=["INT1","INT1_"+[varN_Akt,varN_Bouts]];
-varN_LPA=["INT2","INT2_"+[varN_Akt,varN_Bouts]];
-varN_LPA_Amb=["INT2_Amb","INT2_Amb_"+[varN_Akt,varN_Bouts]];
-varN_MPA=["INT3","INT3_"+[varN_Akt,varN_Bouts]];
-varN_VPA=["INT4","INT4_"+[varN_Akt,varN_Bouts]];
-varN_MVPA=["INT34","INT34_"+[varN_Akt,varN_Bouts]];
+% save the behaviour and intensity class names to Settings for later use
+Settings.statVars=varN_Behvs_Classes;
 
+% check whether bout-generation is turned on and create variables oly if necessary
+if strcmpi(Settings.genBouts,"on")
+    % durations for which bout variables are derived
+    bout_durs=["1min","2min","3min","4min","5min","10min","30min","60min"];
+    % suffixes for representing total-times and frequencies above or below above time-thresholds
+    varN_Bouts_TH=[bout_durs+"_bouts_TH",bout_durs+"_freq_H"];
+    varN_Bouts_TL=[bout_durs+"_bouts_TL",bout_durs+"_freq_L"];
+    % define all bouts related sufffixes by combining above
+    varN_Bouts=[varN_Bouts_TH,varN_Bouts_TL];
+    % define all time-percentile variable suffixes (continuous segment percentiles)
+    varN_Akt=["P50","T50","P10","P90","T30min","N30min","Tmax","NBreaks"];
+else
+    varN_Bouts=[];
+    varN_Akt=[];
+end
 
-%% define variable names specific to horizontal table
+% bouts and time-percentile variables for behavours/int-classes enabled for bout generation
+for itrVar=1:length(varN_Behvs_Classes)
+    if matches(varN_Behvs_Classes(itrVar),Settings.VarsBout)
+        varN_Behvs_Classes=[varN_Behvs_Classes,varN_Behvs_Classes(itrVar)+"_"+[varN_Akt,varN_Bouts]];
+    end
+end
 
-% variables specific for each day in horizontal table
-varN_Dly1=["Date","Day","Weekend","DayType","DayStart","DayStop","Day_QC","refPosInfo","NotEnoughWear","NoWlk",...
-    "TooMuchOther","TooMuchStair","NoSleepInt","NumPrimaryBDs","NumExtraBDs","Excluded"];
+%% define variable names specific to daily tables (both long and wide)
 
-varT_Dly1=["string","string","logical","string","string","string","string","string","logical",...
-    "logical","logical","logical","logical","double","double","double"];
+% variables specific for each day in daily tables
 
-varN_Smry=["NumDays","NumValidDays","NumWorkDays","NumLeisureDays",];
+% daily QC variables to be loaded from QC meta object (from binary mat file)
+varN_DlyQC=["refPosInfo","NotEnoughWear","NoWlk","TooMuchOther","TooMuchStair","NoSleepInt",...
+    "NumPrimaryBDs","NumExtraBDs",varN_QCKneel];
+varT_DlyQC=["string","logical","logical","logical","logical","logical","double","double",varT_QCKneel];
+
+varN_Dly1=["Date","Day","Weekend","DayType","DayStart","DayStop","Day_QC","Excluded"];
+varT_Dly1=["string","string","logical","string","string","string","string","double"];
+
+varN_Smry=["NumDays","NumValidDays","NumWorkDays","NumLeisureDays"];
 
 % aggregate all variable names in the horizontal tables
-dlyVarNames = [varN_Dly1,varN_Comm,varN_Lie,varN_Sit,varN_SitLie,varN_Stand,varN_Move,varN_StandMove,varN_Walk,...
-    varN_Run,varN_Stair,varN_Cycle,varN_Upright,varN_Other,varN_SED,varN_LPA,varN_LPA_Amb,varN_MPA,varN_VPA,varN_MVPA];
+dlyVarNames = [varN_Dly1,varN_DlyQC,varN_Comm,varN_Behvs_Classes];
 % define variable types of the horizontal table
-dlyVarTypes=[varT_Dly1,repmat("double",[1,length(dlyVarNames)-length(varN_Dly1)])];
+dlyVarTypes=[varT_Dly1,varT_DlyQC,repmat("double",[1,length(dlyVarNames)-(length(varN_Dly1)+length(varN_DlyQC))])];
 
 %% define variable names specific to events table
 
@@ -172,20 +183,19 @@ dlyVarTypes=[varT_Dly1,repmat("double",[1,length(dlyVarNames)-length(varN_Dly1)]
 varN_Evnt1=["EventStart","EventStop","Event","Comment"];
 
 % aggregate all variable names in the horizontal tables
-evntVarNames = [varN_Sbjct_evnt,varN_Evnt1,varN_Comm,varN_Lie,varN_Sit,varN_SitLie,varN_Stand,varN_Move,varN_StandMove,varN_Walk,...
-    varN_Run,varN_Stair,varN_Cycle,varN_Upright,varN_Other,varN_SED,varN_LPA,varN_LPA_Amb,varN_MPA,varN_VPA,varN_MVPA];
+evntVarNames = [varN_Sbjct_evnt,varN_Evnt1,varN_Comm,varN_Behvs_Classes];
 % define variable types of the horizontal table
 NumStringVars=length(varN_Sbjct_evnt)+length(varN_Evnt1);
 evntVarTypes=[repmat("string",[1,NumStringVars]),repmat("double",[1,length(evntVarNames)-NumStringVars])];
 
 %% loading master QC table
 try
-    
+
     uiPgDlg = uiprogressdlg(uiFig,'Title','Generating Stats. Please wait.',...
         'Message','Loading Master QC Table...','Cancelable','on');
     %fPrgBar = waitbar(0,'Finding per_sec activity files...');
     %     perSecFs=dir(fullfile(Settings.projectDir,"*","*-Activity_per_s.csv"));
-    
+
     if ~isfile(Settings.masterQCTblF)
         status="Master QC table not found";
         return;
@@ -194,12 +204,12 @@ try
     opt.VariableTypes=repmat("string",[1,length(opt.VariableTypes)]);
     opt.PreserveVariableNames=true;
     masterQCTbl=readtable(Settings.masterQCTblF,opt);
-    
+
     % select files only from given batch if Settings.Batch is not empty
     if ~isempty(Settings.Batch)
         masterQCTbl=masterQCTbl(strcmpi(masterQCTbl.Batch,Settings.Batch),:);
     end
-    
+
     % if QC status is not ignored and QC_Status is not "OK" skip this file from stat generation
     if Settings.statsIgnoreQC=="NotOK"
         masterQCTbl=masterQCTbl(masterQCTbl.QC_Status=="OK" | masterQCTbl.QC_Status=="Check",:);
@@ -208,36 +218,48 @@ try
     elseif Settings.statsIgnoreQC=="None"
         masterQCTbl=masterQCTbl(~ismissing(masterQCTbl.QC_Status),:);
     end
-    
+
     % after deselecting invalid cases check whether there is any valid cases left
     if height(masterQCTbl)==0
         status="No valid data found for stats generation";
         return;
     end
     
-    %% Horizontal table generation
-    
+    % check calf acc data available in the project
+    if strcmpi(Settings.CALFPOS,"on") && ~ismember("Calf_File",masterQCTbl.Properties.VariableNames)
+        status="No valid data for calf accelerometer found. Disable Calf acceerometer under Kneeling Detection";
+        return;
+    end
+    % check trunk acc data available in the project
+    if ~strcmpi(Settings.TRUNKPOS,"off") && ~ismember("Trunk_File",masterQCTbl.Properties.VariableNames)
+        status="No valid data for calf accelerometer found. Disable Calf acceerometer under Kneeling Detection";
+        return;
+    end
+
+    %% Daily and interval based tables generation
+
     % create dlyGenStruct with parameters needed for horizontal table generation
     dlyGenStruct.dlyVarNames=dlyVarNames;
     dlyGenStruct.dlyVarTypes=dlyVarTypes;
+    dlyGenStruct.varN_DlyQC=varN_DlyQC; %QC variables names for which data loaded from QC meta object
     dlyGenStruct.varN_Smry=varN_Smry;
-    dlyGenStruct.NumVarDly=length(varN_Dly1);
+    dlyGenStruct.NumVarDly=length(varN_Dly1)+length(varN_DlyQC);
     dlyGenStruct.sbjctVarNames=varN_Sbjct;
     dlyGenStruct.uiPgDlg=uiPgDlg;
     dlyGenStruct.Settings=Settings;
     dlyGenStruct.totFiles=height(masterQCTbl);
-    
+
     % create empty tables to hold data from daily stat generation process
     fnlPrPSTbl=[]; % empty variable to hold the final horizontal table
     fnlDlyTbl=[]; % empty variable to hold the final long format daily table
-    
+
     % create evntGenStruct with parameters needed for vertical table generation
     evntGenStruct.evntVarNames=evntVarNames;
     evntGenStruct.evntVarTypes=evntVarTypes;
     evntGenStruct.uiPgDlg=uiPgDlg;
     evntGenStruct.Settings=Settings;
     evntGenStruct.totFiles=height(masterQCTbl);
-    
+
     % create empty table to hold data from stat generation process for events
     finalEvntTbl=[]; % empty variable to hold the final vertical table
     % empty variables to hold final trunk data
@@ -245,9 +267,9 @@ try
         finlTrnkET=[];
         finlTrnkDT=[];
     end
-    
+
     for itrFil=1:height(masterQCTbl)
-        
+
         if uiPgDlg.CancelRequested
             status="Canceled";
             return;
@@ -259,45 +281,28 @@ try
         % define trunk daily and event data files if trunk data is saved
         trunkDF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Daily_TrunkData.csv");
         trunkEF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Event_TrunkData.csv");
-        
-        
+
+
         uiPgDlg.Value=(itrFil-1)/height(masterQCTbl)+(1/height(masterQCTbl))*0.1;
         uiPgDlg.Message="Loading data: ID: "+subjctID+". File "+itrFil+" of "+height(masterQCTbl)+"..";
-        
+
         % find batch,  QC_Status and  Sensor_Errs of current file
         % Sensor_Errs is per file flag, but will be propagated into daily tables
         qcBatch=masterQCTbl.Batch(itrFil);
         QC_Status=masterQCTbl.QC_Status(itrFil);
         Sensor_Errs=masterQCTbl.Sensor_Errs(itrFil);
-        
-        
+
+
         % now load real per-ssec data from binary mat file
-        %         perSOBJ = matfile(perSecF); % without directly opening the mat file let's find variables contained
-        %         if ismember("aktTbl",who(perSOBJ)) % if QC data found
-        %             perSecT=perSOBJ.aktTbl;
-        %         else
-        %             status="Activity table not found for ID: "+subjctID;
-        %             return;
-        %         end
-        
         perSOBJ = load(perSecF,'-mat');
         perSecT=perSOBJ.aktTbl;
-        
+
         % now load metadata from binary mat file
-        %        metaOBJ = matfile(metaF); % without directly opening the mat file let's find variables contained
         metaOBJ = load(metaF,'-mat'); %load meta data directly
-        
-        % generating interval(events) based tables
+
+        % generating daily tables
         if matches(Settings.TblFormat,["Daily","Daily+Events"],'IgnoreCase',true)
-            
-            %             if ismember("dlyQCT_meta",who(metaOBJ)) % if QC data found
-            %                 qcMeta=metaOBJ.dlyQCT_meta;
-            %             else
-            %                status="Daily QC metadata not found for ID: "+subjctID;
-            %                return;
-            %             end
-            
-            
+
             % append data to dlyGenStruct relevant to this iteration of stat generation
             dlyGenStruct.itrFil=itrFil;
             dlyGenStruct.subjctID=subjctID;
@@ -305,15 +310,18 @@ try
             dlyGenStruct.qcBatch=qcBatch;
             dlyGenStruct.qcMeta=metaOBJ.dlyQCT_meta;
             dlyGenStruct.Sensor_Errs=Sensor_Errs;
-            
+            if strcmpi(Settings.CALFPOS,"on")
+                dlyGenStruct.Calf_Errs=masterQCTbl.Calf_Errs(itrFil);
+            end
+
             % call genDlyTable function for this ID
             [status,fnlPrPSTbl,fnlDlyTbl] = genDlyTable(perSecT,fnlPrPSTbl,fnlDlyTbl,dlyGenStruct);
             % give the user chance to cancel before next iteration
             if status=="Canceled"
                 return;
             end
-            
-            % merge daily-trunk-data
+
+            % if additional trunk variables are enabled merge with seperately saved daily-trunk-data
             if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD
                 % if a trunk-daily-data file exist reat it
                 if isfile(trunkDF)
@@ -331,28 +339,14 @@ try
                     finlTrnkDT=vertcat(finlTrnkDT,tmpTrnkT(:,4:end));
                 end
             end
-            
+
         end
-        
+
         % generating interval(events) based tables
-        if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events"],'IgnoreCase',true)
-            %             if ismember("evntMeta",who(metaOBJ)) % if QC data found
-            %                 evntMeta=metaOBJ.evntMeta;
-            %             else
-            %                 status="Event metadata not found for ID: "+subjctID;
-            %                 return;
-            %             end
-            if itrFil==1
-                if isfield(metaOBJ,"eventMeta") % if QC data found
-                    evntMetaN="eventMeta";
-                elseif isfield(metaOBJ,"evntMeta")  % if QC data found
-                    evntMetaN="evntMeta";
-                else
-                    evntMetaN="evntMeta";
-                end
-                
-            end
-            evntMeta=metaOBJ.(evntMetaN);
+        if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events","Hourly"],'IgnoreCase',true)
+            
+            % get event information from binary metaOBJ
+            evntMeta=metaOBJ.evntMeta;
             % remove midnight breaks in events
             if strcmpi(Settings.TblFormat,"EventsNoBreak") && length(evntMeta.Names)>=2
                 indsRLE = [find(evntMeta.Names(1:end-1) ~= evntMeta.Names(2:end));length(evntMeta.Names)]; % find unique consecutive events
@@ -369,23 +363,22 @@ try
                     evntMeta.Comments(indsDel,:)=[];
                     evntMeta.Indices(indsDel,:)=[];
                 end
-                
             end
             % append data to evntGenStruct relevant to this iteration of stat generation
             evntGenStruct.itrFil=itrFil;
             evntGenStruct.subjctID=subjctID;
             evntGenStruct.QC_Status=QC_Status;
             evntGenStruct.qcBatch=qcBatch;
-            
+
             % call genHorzTable function for this ID
             [status,finalEvntTbl] = genEventTable(perSecT,evntMeta,finalEvntTbl,evntGenStruct);
-            
+
             % give the user chance to cancel before next iteration
             if status=="Canceled"
                 return;
             end
-            % merge interval-based-trunk-data
-            if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD
+            % if additional trunk variables are enabled merge with seperately saved interval-trunk-data
+            if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD && ~strcmpi(Settings.TblFormat,"Hourly") 
                 % if a trunk-daily-data file exist reat it
                 if isfile(trunkEF)
                     opt_trnk2=detectImportOptions(trunkEF,'VariableNamingRule','preserve');
@@ -403,9 +396,9 @@ try
                 end
             end
         end
-        
+
     end
-    
+
     %% Saving daily and events table
     % saving long format daily table and ProPASS table
     if matches(Settings.TblFormat,["Daily","Daily+Events"],'IgnoreCase',true)
@@ -413,7 +406,7 @@ try
         % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         fnlPrPSTblF=fullfile(Settings.projectDir,Settings.PrPASS_MFile_Wide);
         fnlDlyTblF=fullfile(Settings.projectDir,Settings.ActiPASS_MFile_Long);
-        
+
         uiPgDlg.Value=(itrFil-1)/height(masterQCTbl)+(0.8/height(masterQCTbl));
         uiPgDlg.Message="Saving the final daily tables to disk..";
         %waitbar(0.85,fPrgBar,"Saving the final horizontal table to file..");
@@ -428,29 +421,30 @@ try
                     oldPrPSTbl=readtable(fnlPrPSTblF,impOptPrPST);
                     indOverlap= ismember(oldPrPSTbl.SubjectID,fnlPrPSTbl.SubjectID);
                     oldPrPSTbl(indOverlap,:)=[]; % delete those overlapping rows from old horizontal table
-                    
+
                     fnlPrPSTbl=vertcat(oldPrPSTbl,fnlPrPSTbl); % concatenate master QC table with current batch  QC table
                     fnlPrPSTbl=sortrows(fnlPrPSTbl,"SubjectID"); % sort the table first by ID
                 else
                     %save the existing incompatiable horizontal table
                     [~,oldPrPSTFName,oldPrPSTExt]=fileparts(fnlPrPSTblF);
                     oldPrPSTblF=oldPrPSTFName+"_Renamed_Old_"+datestr(now,'yyyymmdd HHMMSS')+oldPrPSTExt;
-                    
+
                     uialert(uiFig,"Incompatiable ProPASS table found. Old table is saved as: "+oldPrPSTblF,"Stats Warning",...
                         "Icon","warning");
                     copyfile(fnlPrPSTblF,fullfile(Settings.backupDir,oldPrPSTblF));
                 end
             end
+            % write final wide-format daily table to disk
             writetable(fnlPrPSTbl,fnlPrPSTblF,'WriteMode','overwrite');
         else
             allMsgs(1)="No valid data for ProPASS table.";
         end
-        
+
         % save long format daily table to disk
         if ~isempty(fnlDlyTbl)
             %writetable(finalHozTbl,finalHorzTblF,'WriteMode','overwritesheet');
             % find the rows masterQCTbl with the same subjectIDs as current batch (only with non-missimng QC_status)
-            fnlDlyTbl=movevars(fnlDlyTbl,"Sensor_Errs",'After',"Day_QC"); %move Sensor_Errs next to other daily QC flags (table looks nice this way)
+            fnlDlyTbl=movevars(fnlDlyTbl,4:length(varN_Sbjct),'After',"Day_QC"); %move Sensor_Errs next to other daily QC flags (table looks nice this way)
             % merge trunk-variables with thigh-variables
             if Settings.SAVETRNKD
                 fnlDlyTbl=horzcat(fnlDlyTbl,finlTrnkDT);
@@ -462,38 +456,39 @@ try
                     oldDlyTbl=readtable(fnlDlyTblF,impOptDlyT);
                     indOverlap= ismember(oldDlyTbl.SubjectID,fnlDlyTbl.SubjectID);
                     oldDlyTbl(indOverlap,:)=[]; % delete those overlapping rows from old horizontal table
-                    
+
                     fnlDlyTbl=vertcat(oldDlyTbl,fnlDlyTbl); % concatenate master QC table with current batch  QC table
                     fnlDlyTbl=sortrows(fnlDlyTbl,["SubjectID","Date"]); % sort the table first by ID and then by date
                 else
                     %save the existing incompatiable horizontal table
                     [~,oldDlyTFName,oldDlyTExt]=fileparts(fnlDlyTblF);
                     oldDlyTblF=oldDlyTFName+"_Renamed_Old_"+datestr(now,'yyyymmdd HHMMSS')+oldDlyTExt;
-                    
+
                     uialert(uiFig,"Incompatiable long format daily table found. Old table is saved as: "+oldDlyTblF,"Stats Warning",...
                         "Icon","warning");
                     copyfile(fnlDlyTblF,fullfile(Settings.backupDir,oldDlyTblF));
                 end
             end
+            % write final long-format daily table to disk
             writetable(fnlDlyTbl,fnlDlyTblF,'WriteMode','overwrite');
         else
             allMsgs(2)="No valid data for long format daily table.";
         end
     end
-    
+
     % Saving events table to disk
-    if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events"],'IgnoreCase',true)
+    if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events","Hourly"],'IgnoreCase',true)
         % merge finalHozTbl with existing master horizontal table in the disk
         % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         fnlEvntTblF=fullfile(Settings.projectDir,Settings.evntMasterFile);
         uiPgDlg.Value=(itrFil-1)/height(masterQCTbl)+(0.9/height(masterQCTbl));
         uiPgDlg.Message="Saving the final events table to file..";
-        
+
         % merge trunk-variables with thigh-variables
         if Settings.SAVETRNKD
             finalEvntTbl=horzcat(finalEvntTbl,finlTrnkET);
         end
-        
+
         if ~isempty(finalEvntTbl)
             %writetable(finalVerTbl,finalVertTblF,'WriteMode','overwritesheet');
             % find the rows masterQCTbl with the same subjectIDs as current batch (only with non-missimng QC_status)
@@ -504,25 +499,26 @@ try
                     oldEvntTbl=readtable(fnlEvntTblF,impOptVertT);
                     indOverlap = ismember(oldEvntTbl.SubjectID,finalEvntTbl.SubjectID);
                     oldEvntTbl(indOverlap,:)=[]; % delete those overlapping rows from old event table
-                    
+
                     finalEvntTbl=vertcat(oldEvntTbl,finalEvntTbl); % concatenate master QC table with current batch  QC table
                     finalEvntTbl=sortrows(finalEvntTbl,1); % sort the table first by ID
                 else
                     %save the existing incompatiable horizontal table
                     [~,oldVertFName,oldVertTExt]=fileparts(fnlEvntTblF);
                     oldVertTblF=oldVertFName+"_Renamed_Old_"+datestr(now,'yyyymmdd HHMMSS')+oldVertTExt;
-                    
+
                     uialert(uiFig,"Incompatiable Events table found. Old table is saved as: "+oldVertTblF,"Stats Warning",...
                         "Icon","warning");
                     copyfile(fnlEvntTblF,fullfile(Settings.backupDir,oldVertTblF));
                 end
             end
+            % write final interval based table to disk
             writetable(finalEvntTbl,fnlEvntTblF,'WriteMode','overwrite');
         else
             allMsgs(3)="No valid data for Events table.";
         end
     end
-    
+
     if any(allMsgs~="")
         status=join(allMsgs(allMsgs~=""));
     end
@@ -531,7 +527,7 @@ try
 catch ME
     close(uiPgDlg);
     status=[string(ME.message);string(getReport(ME,'extended','hyperlinks','off'))];
-    
+
 end
 
 end
