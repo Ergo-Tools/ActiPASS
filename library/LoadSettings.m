@@ -267,9 +267,9 @@ if ~isfield(Settings,'NWTRIMBUF')
     Settings.NWTRIMBUF=1;
 end
 
-% min length of Active consecutive active period to consider for processing in hrs
+% min length of consecutive wear period to consider for trimming data
 if ~isfield(Settings,'NWTRIMACTLIM')
-    Settings.NWTRIMACTLIM=48; % the number of numerals denoting the subject-ID in fiename
+    Settings.NWTRIMACTLIM=24; 
 end
 
 % NW correction using bedtime based on lying
@@ -610,7 +610,7 @@ end
 
 % load stat-generation table format options
 if ~isfield(Settings,'TblFormat')|| ismissing( Settings.TblFormat) || ...
-        ~matches(Settings.TblFormat,["Daily","Events","EventsNoBreak","Daily+Events"])
+        ~matches(Settings.TblFormat,["Daily","Events","EventsNoBreak","Daily+Events","Hourly"])
     % output table format of stat generation - default- Horizontal
     Settings.TblFormat="Daily";
 end

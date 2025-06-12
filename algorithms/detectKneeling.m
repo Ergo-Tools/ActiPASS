@@ -1,9 +1,27 @@
 function [Akt,VcalfDeg,OffCalf,AngCalfWalk,warnings,status] = detectKneeling(AccCalf,AccCalfFilt,Vcalf,Lcalf,VrefCalf,Vthigh,Lthigh,AccThigFilt,VrefThigh,Akt,Settings,ParamsAP)
 % detectKneeling detect kneeling/squating using the calf and thigh accelerometer data
 %
-% INPUTS
+% INPUTS:
+%       AccCalf: [Nx3] Calf Acc data
+%       AccCalfFilt: Filtered Calf Acc data returned from FindAnglesAndVM
+%       Vcalf: The 3 calf angles returned from FindAnglesAndVM
+%       Lcalf: Filtered Calf Acc vector magnitude
+%       VrefCalf: The Calf reference-position
+%       Vthigh: The 3 thigh angles returned from FindAnglesAndVM
+%       Lthigh: Filtered thigh Acc vector magnitude
+%       AccThigFilt: Filtered thigh Acc data returned from FindAnglesAndVM
+%       VrefThigh: The thigh reference-position
+%       Akt: 1s Activity time series 
+%       Settings: Settings structure
+%       ParamsAP: Algorithm parameters and thresholds structure
 %
 % OUTPUTS:
+%       Akt: 1s activity time series including kneeling
+%       VcalfDeg: The 3 calf angles in degrees
+%       OffCalf: The non-wear times of calf (1s logical series) 
+%       AngCalfWalk: The angle of calf during walking
+%       warnings: string of all warnings generated
+%       status: OK if everything went well, otherwise errors occured
 %
 
 % Copyright (c) 2024, Pasan Hettiarachchi .

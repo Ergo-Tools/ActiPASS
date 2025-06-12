@@ -224,6 +224,17 @@ try
         status="No valid data found for stats generation";
         return;
     end
+    
+    % check calf acc data available in the project
+    if strcmpi(Settings.CALFPOS,"on") && ~ismember("Calf_File",masterQCTbl.Properties.VariableNames)
+        status="No valid data for calf accelerometer found. Disable Calf acceerometer under Kneeling Detection";
+        return;
+    end
+    % check trunk acc data available in the project
+    if ~strcmpi(Settings.TRUNKPOS,"off") && ~ismember("Trunk_File",masterQCTbl.Properties.VariableNames)
+        status="No valid data for calf accelerometer found. Disable Calf acceerometer under Kneeling Detection";
+        return;
+    end
 
     %% Daily and interval based tables generation
 
@@ -332,19 +343,10 @@ try
         end
 
         % generating interval(events) based tables
-        if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events"],'IgnoreCase',true)
-
-            if itrFil==1
-                if isfield(metaOBJ,"eventMeta") % if QC data found
-                    evntMetaN="eventMeta";
-                elseif isfield(metaOBJ,"evntMeta")  % if QC data found
-                    evntMetaN="evntMeta";
-                else
-                    evntMetaN="evntMeta";
-                end
-
-            end
-            evntMeta=metaOBJ.(evntMetaN);
+        if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events","Hourly"],'IgnoreCase',true)
+            
+            % get event information from binary metaOBJ
+            evntMeta=metaOBJ.evntMeta;
             % remove midnight breaks in events
             if strcmpi(Settings.TblFormat,"EventsNoBreak") && length(evntMeta.Names)>=2
                 indsRLE = [find(evntMeta.Names(1:end-1) ~= evntMeta.Names(2:end));length(evntMeta.Names)]; % find unique consecutive events
@@ -361,7 +363,6 @@ try
                     evntMeta.Comments(indsDel,:)=[];
                     evntMeta.Indices(indsDel,:)=[];
                 end
-
             end
             % append data to evntGenStruct relevant to this iteration of stat generation
             evntGenStruct.itrFil=itrFil;
@@ -377,7 +378,7 @@ try
                 return;
             end
             % if additional trunk variables are enabled merge with seperately saved interval-trunk-data
-            if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD
+            if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD && ~strcmpi(Settings.TblFormat,"Hourly") 
                 % if a trunk-daily-data file exist reat it
                 if isfile(trunkEF)
                     opt_trnk2=detectImportOptions(trunkEF,'VariableNamingRule','preserve');
@@ -476,7 +477,7 @@ try
     end
 
     % Saving events table to disk
-    if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events"],'IgnoreCase',true)
+    if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events","Hourly"],'IgnoreCase',true)
         % merge finalHozTbl with existing master horizontal table in the disk
         % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         fnlEvntTblF=fullfile(Settings.projectDir,Settings.evntMasterFile);
