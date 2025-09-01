@@ -48,7 +48,7 @@ varN_DlyQC=dlyGenStruct.varN_DlyQC;
 
 
 
-% convert excel date-numbers to matlab datetime vector
+% convert matlab datenumbers to datetime
 dateTimeDT=datetime(perSecT.DateTime,'ConvertFrom','datenum');
 %round off datetime values to nearest second
 dateTimeDT=dateshift(dateTimeDT, 'start', 'second', 'nearest');

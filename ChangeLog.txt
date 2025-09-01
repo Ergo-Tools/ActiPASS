@@ -1,0 +1,325 @@
+ActiPASS Version 2025.06.1 (2025-06-12)
+#############################################
+
+New Features:
+1. Kneeling detection support with optional calf accelerometer and new activity "Kneeling".
+2. Added support for generating hourly tables directly (without using diary defined intervals) 
+
+
+Fixes and changes:
+1. ActiPASS now uses json file format in config files for better readability
+2. Code for Time synchronization of multiple accelerometers is refactored to be more in-line with ActiPASS workflow 
+
+
+ActiPASS Version 2025.04.1 (2025-04-01)
+#############################################
+
+New Features:
+1. ActiPASS has now switched to Matlab 2024b. Compiled version now comes with it's own installer. Manual runtime installation is no longer needed.
+2. The quality checking UI now displays QC visualizations. Double clicking on QC table rows opens-up the relevant QC visualization.
+
+Fixes:
+1. Device-ID from ActivPAL files with with more than 6 digits are now correctly detected
+
+
+ActiPASS Version 2025.03.1 (2025-03-12)
+#############################################
+
+Changes and fixes:
+1. Added function to calculated clinical sit-to.stand counts
+
+#############################################
+ActiPASS Version 2024.06.4 (2025-02-17)
+#############################################
+
+Changes and fixes:
+1. Added ability to merge sleep-data for each auto detected times-of-bed periods
+
+#############################################
+ActiPASS Version 2024.06.3 (2024-12-11)
+#############################################
+
+Changes and fixes:
+1. Fixed a crash in visualizations when Sleep InOut-Bed option is enabled
+
+#############################################
+ActiPASS Version 2024.06.2 (2024-12-04)
+#############################################
+
+Changes and fixes:
+1. Added "NWCORRECTION" option called "extra" which disables non-wear detected during night/bed periods
+
+#############################################
+ActiPASS Version 2024.06.1 (2024-06-04)
+#############################################
+
+Changes and fixes:
+1. Changes generic CSV file format specify the device-type. 
+2. Minor bug fixes
+
+
+#############################################
+ActiPASS Version 2024.05.4 (2024-05-29)
+#############################################
+
+Changes and fixes:
+1. Inclusion of Movisens support both CLI and GUI (only via accelerometer file-lists GUI). 
+2. Minor bug fixes
+
+
+#############################################
+ActiPASS Version 2024.05.1 (2024-05-07)
+#############################################
+
+Changes:
+1. Changes needed to various functions to support CLI version
+2. Cosmetic changes to functions
+3. Releasing first CLI version actipass_cli version 2024.05.02
+
+
+#############################################
+ActiPASS Version 2024.05 (2024-04-26)
+#############################################
+
+Changes:
+1. Experimental generic-CSV file support
+
+
+#############################################
+ActiPASS Version 1.67.1 (2024-04-11)
+#############################################
+
+Changes:
+1. Experimental Sit-to-stand angular velocity algorithm integration
+
+
+#############################################
+ActiPASS Version 1.66.8 (2024-04-10)
+#############################################
+
+Minor_changes:
+1. Produce cleaner tables by saving all unavailable data as empty cells (instead of NaNs)
+Bugfix:
+1. Fixed a data-type mismatch error which caused ActiPASS to crash with trunk data
+
+#############################################
+ActiPASS Version 1.66.3 (2024-03-25)
+#############################################
+
+minor-fix:
+1. If interpolation errors occurs while loading trunk data, continue to next matching trunk acc file
+
+
+#############################################
+ActiPASS Version 1.66.1 (2024-03-24)
+#############################################
+
+minor-fix:
+1. Some trunk related quality-check columns were not properly updated in master-QC-table because those were not initialised properly
+
+
+#############################################
+ActiPASS Version 1.66.0 (2024-03-24)
+#############################################
+Bugfix:
+1. Experimental release with full trunk accelerometer support
+   with major bugfix in trunk processing. Previously thigh acc data was used as trunk acc data
+
+Changes:
+1. Better quality checks related to trunk data
+
+2. Ability to use accelerometer file list with trunk accelerometer
+
+
+
+#############################################
+ActiPASS Version 1.65 (2024-03-08)
+#############################################
+1. Experimental release with full trunk accelerometer support
+2. Ability to use steps per minute in slow/fast walk detection and intensity calculations
+
+
+
+#############################################
+ActiPASS Version 1.64 (2024-02-29)
+#############################################
+1. Experimental release with trunk accelerometer support (only for lying down detection at the moment)
+
+#############################################
+ActiPASS Version 1.62 (2023-11-30)
+#############################################
+
+*************What's New*********************
+1. Bugfix: ActivPAL g-format compressed data was detected as integer format
+
+
+#############################################
+ActiPASS Version 1.61.0 (2023-10-24)
+#############################################
+
+*************What's New*********************
+1. New logos
+2. SENS Motion binary file support (no longer experimental)
+
+
+#############################################
+ActiPASS Version 1.60.0 (2023-09-15)
+#############################################
+
+*************What's New*********************
+1. Experimental SENS motion bin file support
+2. Ability to read ActivPAL CSV files in both g-format an integer format
+
+
+#############################################
+ActiPASS Version 1.59.1 (2023-09-03)
+#############################################
+
+*********** Bugfixes  ***************
+1. Fixed a major bug in Bedtime/Sleep module. 
+   The secondary bedtimes (or possible extra bedtimes) were treated as primary bedtimes because of a typecasting issue.
+   This bug has been present since version 1.50 undetected. 
+2. Fixed a bug in stats-generation when a mesurement ends exactly at midnight and auto-trimming is disabled
+
+
+#############################################
+ActiPASS Version 1.58 (2023-06-21)
+#############################################
+
+***********  What's_New  *****************************
+1. GUI cosmetic changes
+
+*********** Bugfixes  ***************
+1. Fix event (interval) based table was not saving under (Daily+Events) option
+
+
+#############################################
+ActiPASS Version 1.57 (2023-05-21)
+#############################################
+
+***********  What's_New  *****************************
+1. GUI cosmetic changes
+
+#############################################
+ActiPASS Version 1.56 (2023-04-06)
+#############################################
+
+***********  What's_New  *****************************
+
+1. Performance improvements
+2. New variable "Upright"
+
+********** Bug-Fixes *********************************
+1. Bug-fix in crash of stats generation when "Stats Domains" are specified.
+
+
+#############################################
+ActiPASS Version 1.55 (2023-03-25)
+#############################################
+
+***********  What's_New  *****************************
+
+1. Axivity accelerometer default orientations are now ProPASS defaults (change from Acti4 defaults)
+2. Confirm before batch process
+3. Better info messages regarding orientation warnings.
+
+********** Bug-Fixes *********************************
+1. Bug-fix in stats generation related to INT1 not containing LieStill time.
+
+
+
+
+
+#############################################
+ActiPASS Version 1.54 (2023-03-23)
+#############################################
+
+***********  What's_New  *****************************
+
+1. Added a feature to quality check an ActiPASS formatted diary
+2. Minor bug-fixes
+
+
+
+#############################################
+ActiPASS Version 1.53 (2023-03-18)
+#############################################
+
+***********  What's_New  *****************************
+
+1. Added support to select ProPASS daily-QC criteria to GUI (in addition to ValiDuration>20hrs)
+2. Removed daily ValidDuration settting from main GUI (it still exists under Setings GUI)
+3. Stats generation speedups
+
+
+
+#############################################
+ActiPASS Version 1.52 (2023-03-16)
+#############################################
+
+***********  What's_New  *****************************
+
+1. Renamed the behaviour "SleepOutBed" to "LieStill"
+2. The variable "Sleep" no longer includes the times of "SleepOutBed" (i.e. LieStill)
+
+
+
+#############################################
+ActiPASS Version 1.51 (2023-03-15)
+#############################################
+
+***********  What's_New  *****************************
+
+1. Help icons in the GUI panels direct the user to specific help topics.
+2. Minor bugfixes related loading ProPASS default settings
+
+
+
+#############################################
+ActiPASS Version 1.50 (2023-03-13)
+#############################################
+
+***********  What's_New  *****************************
+
+1. New improved "auto2" bedtime algorithm is the now default bedtime algorithm
+2. Major changes to ActiPASS output table and stats-generation in order to do a daily inclusion criteria.
+	a) Long format daily table including all measurement days is now saved bey default (for daily table format)
+	b) ProPASS wide-format table now also includes more qc and outlier information
+3. Other cosmetic changes changes to UI
+4. Minor refactoring, 
+5. Better error messages
+
+
+#############################################
+ActiPASS Version 1.49 (2023-03-05)
+#############################################
+
+***********  What's_New  *****************************
+
+1. "auto2" bedtime algorithm is fine tuned and will be the new default. This helps to detect missing bedtimes and remove extra bedtimes.
+2. Changes to first-stage process to save more quality-check data to accomodate future major changes to ActiPASS stat gen module)
+
+
+#############################################
+ActiPASS Version 1.48 (2022-10-26)
+#############################################
+
+***********  What's_New  *****************************
+
+1. New experimental bedtime algorithm "auto2". available under advanced settings. The old bedtime algorithm "auto" is now renamed to "auto1".
+
+
+
+#############################################
+ActiPASS Version 1.47 (2022-10-18)
+#############################################
+
+***********  What's_New  *****************************
+
+1. New outlier criteria "NoSleepInterval" (disabled by default in ProPASS mode)
+
+
+***********  BugFixes   ******************************
+1. Stat Generation: Some bout related advanced options were not properly communicated from GUI to bout-generation code
+2. Stat Generation: Variables ending with "_Bouts_TL" was not calculated properly.
+3. Visualization: Fixed an error where underscores in event names were interpreted as Latex. Fixed now

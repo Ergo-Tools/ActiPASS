@@ -1,4 +1,4 @@
-function [status,finalEvntTbl] = genEventTable(perSecT,eventMeta,finalEvntTbl,evntGenStruct)
+function [status,finalEvntTbl] = genEventTable(perSecT,evntMeta,finalEvntTbl,evntGenStruct)
 % genEventTable generate the ActiPASS event based  table from the given per-sec table
 % Copyright (c) 2023, Pasan Hettiarachchi .
 % All rights reserved.
@@ -41,9 +41,39 @@ totFiles=evntGenStruct.totFiles;
 qcBatch=evntGenStruct.qcBatch;
 QC_Status=evntGenStruct.QC_Status;
 
+% if an hourly table is requested diary based eventMeta structure is ignored and it's regenerated
+% with eventes (intervals) corresponding to clock hours
+if matches(Settings.TblFormat,"Hourly",'IgnoreCase',true)
+    % reset eventMeta structure
+    evntMeta=struct('Names',[],'StartTs',[],'EndTs',[],'Comments',[],'Indices',[]);
+    
+    %round off datetime values to begining of each full hour
+    dtHrs=floor(perSecT.DateTime*24)/24;
+    % unique full hours
+    uniqueHrs=unique(dtHrs);
+    
+    % append information related to each hour to evntMeta structure
+    for itrHr=1:length(uniqueHrs)
+        % find indices of 1s table relevant to current event (interval) 
+        indEvntStart=find(dtHrs==uniqueHrs(itrHr),1,"first");
+        indEvntEnd=find(dtHrs==uniqueHrs(itrHr),1,"last");
+        tEvntStart=perSecT.DateTime(indEvntStart);
+        tEvntEnd=perSecT.DateTime(indEvntEnd);
+        evntNm="Hour_"+datestr(uniqueHrs(itrHr),"HH");
+        evntCmnt="";
+        % save meta info related to this hour in the evntMeta structure array
+        evntMeta.StartTs=[evntMeta.StartTs;tEvntStart];
+        evntMeta.EndTs=[evntMeta.EndTs;tEvntEnd];
+        evntMeta.Indices=[evntMeta.Indices;[indEvntStart,indEvntEnd]];
+        evntMeta.Names=[evntMeta.Names;evntNm];
+        evntMeta.Comments=[evntMeta.Comments;evntCmnt];
+    end
 
-% find the number of days
-numEvents=length(eventMeta.Names);
+end
+
+
+% find the number of events
+numEvents=length(evntMeta.Names);
 %iterate through the days
 eventTable=table('Size',[numEvents,length(evntVarNames)],'VariableTypes',evntVarTypes,'VariableNames',evntVarNames);
 
@@ -62,23 +92,21 @@ for itrEvent=1:numEvents
     %% find basic data for this particular event
     
     % do a quality check of event indices and correct end index if end-index is equalent to start-index of next event.
-    wrongEndInds=eq(eventMeta.Indices(1:end-1,2),eventMeta.Indices(2:end,1));
+    wrongEndInds=eq(evntMeta.Indices(1:end-1,2),evntMeta.Indices(2:end,1));
     if any(wrongEndInds)
-        eventMeta.Indices(wrongEndInds,2)=eventMeta.Indices(wrongEndInds,2)-1;
+        evntMeta.Indices(wrongEndInds,2)=evntMeta.Indices(wrongEndInds,2)-1;
     end
-    evntStrtIndx=eventMeta.Indices(itrEvent,1);
-    evntEndIndx=eventMeta.Indices(itrEvent,2);
+    % find start and end indices and times for each event (interval) and trim the 1s table to current interval
+    evntStrtIndx=evntMeta.Indices(itrEvent,1);
+    evntEndIndx=evntMeta.Indices(itrEvent,2);
     rowsEvnt=evntStrtIndx:evntEndIndx; % rows corresponding to current event in per-sec table
-    
-    
     evntPerSecT=perSecT(rowsEvnt,:);
-    
-    
+        
     % fill information related to current day
-    eventTable.EventStart(itrEvent)=datestr(eventMeta.StartTs(itrEvent),31);
-    eventTable.EventStop(itrEvent)= datestr(eventMeta.EndTs(itrEvent),31);
-    eventTable.Event(itrEvent)=eventMeta.Names(itrEvent);
-    eventTable.Comment(itrEvent)=eventMeta.Comments(itrEvent);
+    eventTable.EventStart(itrEvent)=datestr(evntMeta.StartTs(itrEvent),31);
+    eventTable.EventStop(itrEvent)= datestr(evntMeta.EndTs(itrEvent),31);
+    eventTable.Event(itrEvent)=evntMeta.Names(itrEvent);
+    eventTable.Comment(itrEvent)=evntMeta.Comments(itrEvent);
     eventTable.Duration(itrEvent)=round(height(evntPerSecT)/60,Settings.prec_dig_min);
     
     rows_SI=evntPerSecT.SleepInterval ==1; % find the seconds flagged as sleep-interval
