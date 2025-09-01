@@ -1,4 +1,4 @@
-function   VrefTrunk = EstimateRefTrunk1(firstDay,Vtrunk,SF,Akt,OffTrunk,BF) 
+function   VrefTrunk = EstimateRefTrunk1(firstDay,Vtrunk,SF,Akt,OffTrunk,VrefTrunkDef) 
 
 % Estimation of reference angle for trunk accelerometer.
 % Trunk reference angle is estimeated for each interval in the setup file. The calculation is based on 
@@ -7,11 +7,7 @@ function   VrefTrunk = EstimateRefTrunk1(firstDay,Vtrunk,SF,Akt,OffTrunk,BF)
  
  persistent oldRef
  if firstDay  %first interval for ID: provisionel reference
-   if BF==1
-       oldRef = pi*[27 27 0]/180; %average back accelerometer angle
-    else
-       oldRef = pi*[10 10 0]/180; %tentative for front accelerometer
-    end
+   oldRef=VrefTrunkDef;
  end
  VtrunkAccAP = median(reshape(Vtrunk(:,2),SF,length(Akt))); %ant/pos accelerometer angle 
  VtrunkAccLat = median(reshape(Vtrunk(:,3),SF,length(Akt))); %lat accelerometer angle

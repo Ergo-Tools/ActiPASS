@@ -1,6 +1,9 @@
 
 function [status,trnkDTbl,trnkETbl]=genTrnkVariables(Akt,vTrnkRot,dlyMeta,evntMeta,saveDir,ID,Settings)
 % genTrnkVariables generate daily and interval bbased trunk-variables and save them to files
+% Based on original Acti4 forward-bending detection logic found in:
+% https://github.com/motus-nfa/Acti4/blob/main/Version%20July%202020/AnalyseAndPlot.m
+%
 % INPUTS:
 % Akt [N,1] - a vector representing an activity or behaviour for each second
 % vTrnkRot [Fs*N,3] - trunk angles (after reference-positions (rotation))
@@ -8,10 +11,10 @@ function [status,trnkDTbl,trnkETbl]=genTrnkVariables(Akt,vTrnkRot,dlyMeta,evntMe
 % dlyMeta - metadata for days (like indices and times)
 % evntMeta - metadata for intervals (like indices and times)
 % saveDir - directory where to save tables (usually ID folder under IndividualOut)  
-
+%
 % OUTPUTS:
 % status - "ok" if everything went well, otherwise detailed exception
-
+%
 % Copyright (c) 2024, Pasan Hettiarachchi .
 % All rights reserved.
 %
