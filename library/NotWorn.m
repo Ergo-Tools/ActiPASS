@@ -1,7 +1,7 @@
 function  Af = NotWorn(V,Acc,SF)
 % NotWorn Estimation of periods of 'not-worn'
 
-% All periods longer than 90 minuttes with no activity are considered not-worn;
+% All periods longer than 90 minutes with no activity are considered not-worn;
 % periods between 10 to 90 minutes are considered not-worn if a certain amount of movement/acceleration
 % is detection just before (within 10 sec.) and the orientaion deviates less than 5° from horizontal lying.
 
@@ -17,7 +17,7 @@ function  Af = NotWorn(V,Acc,SF)
 % % Copyright (c) 2020, Jørgen Skotte
 % https://github.com/motus-nfa/Acti4/blob/main/Version%20July%202020/NotWorn.m
 
-% Copyright (c) 2021, Pasan Hettiarachchi .
+% Copyright (c) 2024, Pasan Hettiarachchi .
 % All rights reserved.
 %
 % Redistribution and use in source and binary forms, with or without
