@@ -65,6 +65,7 @@ Settings.boutBreak=statStruct.boutBreak; % bout break for all bouts except 1 min
 Settings.SAVETRNKD=statStruct.SAVETRNKD; % flag for saving trunk variables
 Settings.TRUNKPOS=statStruct.TRUNKPOS; % indicate whether trunk acc is used
 Settings.CALFPOS=statStruct.CALFPOS; % indicate whether calf acc is used
+Settings.INT_ALG=statStruct.INT_ALG; % intensity algorithm selection posture or posture+raw-data
 
 
 % activity to MET translation
@@ -113,7 +114,7 @@ varN_Sbjct=["SubjectID","QC_Status","Batch","Sensor_Errs"];
 varN_Sbjct_evnt=["SubjectID","QC_Status","Batch"];
 
 varN_Comm=["Duration","NonWear","AwakeNW","SlpIntNW","ValidDuration","Awake","SleepInterval","Bedtime",...
-    "Sleep","SleepInBed","LieStill","Walk_Slow","Walk_Fast","NumSteps","NumStepsWalk","NumStepsRun","TotalTransitions"];
+    "Sleep","SleepInBed","LieStill","NumSteps","NumStepsWalk","NumStepsRun","TotalTransitions"];
 
 % check whether Calf Acc. is enabled and if so add the behaviour Kneel
 if strcmpi(Settings.CALFPOS,"on")
@@ -130,7 +131,7 @@ end
 
 % define variable names of each behaviour and intensity classes
 % NonWear=0, Lie=1, Sit=2, Stand=3, Move=4, Walk=5, Run=6, Stair=7, Cycle=8, Other=9, Sleep=10, LieStill=11, Kneel=12
-varN_Behvs_Classes=["Lie","Sit","SitLie","Stand","Move","StandMove","Walk","Run","Stair","Cycle",varN_Kneel,"Upright","Other","INT1","INT2","INT2_Amb","INT3","INT4","INT34"];
+varN_Behvs_Classes=["Lie","Sit","SitLie","Stand","Move","StandMove","Walk","Walk_Slow","Walk_Fast","Run","Stair","Cycle",varN_Kneel,"Upright","Other","INT1","INT2","INT2_Amb","INT3","INT4","INT34"];
 
 % save the behaviour and intensity class names to Settings for later use
 Settings.statVars=varN_Behvs_Classes;
@@ -224,7 +225,7 @@ try
         status="No valid data found for stats generation";
         return;
     end
-    
+
     % check calf acc data available in the project
     if strcmpi(Settings.CALFPOS,"on") && ~ismember("Calf_File",masterQCTbl.Properties.VariableNames)
         status="No valid data for calf accelerometer found. Disable Calf acceerometer under Kneeling Detection";
@@ -234,6 +235,18 @@ try
     if ~strcmpi(Settings.TRUNKPOS,"off") && ~ismember("Trunk_File",masterQCTbl.Properties.VariableNames)
         status="No valid data for calf accelerometer found. Disable Calf acceerometer under Kneeling Detection";
         return;
+    end
+    if strcmpi(Settings.INT_ALG,"raw+posture")
+        % check intensity-algorithm setting is consistent
+        allpaeeFs=fullfile(statStruct.projectDir,statStruct.indvDirOut,masterQCTbl.SubjectID,masterQCTbl.SubjectID+" - PAEE.csv");
+
+        if ~all(isfile(allpaeeFs))
+            status="raw+posture intensity algorithm output not found for some (or all) files. "+...
+                "Inconsistent intensity algorithm settings during batch processing. "+...
+                "Make sure all batches are processed with ""raw+posture"" setting.";
+            return;
+
+        end
     end
 
     %% Daily and interval based tables generation
@@ -278,6 +291,7 @@ try
         % define locations of 1s data file and events metadata file
         perSecF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Activity_per_s.mat");
         metaF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Metadata.mat");
+        paeeF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - PAEE.csv");
         % define trunk daily and event data files if trunk data is saved
         trunkDF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Daily_TrunkData.csv");
         trunkEF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Event_TrunkData.csv");
@@ -299,6 +313,18 @@ try
 
         % now load metadata from binary mat file
         metaOBJ = load(metaF,'-mat'); %load meta data directly
+        
+        % load R intensity algorithm output if it's enabled
+        if strcmpi(Settings.INT_ALG,"raw+posture")
+            % read PAEE time series (time is in POSIX)
+            paeeT=readtable(paeeF,"FileType","text","Delimiter",",","VariableNamingRule","preserve");
+            % convert POSIX time to a datenumber (consider no timezone)
+            tPAEE=datenum(datetime(paeeT.time,"ConvertFrom","posixtime","TimeZone",''));
+            %interpolate 10s intensity-algorithm output back to 1s
+            paee=interp1(tPAEE,paeeT.paee,perSecT.DateTime,"nearest","extrap");
+            % add 'paee' column to perSecT 
+            perSecT=horzcat(perSecT,table(paee));
+        end
 
         % generating daily tables
         if matches(Settings.TblFormat,["Daily","Daily+Events"],'IgnoreCase',true)
@@ -344,7 +370,7 @@ try
 
         % generating interval(events) based tables
         if matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events","Hourly"],'IgnoreCase',true)
-            
+
             % get event information from binary metaOBJ
             evntMeta=metaOBJ.evntMeta;
             % remove midnight breaks in events
@@ -378,7 +404,7 @@ try
                 return;
             end
             % if additional trunk variables are enabled merge with seperately saved interval-trunk-data
-            if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD && ~strcmpi(Settings.TblFormat,"Hourly") 
+            if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD && ~strcmpi(Settings.TblFormat,"Hourly")
                 % if a trunk-daily-data file exist reat it
                 if isfile(trunkEF)
                     opt_trnk2=detectImportOptions(trunkEF,'VariableNamingRule','preserve');

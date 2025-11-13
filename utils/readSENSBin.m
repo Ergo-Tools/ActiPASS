@@ -9,14 +9,6 @@ function [Data,SF,deviceID] = readSENSBin(File,timeZoneOffset)
 %       SF            [double] sample frequency
 %       deviceID      [string] the device ID -currently set to NaN since SENS bin files do not carry this information
 
-% arguments checks
-arguments
-
-    File {mustBeFile}
-    % if no timeZoneOffset is given assume it's local time-zone
-    timeZoneOffset double = hours(tzoffset(datetime('now','TimeZone','local')))
-end
-
 % Copyright (c) 2023, Pasan Hettiarachchi .
 % All rights reserved.
 %
@@ -42,6 +34,14 @@ end
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
+
+% arguments checks
+arguments
+
+    File {mustBeFile}
+    % if no timeZoneOffset is given assume it's local time-zone
+    timeZoneOffset double = hours(tzoffset(datetime('now','TimeZone','local')))
+end
 
 % initialise outputs
 Data=[];
@@ -71,25 +71,25 @@ try
     % Check if match is found
     if ~isempty(tokens)
         deviceID = strjoin(tokens{1}(1:3),"");  % Reconstruct sensor-ID
-
     else
         % try detecting device-ID once more for new filename pattern like "export_*********_e-9315c7_acc.bin"
-        pattern = "export_([a-zA-Z0-9]+)_e-([0-9a-fA-F]{6})_acc\.(bin|hex)";
+        pattern = "export_.*_e-(?<id>[0-9a-fA-F]+)_acc\.(bin|hex)$";
 
         % Apply regexp
         tokens = regexp(append(f_name,f_ext), pattern, 'tokens');
-
+        % if there is a regex match 
         if ~isempty(tokens)
             %subjectID = tokens{1}{1};
             deviceID = tokens{1}{2};
             %extension = tokens{1}{3};
         end
-
     end
 
     try
         % assume ID string is hexadecimal and find the decimal value from the hex value
         deviceID=hex2dec(deviceID);
+    catch ME_2
+        deviceID=NaN;
     end
 
     if strcmpi(f_ext,".bin")
