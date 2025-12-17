@@ -1,35 +1,34 @@
 # Source license
 
-Unless otherwise specified in an individual source file, all source code in this repository are release under **BSD 3-Clause license**. This means if a different license is included in a source file, that license supersedes BSD 3-Clause license.
 
-**BSD 3-Clause License**
+**ActiPASS - Thigh accelerometer data processing software**
 
-Copyright (c) 2023, Pasan Hettiarachchi and Peter Johansson
+Copyright 2020-2025 by Pasan Hettiarachchi & Peter Johansson
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+licenses below for more details.
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
 
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-3. Neither the name of the copyright holder nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
+- The **CLI workflow/orchestration code** in `./cli/` is licensed under the
+  **GNU General Public License, version 3.0 or (at your option) any later version**.
+  See `LICENSES/GPL-3.0-or-later.txt` and per-file license headers.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+- The **algorithms, configs, library, statistics, and utility** functionality
+  in respective folders are licensed under the **BSD 3-Clause License** or the
+  license specified in the individual file.
+  See `LICENSES/BSD-3-Clause.txt` and per-file license headers.
+
+When distributing the repository as an integrated tool, the CLI workflow (residing in ./cli) constitutes
+a GPL-licensed program. Original BSD-licensed files remain under BSD, and their
+copyright and license notices must be preserved.
+
+——
+
+This overview does not replace the full license texts in `LICENSES/`.
 
 # Binary release license
 

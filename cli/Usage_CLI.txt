@@ -1,0 +1,37 @@
+Usage Syntax:
+actipass_cli.exe "file_in" out "file_or_folder_out" ID "ID" diary "file_diary" daily "on" vis "on" loc "front" mode "PROPASS"
+  - arguments:
+   file_in: first argument is always the full file-path to accelerometer raw data file
+   out: optional output file or a folder (only .csv, .xlsx or .mat files accepted)
+   ID: optional participant ID
+   diary: optional ActiPASS formatted diary Excel format
+   daily: optional. Default "on". "off" disables daily output table
+   vis: optional. Default "on". "off" disables activity visualizations
+   loc: optional device location: default: "front", "right" or "left"
+   mode: optional operation-mode. default: "PROPASS" or "ADVANCED"
+
+actipass_cli.exe --help
+    - display help/readme text in console
+actipass_cli.exe --add-to-sendto
+    - add actipass_cli.exe to windows SendTo folder as a shortcut
+
+Examples:
+* actipass_cli.exe "C:\Users\UNAME\Desktop\testdata.csv" 
+  - daily data is saved to "C:\Users\UNAME\Desktop\testdata_actipass_daily.xlsx"
+  - quality-check visualization is saved as "C:\Users\UNAME\Downloads\testdata_QC-1.png"
+
+* actipass_cli.exe "C:\Users\UNAME\Desktop\testdata.csv" out "C:\Users\UNAME\Downloads" ID "S0001" diary "C:\Users\UNAME\Desktop\diary.xlsx"
+  - diary is used to trim data, define manual lying, bed, sleep or non-wear periods or divide data into intervals
+  - 1s output is saved to "C:\Users\UNAME\Deownloads\S0001_actipass_1s.mat"
+  - daily output is saved to "C:\Users\UNAME\Deownloads\S0001_actipass_daily.xlsx"
+  - quality-check visualization is saved as "C:\Users\UNAME\Downloads\S0001_QC-1.png"
+
+* actipass_cli.exe "C:\Users\UNAME\Desktop\testdata.csv" out "C:\Users\UNAME\Downloads" daily "off" vis "off" mode "ADVANCED"
+  - only 1s outputs is saved. (to "C:\Users\UNAME\Deownloads\testdata_actipass_1s.mat")
+  - algorithm parameters and options are loaded from ActiPASS json conf files
+
+ActiPASS CLI version is developed by: Pasan Hettiarachchi pasan.hettiarachchi@medsci.uu.se 
+at Occupational and Environmental Medicine, Department of Medical Sciences, Uppsala University
+
+See full license agreement:
+https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement
