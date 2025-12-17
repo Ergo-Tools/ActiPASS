@@ -13,7 +13,7 @@ licenses below for more details.
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-- The **ActiPASS_CLI code** in `./cli/` is licensed under the
+- The **ActiPASS_CLI code** in this folder `cli/` is licensed under the
   **GNU General Public License, version 3.0 or (at your option) any later version**.
   See `LICENSES/GPL-3.0-or-later.txt` and per-file license headers.
 
