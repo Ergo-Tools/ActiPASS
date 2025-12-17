@@ -1,4 +1,4 @@
-## Various utility functions used by ActiPASS software
+## Binary and text loaders for various brands of accelerometers and other utility functions
 
 ### License
 Unless otherwise specified in an individual source file, all source code in this repositery are release under **BSD 3-Clause license**. This means if a different license is included in a source file, that license supersedes the BSD 3-Clause license.

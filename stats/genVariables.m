@@ -1,9 +1,11 @@
-function statTable = genVariables(statTable,Activity,Steps,rows_SI,rows_BT,itrSeg,Settings)
+function statTable = genVariables(statTable,PerSecT,rows_SI,rows_BT,itrSeg,Settings)
 %genVariables generate variables for given activity of a given segment(a day or an Event)
 % INPUTS:
 % statTable - the table to fill data with
-% Activity - a vector representing an activity or behaviour for each second
-% Steps - the steps count (when applicable) for each second
+% PerSecT - ActiPASS 1s activity/posture table
+%    PerSecT.Activity - a vector representing an activity or behaviour for each second
+%    PerSecT.Steps - the steps count (when applicable) for each second
+%    PerSecT.paee - intensity calculated from R raw+posture algorithm (if enabled)
 % rows_SI - the logical flag representing sleep-interval for each second
 % rows_BT - the logical flag representing bedtime for each second
 % itrSeg - the iteration number of current segment
@@ -45,16 +47,13 @@ function statTable = genVariables(statTable,Activity,Steps,rows_SI,rows_BT,itrSe
 % selected variable names for statistics generation
 statVars=Settings.statVars;
 
-% check whether to use steps/min in intensity and walk_slow walk_fast calculations
-if Settings.CADPMIN
-    Steps60=movmean(Steps,60); % calculate steps/min based on one minute window
-    Steps60(Steps==0)=0;
-    %Steps60=movmean(Steps,[0,60],'SamplePoints',1:60:length(Steps));
-else
-    Steps60=Steps; % use steps/sec as it is
-end
+% find activity numbers and steps/s values from PerSecT
+Activity=PerSecT.Activity;
+Steps=PerSecT.Steps;
+
+
 % precision of variables given in minutes
-prec=Settings.prec_dig_min; 
+prec=Settings.prec_dig_min;
 %generate non repetitive (for each activity or energy-class) basic variables
 % statTable.Duration(itrSeg)=round(length(Activity)/60,prec);
 % statTable.Excluded(itrSeg)=round(sum(Activity==-1)/60,prec);
@@ -62,61 +61,72 @@ statTable.NonWear(itrSeg)=round(sum(Activity==0)/60,prec);
 statTable.ValidDuration(itrSeg)=round(sum(Activity~=0 & Activity~=-1)/60,prec);
 statTable.Awake(itrSeg)=round(sum(Activity~=0 & Activity~=-1 & ~rows_SI)/60,prec); % wake-time in minutes
 statTable.AwakeNW(itrSeg)=round(sum(Activity==0 & ~rows_SI)/60,prec); % non wear during awake times
-statTable.Walk_Slow(itrSeg)=round(sum(Activity==5 & ~rows_SI & Steps60<Settings.Wlk_Slow_Cad/60)/60,prec);
-statTable.Walk_Fast(itrSeg)=round(sum(Activity==5 & ~rows_SI & Steps60>=Settings.Wlk_Slow_Cad/60)/60,prec);
 statTable.TotalTransitions(itrSeg)= sum(diff(~rows_SI.*Activity)~=0); % total transitions (this actually includes transitions to/from NW or excluded periods)
 statTable.Bedtime(itrSeg)= round(sum(Activity~=-1 & rows_BT)/60,prec); % bedtime in minutes
 statTable.SleepInterval(itrSeg)=round(sum(Activity~=-1 & Activity~=0 & rows_SI)/60,prec); % sleep-interval in minutes
 statTable.SlpIntNW(itrSeg)=round(sum(Activity==0 & rows_SI)/60,prec); % NW during sleep interval
 
-%% generate TAI
+%% generate TAI ("thigh activity index" which resembles a MET time series)
 
-dayTAI=Settings.MET_SI*(rows_SI & Activity~=-1 & Activity~=0)+... % sleep-interval
-    Settings.MET_Lie*(~rows_SI & Activity==1)+...% lying
-    Settings.MET_LieStill*(~rows_SI & Activity==11)+...% sleep-outside-bed (called LieStill)
-    Settings.MET_Sit*(~rows_SI & Activity==2)+... % sitting
-    Settings.MET_Stand*(~rows_SI & Activity==3)+... % standing
-    Settings.MET_Move*(~rows_SI & Activity==4)+... % moving
-    genMETWalk((~rows_SI & Activity==5),Steps60*60,Settings)+... % walking
-    Settings.MET_Running*(~rows_SI & Activity==6)+... %running
-    Settings.MET_Stairs*(~rows_SI & Activity==7)+... % stair-walking
-    Settings.MET_Cycle*(~rows_SI & Activity==8)+... & cycling
-    genMETOther(~rows_SI & Activity==9,Steps60*60,Settings); % other
-% all remaining seconds (non-wear or excluded) are flagged as -1
-dayTAI(dayTAI==0)=-1;
+% create MAP for exponential filtering (smoothing) TAI
+mapTC=containers.Map(["TC10","TC20","TC30","TC60","TC90","TC120"],[10,20,30,60,90,120]);
+if  strcmpi(Settings.INT_ALG,"posture")
+    dayTAI=Settings.MET_SI*(rows_SI & Activity~=-1 & Activity~=0)+... % sleep-interval
+        Settings.MET_Lie*(~rows_SI & Activity==1)+...% lying
+        Settings.MET_LieStill*(~rows_SI & Activity==11)+...% sleep-outside-bed (called LieStill)
+        Settings.MET_Sit*(~rows_SI & Activity==2)+... % sitting
+        Settings.MET_Stand*(~rows_SI & Activity==3)+... % standing
+        Settings.MET_Move*(~rows_SI & Activity==4)+... % moving
+        genMETWalk((~rows_SI & Activity==5),Steps*60,Settings)+... % walking
+        Settings.MET_Running*(~rows_SI & Activity==6)+... %running
+        Settings.MET_Stairs*(~rows_SI & Activity==7)+... % stair-walking
+        Settings.MET_Cycle*(~rows_SI & Activity==8)+... & cycling
+        genMETOther(~rows_SI & Activity==9,Steps*60,Settings); % other
+    % all remaining seconds (non-wear or excluded) are flagged as -1
+    dayTAI(dayTAI==0)=-1;
 
-% filter TAI if needed
-if ~strcmpi(Settings.FilterTAI,"off")
-    if strcmpi(Settings.FilterTAI,"TC10")
-        taiTC=10;
-    elseif  strcmpi(Settings.FilterTAI,"TC20")
-        taiTC=20;
-    elseif  strcmpi(Settings.FilterTAI,"TC30")
-        taiTC=30;
-    elseif  strcmpi(Settings.FilterTAI,"TC60")
-        taiTC=60;
-    elseif  strcmpi(Settings.FilterTAI,"TC90")
-        taiTC=90;
-    elseif  strcmpi(Settings.FilterTAI,"TC120")
-        taiTC=120;
+    % filter (smoothen) TAI if needed
+    if ~strcmpi(Settings.FilterTAI,"off")
+        % find the time-constant corresponding to the FilterTAI setting
+        taiTC=mapTC(Settings.FilterTAI);
+        % do the exponential filtering (smoothing)
+        alpha = 1-exp(-1/taiTC);
+        dayTAI=filter(alpha, [1 alpha-1], dayTAI);
     end
-    alpha = 1-exp(-1/taiTC);
-    dayTAI=filter(alpha, [1 alpha-1], dayTAI);
+
+    %discretaize TAI to intensity classes
+    dayPALevels = discretize(dayTAI,[Settings.MET_INT_Slp,Settings.MET_INT_SED,Settings.MET_INT_LPA,Settings.MET_INT_LPA_Amb,Settings.MET_INT_MPA,Settings.MET_INT_VPA, inf],...
+        'categorical',["Slp","SED","LPA","LPA_Amb","MPA","VPA"]);
+
+elseif strcmpi(Settings.INT_ALG,"raw+posture")
+    % set paee of excluded and non-wear times to -1
+    PerSecT.paee(Activity==-1 | Activity==0)=-1; %excluded or non-wear
+    PerSecT.paee(rows_SI & Activity~=-1 & Activity~=0)=-0.5; %sleep-interval
+    
+    % filter (smoothen) PAEE if needed
+    if ~strcmpi(Settings.FilterTAI,"off")
+        % find the time-constant corresponding to the FilterTAI setting
+        taiTC=mapTC(Settings.FilterTAI);
+        % do the exponential filtering (smoothing)
+        alpha = 1-exp(-1/taiTC);
+        PerSecT.paee=filter(alpha, [1 alpha-1], PerSecT.paee);
+    end
+
+    %discretaize TAI to intensity classes
+    dayPALevels = discretize(PerSecT.paee,[-0.6, 0, 0.0349, 0.2092, 0.4184, inf],...
+        'categorical',["Slp","SED","LPA","MPA","VPA"]);
+    % add category LPA_Amb in order to match the workflow posture only intensity algorithm
+    dayPALevels = addcats(dayPALevels,"LPA_Amb",After="LPA");
 end
-
-%discretaize TAI to intensity classes
-dayPALevels = discretize(dayTAI,[Settings.MET_INT_Slp,Settings.MET_INT_SED,Settings.MET_INT_LPA,Settings.MET_INT_LPA_Amb,Settings.MET_INT_MPA,Settings.MET_INT_VPA, inf],...
-    'categorical',{'Slp','SED','LPA','LPA_Amb','MPA','VPA'});
-
 %% generate daily basic activity times
 
 statTable.Sleep(itrSeg)=round(sum(Activity==10)/60,prec); % total sleep both in-bed and out-bed in minutes
 statTable.SleepInBed(itrSeg)=round(sum(Activity==10)/60,prec); % total sleep in-bed  in minutes
 statTable.LieStill(itrSeg)=round(sum(Activity==11)/60,prec); % total sleep  out-bed in minutes
 statTable.NumSteps(itrSeg)=round(sum((~rows_SI & (Activity==4 | Activity==5 |...
-    Activity==6 | Activity==7)).*Steps)); % number of steps outside sleep-interval 
-statTable.NumStepsWalk(itrSeg)=round(sum((~rows_SI & Activity==5).*Steps)); % number of steps of walking outside sleep-interval 
-statTable.NumStepsRun(itrSeg)=round(sum((~rows_SI & Activity==6).*Steps)); % number of steps of walking outside sleep-interval 
+    Activity==6 | Activity==7)).*Steps)); % number of steps outside sleep-interval
+statTable.NumStepsWalk(itrSeg)=round(sum((~rows_SI & Activity==5).*Steps)); % number of steps of walking outside sleep-interval
+statTable.NumStepsRun(itrSeg)=round(sum((~rows_SI & Activity==6).*Steps)); % number of steps of walking outside sleep-interval
 
 
 %% generate descriptive parameters part 2
@@ -137,6 +147,10 @@ for itrVarN=1:length(statVars)
             rowsVarN=~rows_SI &(Activity==3 |Activity==4);
         case "Walk"
             rowsVarN=~rows_SI &(Activity==5);
+        case "Walk_Slow"
+            rowsVarN=~rows_SI & (Activity==5) & Steps<Settings.Wlk_Slow_Cad/60;
+        case "Walk_Fast"
+            rowsVarN=~rows_SI & (Activity==5) & Steps>=Settings.Wlk_Slow_Cad/60;
         case "Run"
             rowsVarN=~rows_SI &(Activity==6);
         case "Stair"
@@ -163,9 +177,9 @@ for itrVarN=1:length(statVars)
             rowsVarN= (dayPALevels=="VPA" | dayPALevels=="MPA");
     end
     statTable.(statVars(itrVarN))(itrSeg)=round(sum(rowsVarN)/60,prec); % total duration of selected activity or intensity-class
-    
+
     % call the bouts and segment-time percentile generation function
-    
+
     if strcmpi(Settings.genBouts,"on") && matches(statVars(itrVarN),Settings.VarsBout)
         % call the stat generation function with seconds flagged with a given activity, combined-activity or intensity class
         [statTable.(statVars(itrVarN)+"_Tmax")(itrSeg),statTable.(statVars(itrVarN)+"_P50")(itrSeg),...
@@ -187,8 +201,8 @@ for itrVarN=1:length(statVars)
             statTable.(statVars(itrVarN)+"_1min_freq_L")(itrSeg),statTable.(statVars(itrVarN)+"_2min_freq_L")(itrSeg),...
             statTable.(statVars(itrVarN)+"_3min_freq_L")(itrSeg),statTable.(statVars(itrVarN)+"_4min_freq_L")(itrSeg),...
             statTable.(statVars(itrVarN)+"_5min_freq_L")(itrSeg),statTable.(statVars(itrVarN)+"_10min_freq_L")(itrSeg),...
-            statTable.(statVars(itrVarN)+"_30min_freq_L")(itrSeg),statTable.(statVars(itrVarN)+"_60min_freq_L")(itrSeg)] = genAktStats(rowsVarN',Settings); 
-   
+            statTable.(statVars(itrVarN)+"_30min_freq_L")(itrSeg),statTable.(statVars(itrVarN)+"_60min_freq_L")(itrSeg)] = genAktStats(rowsVarN',Settings);
+
     end
 end
 

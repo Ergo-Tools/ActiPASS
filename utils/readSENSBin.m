@@ -9,14 +9,6 @@ function [Data,SF,deviceID] = readSENSBin(File,timeZoneOffset)
 %       SF            [double] sample frequency
 %       deviceID      [string] the device ID -currently set to NaN since SENS bin files do not carry this information
 
-% arguments checks
-arguments
-    
-    File {mustBeFile}
-    % if no timeZoneOffset is given assume it's local time-zone
-    timeZoneOffset double = hours(tzoffset(datetime('now','TimeZone','local')))
-end
-
 % Copyright (c) 2023, Pasan Hettiarachchi .
 % All rights reserved.
 %
@@ -43,6 +35,14 @@ end
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
 
+% arguments checks
+arguments
+
+    File {mustBeFile}
+    % if no timeZoneOffset is given assume it's local time-zone
+    timeZoneOffset double = hours(tzoffset(datetime('now','TimeZone','local')))
+end
+
 % initialise outputs
 Data=[];
 SF=NaN;
@@ -53,21 +53,45 @@ try
     if ~matches(f_ext,[".hex",".bin"],'IgnoreCase',true)
         error(f_ext+" file type not supported");
     end
-    patStartID = textBoundary+"export_";
-    patEndID = "_acc-"+wildcardPattern+textBoundary;
-    deviceID=extractBetween(f_name,patStartID,patEndID); % find the device-ID string
-    % check whether the iD_string have the correct format
-    if isempty(deviceID) || ~matches(deviceID,textBoundary+alphanumericsPattern(2)+"-"+alphanumericsPattern(2)+"."+alphanumericsPattern(2)+textBoundary)
-        deviceID=NaN;
+
+    % patStartID = textBoundary+"export_";
+    % patEndID = "_acc-"+wildcardPattern+textBoundary;
+    % tmpID=extractBetween(f_name,patStartID,patEndID); % find the device-ID string
+    % % check whether the iD_string have the correct format
+    % if ~isempty(tmpID) && matches(tmpID,textBoundary+alphanumericsPattern(2)+"-"+alphanumericsPattern(2)+"."+alphanumericsPattern(2)+textBoundary)
+    %     deviceID=tmpID;
+    % end
+
+    % Regular expression pattern to match filenames like "export_81-36.E1_acc-3ax-4g_2023-11-27T230000_2023-12-04T23.00.00.bin"
+    pattern = "export_([0-9A-Fa-f]{2})-([0-9A-Fa-f]{2})\.([0-9A-Fa-f]{2})_acc-3ax-4g_.*\.(bin|hex)$";
+
+    % Match the pattern
+    tokens = regexp(append(f_name,f_ext), pattern, 'tokens');
+
+    % Check if match is found
+    if ~isempty(tokens)
+        deviceID = strjoin(tokens{1}(1:3),"");  % Reconstruct sensor-ID
     else
-        try
-            % assume ID string is hexadecimal and find the decimal value from the hex value
-            deviceID=hex2dec(erase(deviceID,["-","."]));
-        catch
-            deviceID=NaN;
+        % try detecting device-ID once more for new filename pattern like "export_*********_e-9315c7_acc.bin"
+        pattern = "export_.*_e-(?<id>[0-9a-fA-F]+)_acc\.(bin|hex)$";
+
+        % Apply regexp
+        tokens = regexp(append(f_name,f_ext), pattern, 'tokens');
+        % if there is a regex match 
+        if ~isempty(tokens)
+            %subjectID = tokens{1}{1};
+            deviceID = tokens{1}{2};
+            %extension = tokens{1}{3};
         end
     end
-    
+
+    try
+        % assume ID string is hexadecimal and find the decimal value from the hex value
+        deviceID=hex2dec(deviceID);
+    catch ME_2
+        deviceID=NaN;
+    end
+
     if strcmpi(f_ext,".bin")
         Fid = fopen(File);
         D_raw = fread(Fid,[6,Inf],'int16=>int16',0,'b')'; %6 bytes (Unix ms), 2 bytes (X), 2 bytes (Y), 2 bytes (Z)
@@ -77,22 +101,22 @@ try
         T_sens = datenum('1970/01/01') + T_raw/1000/86400 + timeZoneOffset/24; %return local time
         SF=round(1/(86400*mean(diff(T_sens(1:min(1000,length(T_sens)))))),1); % find the sample frequency
         Data =  [T_sens,Acc]; % merge time and Acc data horizontally into one matrix
-        
+
     elseif strcmpi(f_ext,".hex")
         D_hex = fileread(File);  % oload the full hex file into memory
         D_hex(D_hex==char(10))=[]; %remove the newline character
         D_hex=reshape(D_hex,2,[])'; %reshape such that two-byte hext string is in each row
         D_hex =uint8(base2dec(D_hex,16)); % converthex values to uint8 (bytes)
         D_hex=swapbytes(typecast(D_hex,'int16')); % typecast to integers and change the endian
-        D_hex=reshape(D_hex,6,[])';% reshape to 6 words (12 byte) rows: 6 bytes (Unix ms), 2 bytes (X), 2 bytes (Y), 2 bytes (Z) again 
+        D_hex=reshape(D_hex,6,[])';% reshape to 6 words (12 byte) rows: 6 bytes (Unix ms), 2 bytes (X), 2 bytes (Y), 2 bytes (Z) again
         Acc = double(D_hex(:,4:6))*0.0078125; %Acceleration
         T_raw = double([typecast(D_hex(:,1),'uint16'),typecast(D_hex(:,2),'uint16'),typecast(D_hex(:,3),'uint16')]) * [2^32,2^16,1]';
         T_sens = datenum('1970/01/01') + T_raw/1000/86400 + timeZoneOffset/24; %return local time
         SF=round(1/(86400*mean(diff(T_sens(1:min(1000,length(T_sens)))))),1); % find the sample frequency
         Data =  [T_sens,Acc]; % merge time and Acc data horizontally into one matrix
-    
+
     end
-    
+
 catch ME
     error("Error loading SENS motion bin file: "+ME.message);
 end

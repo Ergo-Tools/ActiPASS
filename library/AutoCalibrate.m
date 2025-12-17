@@ -25,8 +25,8 @@ function [Acc,scale,offset,status,warntxt,sens_err] = AutoCalibrate(Acc,varargin
 % algorithm by OpenMovement Project
 % https://github.com/digitalinteraction/openmovement/blob/master/Software/Analysis/Matlab/estimateCalibration.m
 
-%   version 0.01 
-%   Pasan Hettiarachchi (c), 2021
+%   version 0.2 
+%   Pasan Hettiarachchi (c), 2024
 %   <pasan.hettiarachchi@medsci.uu.se>
 
 % Copyright (c) 2021, Pasan Hettiarachchi .

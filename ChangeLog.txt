@@ -1,3 +1,16 @@
+ActiPASS Version 2025.12.1 (2025-12-17)
+#############################################
+
+Changes and new features:
+1. Added the ability to generate bouts on Walk_Slow and Walk_Fast variables
+2. Changes to stats generation module related to upcoming new machine learning raw+posture intensity algorithm 
+3. Changes to SENS bin and hex file parser to accommodate new device IDs
+4. Released ActiPASS_CLI 2025.12.1 ith full source code under GPLV3
+
+Bugfixes:
+1. Changes to Axivity WAV file parser to match the CWA_Readfile syntax (data is exported with fieldname "AXES" instead of "ACC")
+
+
 ActiPASS Version 2025.06.1 (2025-06-12)
 #############################################
 
