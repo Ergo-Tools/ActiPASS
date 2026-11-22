@@ -28,5 +28,7 @@ export default defineConfig(() => ({
       // 3. tell Vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
     },
+    // the About page imports ../CHANGELOG.md (repository root)
+    fs: { allow: [".."] },
   },
 }));

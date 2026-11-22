@@ -4,7 +4,8 @@
     "targets": ["nsis"],
     "resources": {
       "../../engine-matlab/build/dist/Actipass_Engine_Installer.exe": "engine/Actipass_Engine_Installer.exe",
-      "../../engine-matlab/build/dist/version.txt": "engine/version.txt"
+      "../../engine-matlab/build/dist/version.txt": "engine/version.txt",
+      "../../CHANGELOG.md": "CHANGELOG.md"
     },
     "windows": {
       "nsis": {

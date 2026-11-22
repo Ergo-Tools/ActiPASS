@@ -21,6 +21,14 @@
     ["License agreement", "https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement"],
   ];
   const open = (u: string) => openUrl(u).catch(() => {});
+
+  // the change log of the app (CHANGELOG.md, built into the app): one block per version
+  import changelogText from "../../../../CHANGELOG.md?raw";
+  const releases = changelogText.split(/^## /m).slice(1).map((block) => {
+    const [head, ...body] = block.split(/\r?\n/);
+    return { head: head.trim(), body: body.join("\n").trim() };
+  });
+  const PROCESSING_LOG = "https://github.com/Ergo-Tools/ActiPASS/blob/main/ChangeLog.txt";
 </script>
 
 <h1>About Actipass<HelpLink doc={manual("about")} /></h1>
@@ -76,6 +84,18 @@
   </div>
 </div>
 
+<div class="card">
+  <h2>Change log<HelpLink doc={manual("about", "change-log")} label="Change log" /></h2>
+  {#each releases as r, i}
+    <details open={i === 0}>
+      <summary><strong>{r.head}</strong></summary>
+      <div class="changes">{r.body}</div>
+    </details>
+  {/each}
+  <p class="muted small">Changes of the processing (the same for the classic app):
+    <button class="link" onclick={() => open(PROCESSING_LOG)}>ActiPASS change log</button></p>
+</div>
+
 <style>
   dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.3rem 1rem; margin: 0; }
   dt { color: var(--muted); }
@@ -87,6 +107,9 @@
   @media (max-width: 1000px) { .top { grid-template-columns: 1fr; } }
   /* the licence text has its own line breaks (CR/LF): show them */
   .lictext { white-space: pre-line; }
+  .changes { white-space: pre-line; margin: 0.4rem 0 0.6rem; }
+  details { margin-bottom: 0.3rem; }
+  .small { font-size: 0.88em; }
   /* the image has a white background: keep it on white in dark mode too */
   .logo { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.25rem; }
   .logo img { display: block; width: 100%; height: auto; }
