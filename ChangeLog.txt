@@ -45,7 +45,8 @@ Bugfixes:
    errors.
 6. Device IDs (Movisens serial number, IDs as text), trunk/calf WAV conversion and reference positions, and several
    robustness fixes in batch processing.
-7. ActiPASS CLI: the same resampling, diary and SENS fixes, plus the missing dependency brewermap.m.
+7. ActiPASS CLI 2026.11.3: the same resampling, diary and SENS fixes, plus the missing dependency brewermap.m;
+   ReadMe_CLI.txt and Usage_CLI.txt now match the program (output file names, modes, return codes).
 
 
 ActiPASS Version 2025.12.1 (2025-12-17)

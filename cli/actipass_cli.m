@@ -15,8 +15,8 @@ function exitcode = actipass_cli(acc_file,options)
 
 % Required toolboxes:
 % 'Signal Processing Toolbox'
-% 'Image Processing Toolbox'
 % 'Statistics and Machine Learning Toolbox'
+% (the Image Processing Toolbox is no longer needed: rle, removeShortRuns and movingMode are used)
 
 % Required files (make sure these are in Matlab path)
 
@@ -43,6 +43,7 @@ function exitcode = actipass_cli(acc_file,options)
 % "lyingAlgA.m"
 % "lyingAlgB.m"
 % "matchDiaryTicks.m"
+% "movingMode.m"
 % "NotWorn.m"
 % "NotWornQC.m"
 % "open_diary.m"
@@ -58,6 +59,7 @@ function exitcode = actipass_cli(acc_file,options)
 % "readMovisensBin.m"
 % "readSENSBin.m"
 % "readWAVtoACC.m"
+% "removeShortRuns.m"
 % "rgb.m"
 % "rle.m"
 % "SkottesSlp.m"
@@ -78,7 +80,7 @@ arguments
 end
 
 %% intialize actipass_cli
-version="2025.12.1"; % actipass_cli version string
+version="2026.11.3"; % actipass_cli version string
 exitcode=0; % set exit code to zero
 
 % define ProPASS or Advanced mode
@@ -190,7 +192,7 @@ try
     %% load settings
     % use ActiPASS GUI to change settings
     if matches(opmode,["CLI","ADVANCED"],"IgnoreCase",true)
-        % if Advanced or CLI mode license found load settings and parameters from config files
+        % ADVANCED or CLI mode: settings and parameters from the ActiPASS config files
         [Settings,ParamsAP] = LoadSettings(ActiPASSConfig,ParamsConfig);
         fprintf('%s %s mode. Settings and parameters are loaded from config files.\n',string(datetime,"HH:mm:ss.SSS"),opmode);
     elseif matches(opmode,"PROPASS","IgnoreCase",true)
@@ -608,7 +610,7 @@ try
     % export 1s activity table
     fprintf('%s Now exporting output to files: %s ....\n',string(datetime,"HH:mm:ss.SSS"),out_file);
     
-    % write detected activity time-series to a file (only under ADVANCED or CLI mode license)
+    % write detected activity time-series to a file (in every mode, when an output file or folder is given)
     if matches(opmode,["PROPASS","CLI","ADVANCED"],"IgnoreCase",true)
         if out_file~=""
             T_1s=table(timeFull',actFull',stepsFull',svmFull,evntsFull,BD_full',SI_full','VariableNames',varn_1S);

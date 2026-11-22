@@ -1,36 +1,38 @@
 Usage Syntax:
 actipass_cli.exe "file_in" out "file_or_folder_out" ID "ID" diary "file_diary" daily "on" vis "on" loc "front" mode "PROPASS"
   - arguments:
-   file_in: first argument is always the full file-path to accelerometer raw data file
-   out: optional output file or a folder (only .csv, .xlsx or .mat files accepted)
-   ID: optional participant ID
-   diary: optional ActiPASS formatted diary Excel format
-   daily: optional. Default "on". "off" disables daily output table
-   vis: optional. Default "on". "off" disables activity visualizations
-   loc: optional device location: default: "front", "right" or "left"
-   mode: optional operation-mode. default: "PROPASS" or "ADVANCED"
+   file_in: first argument is always the full file path of the accelerometer raw data file
+   out:     optional. Output file (.csv, .xlsx or .mat) or folder for the 1 s data. Without it, no 1 s data
+            are saved and the other outputs go to the folder of file_in
+   ID:      optional participant ID. Default: the file name of file_in
+   diary:   optional ActiPASS formatted diary (Excel, .xlsx or .xls)
+   daily:   optional. Default "on". "off" disables the daily activity table
+   vis:     optional. Default "on". "off" disables the quality-check figures
+   loc:     optional device location: "front" (default), "right" or "left"
+   mode:    optional operation mode: "PROPASS" (default: default settings and parameters), "ADVANCED" or "CLI"
+            (settings and parameters from the ActiPASS config files in %APPDATA%\ActiPASS)
 
 actipass_cli.exe --help
-    - display help/readme text in console
+    - display the help/readme text in the console
 actipass_cli.exe --add-to-sendto
-    - add actipass_cli.exe to windows SendTo folder as a shortcut
+    - add actipass_cli.exe to the Windows SendTo folder as a shortcut
 
 Examples:
-* actipass_cli.exe "C:\Users\UNAME\Desktop\testdata.csv" 
-  - daily data is saved to "C:\Users\UNAME\Desktop\testdata_actipass_daily.xlsx"
-  - quality-check visualization is saved as "C:\Users\UNAME\Downloads\testdata_QC-1.png"
+* actipass_cli.exe "C:\Users\UNAME\Desktop\testdata.csv"
+  - daily activity table is saved to "C:\Users\UNAME\Desktop\testdata_dailyact.xlsx"
+  - quality-check figure is saved as "C:\Users\UNAME\Desktop\testdata_QC-1.png" (QC-2, QC-3 ... for long recordings)
 
 * actipass_cli.exe "C:\Users\UNAME\Desktop\testdata.csv" out "C:\Users\UNAME\Downloads" ID "S0001" diary "C:\Users\UNAME\Desktop\diary.xlsx"
   - diary is used to trim data, define manual lying, bed, sleep or non-wear periods or divide data into intervals
-  - 1s output is saved to "C:\Users\UNAME\Deownloads\S0001_actipass_1s.mat"
-  - daily output is saved to "C:\Users\UNAME\Deownloads\S0001_actipass_daily.xlsx"
-  - quality-check visualization is saved as "C:\Users\UNAME\Downloads\S0001_QC-1.png"
+  - 1 s output is saved to "C:\Users\UNAME\Downloads\S0001_actipass_1s.mat"
+  - daily activity table is saved to "C:\Users\UNAME\Downloads\S0001_dailyact.xlsx"
+  - quality-check figure is saved as "C:\Users\UNAME\Downloads\S0001_QC-1.png"
 
 * actipass_cli.exe "C:\Users\UNAME\Desktop\testdata.csv" out "C:\Users\UNAME\Downloads" daily "off" vis "off" mode "ADVANCED"
-  - only 1s outputs is saved. (to "C:\Users\UNAME\Deownloads\testdata_actipass_1s.mat")
-  - algorithm parameters and options are loaded from ActiPASS json conf files
+  - only the 1 s output is saved (to "C:\Users\UNAME\Downloads\testdata_actipass_1s.mat")
+  - settings and algorithm parameters are loaded from the ActiPASS json config files
 
-ActiPASS CLI version is developed by: Pasan Hettiarachchi pasan.hettiarachchi@medsci.uu.se 
+ActiPASS CLI is developed by: Pasan Hettiarachchi pasan.hettiarachchi@medsci.uu.se
 at Occupational and Environmental Medicine, Department of Medical Sciences, Uppsala University
 
 See full license agreement:
