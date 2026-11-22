@@ -26,7 +26,8 @@ try
     end
     
     % instead of just resampling activity vector use a mode-filter to find the new low-resolution activity vector
-    Akt_mode= modefilt(actFull+1,[1,2*floor(visStep/2)+1],'replicate'); %filter window should be odd
+    Akt_mode= movingMode(actFull+1,2*floor(visStep/2)+1); %filter window should be odd (movingMode = modefilt without the Image Processing Toolbox)
+    % Akt_mode= modefilt(actFull+1,[1,2*floor(visStep/2)+1],'replicate'); %filter window should be odd
     
     % add time-of-bed and sleep data to visualizations
     if (strcmpi(Settings.BEDTIME,"diary") || matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)) && strcmpi(statusBdTime,"OK")

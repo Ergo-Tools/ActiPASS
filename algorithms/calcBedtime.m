@@ -138,16 +138,13 @@ try
     if  matches(Settings.BEDTIME,["auto1","auto2"],"IgnoreCase",true)
         % this is where automatic bedtime detection happens. It is done using a simple filtering of lying "auto1"
         if strcmpi(Settings.BEDTIME,"auto1")
-            bedLgc=~bwareaopen(aktFull~=1,lenAktFilt);
-            bedLgc=bwareaopen(bedLgc,lenLieFilt);
-            % find indices of bedtime starts and stops
-            indBdStarts=find(diff([0,bedLgc])==1);
-            indBdEnds=find(diff([0,bedLgc])==-1);
-            % if for some reason last element of bedtime logic vector bedLgc is true
-            % then length(indBdEnds) < length(indBdStarts)
-            if length(indBdEnds) < length(indBdStarts)
-                indBdEnds=[indBdEnds,length(bedLgc)];
-            end
+            bedLgc=~removeShortRuns(aktFull~=1,lenAktFilt);
+            bedLgc=removeShortRuns(bedLgc,lenLieFilt);
+            % find indices of bedtime starts and stops using run-length-encoding
+            runsBL=rle(bedLgc);
+            indBdStarts=runsBL{3}(runsBL{1});
+            % the end index is the first second after each bedtime, or the last second when a bedtime reaches the end
+            indBdEnds=min(runsBL{4}(runsBL{1})+1,length(bedLgc));
             % or somewhat complicated "auto2" bedtime algorithm
         elseif strcmpi(Settings.BEDTIME,"auto2")
             runLsBL=calcBedLgc(aktFull,timeFlDT,lenAktFilt,lenLieFilt,VLongSitBt);
@@ -348,7 +345,8 @@ try
         
         % use a moving-mode filter to reduce the resolution of activity vector (for faster plotting)
         
-        aktFullVis = modefilt(aktFull+1,[1,2*floor(visStep/2)+1],'replicate');
+        aktFullVis = movingMode(aktFull+1,2*floor(visStep/2)+1); % movingMode = modefilt without the Image Processing Toolbox
+        % aktFullVis = modefilt(aktFull+1,[1,2*floor(visStep/2)+1],'replicate');
         
         % find the indices of activity transitions
         diffAkts=[find(diff([0,aktFullVis])~=0),length(aktFullVis)];

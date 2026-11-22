@@ -1,4 +1,4 @@
-function VrefDTRNK = EstimateRefTrunkD(firstDay,Acc,Vtrunk,Akt,OffTrunk,BF,VrefDTH,RefTs,Fs,dTrnkRefFile)
+function VrefDTRNK = EstimateRefTrunkD(firstDay,Acc,Vtrunk,Akt,OffTrunk,VrefTrunkDef,VrefDTH,RefTs,Fs,dTrnkRefFile)
 %
 % Find reference angle for leg accelerometer using diary markers.
 % Leg reference angle is calculated by finding a standing a period
@@ -19,11 +19,6 @@ VrefDTRNK=struct('RefT',{},'Vref',{},'Method',{});
 persistent oldRef
 
 RefTs=datenum(RefTs); % convert RefTs from datetime to datenum
-if BF==1
-    VrefTrunkDef=pi*[27 27 0]/180;
-else
-    VrefTrunkDef = pi*[10 10 0]/180; %tentative for front accelerometer
-end
 
 if firstDay  %first interval for ID: provisionel reference for calculation of Akt
     oldRef = VrefTrunkDef; %average back accelerometer angle
@@ -32,7 +27,7 @@ end
 curRefTs=RefTs(RefTs>= Acc(1,1) & RefTs<Acc(end,1)); % find refTs relevant to current day+-buffer (This function is usually called every day)
 if isempty(curRefTs)
     if isequal(oldRef,VrefTrunkDef)
-        VrefDTRNK(1).Vref = EstimateRefTrunk1(firstDay,Vtrunk,Fs,Akt,OffTrunk,BF);
+        VrefDTRNK(1).Vref = EstimateRefTrunk1(firstDay,Vtrunk,Fs,Akt,OffTrunk,VrefTrunkDef);
         VrefDTRNK(1).RefT=Acc(1,1);
         VrefDTRNK(1).Method="ND-auto1"; % No diary ref. or previous standing ref. , falling back to auto1
     else
@@ -82,16 +77,14 @@ else
             movStdAcc=movstd(Acc(indAccStart:indAccEnd,2:4),Fs,1);
             movStdAcc=movStdAcc(1:Fs:size(movStdAcc,1),:);
             sumMovStdAcc=sum(movStdAcc,2);
-            StandSegs=bwconncomp(AktWin==3 & sumMovStdAcc' < 0.05); % find segments of standing
-            StndSgsLnths=cellfun(@length,StandSegs.PixelIdxList);
-            SelSegIdxs=find(StndSgsLnths>tMinStand);%  find segments of standing with duration larger than tMinStand
+            runsStand=rle(AktWin==3 & sumMovStdAcc' < 0.05); % find segments of standing using run-length-encoding
+            SelSegIdxs=find(runsStand{1} & runsStand{2}>tMinStand);%  find segments of standing with duration larger than tMinStand
             
             if length(SelSegIdxs) >=1  % if there are at least one segment of standing with duration larger than tMinStand
-                StandSegs.PixelIdxList=StandSegs.PixelIdxList(SelSegIdxs); %only select standing with duration larger than tMinStand
-                funSumMovStd=@(x) mean(sumMovStdAcc(x)); %define a anonymous function to be used in cellfun to find mean values of sumMovStdAcc in each segment
-                [~,segNum]=min(cellfun(funSumMovStd,StandSegs.PixelIdxList)); % find the  standing segment with minimum standard deviation during the given time window
-                indStartStand=StandSegs.PixelIdxList{segNum}(1);% The first second of standing segment
-                indEndStand=StandSegs.PixelIdxList{segNum}(end); % The last second of standing segment
+                segMeans=arrayfun(@(i) mean(sumMovStdAcc(runsStand{3}(i):runsStand{4}(i))),SelSegIdxs); % mean of sumMovStdAcc in each selected segment
+                [~,segNum]=min(segMeans); % find the  standing segment with minimum standard deviation during the given time window
+                indStartStand=runsStand{3}(SelSegIdxs(segNum));% The first second of standing segment
+                indEndStand=runsStand{4}(SelSegIdxs(segNum)); % The last second of standing segment
                 [~,indMinSumStd]=min(sumMovStdAcc(indStartStand:indEndStand)); % find the second with minimum sumMovStdAcc
                 indMidStand=indStartStand+indMinSumStd-1; % find the second with minimum sumMovStdAcc
                 indStartStand=max(indMidStand-floor(tMinStand/2),indStartStand); %define a timewindow centered around the minimum sumMovStdAcc second
@@ -110,7 +103,7 @@ else
             else
                 if isequal(oldRef,VrefTrunkDef)
                     
-                    VrefDTRNK(itr).Vref = EstimateRefTrunk1(firstDay,Vtrunk,Fs,Akt,OffTrunk,BF);
+                    VrefDTRNK(itr).Vref = EstimateRefTrunk1(firstDay,Vtrunk,Fs,Akt,OffTrunk,VrefTrunkDef);
                     VrefDTRNK(itr).Method="D-auto1"; % indicate diary ref. exist, but no standing section found, falling back to auto1
                 else
                     VrefDTRNK(itr).Vref=oldRef;

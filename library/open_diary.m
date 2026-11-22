@@ -87,7 +87,7 @@ try
                 diaryStrct(itr).Comments="";
                 diaryStrct(itr).StartT=NaT;
                 diaryStrct(itr).StopT=NaT;
-                diaryStrct(itr).RefT=NaT;
+                diaryStrct(itr).RefTs=NaT;
                 diaryStrct(itr).rawData=table('Size',[0,4],'VariableTypes',VariableTypesQC,'VariableNames',VariableNames);
             end
             status="Not a valid diary file. Continuing with no diary data";

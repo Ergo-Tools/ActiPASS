@@ -30,6 +30,13 @@ Please report any publications which implement ActiPASS [here](https://doit.medf
     <figcaption>ActiPASS - a user friendly tool to process thigh-worn accelerometer data</figcaption>
 </figure>
 
+### Actipass desktop app (new)
+
+From version 2026.11.3, ActiPASS also comes as a desktop app with a new user interface, released together
+with the classic app and with the same version number. Its source code is in [`desktop/`](desktop/) under
+GPL-3.0-or-later; see the [desktop app user manual](https://github.com/Ergo-Tools/ActiPASS/wiki/Desktop-App-User-Manual).
+The processing engine it uses is distributed in compiled form under the End-User License Agreement.
+
 ### Download ActiPASS
 
 Please contact developers via email to receive a compiled executable version of ActiPASS if you agree to the [End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement).
@@ -51,3 +58,19 @@ Please contact developers via email to receive a compiled executable version of 
 
 [**Source code license**](https://github.com/Ergo-Tools/ActiPASS/blob/main/LICENSE.md)
 
+### Source code structure
+
+| Folder | Contents | License |
+|---|---|---|
+| [`algorithms/`](algorithms) | classification and analysis algorithms (activities, reference positions, lying, time-in-bed and sleep, kneeling, trunk variables) and the analysis tools (sit-to-stand, merge sleep data, WBV) | BSD-3-Clause |
+| [`library/`](library) | functions of the processing workflow: settings, files and diary, calibration, resampling, non-wear, orientation checks, synchronisation, figures, helpers | BSD-3-Clause |
+| [`stats/`](stats) | stats generation: daily, event based and bout variables, trunk variables | BSD-3-Clause |
+| [`utils/`](utils) | readers for the supported accelerometer file formats | BSD-3-Clause |
+| [`conf/`](conf) | example settings and algorithm parameter files | BSD-3-Clause |
+| [`main/`](main) | example workflow script | BSD-3-Clause |
+| [`cli/`](cli) | ActiPASS CLI (command-line version for previews and feedback) | GPL-3.0-or-later |
+| [`desktop/`](desktop) | Actipass desktop app (user interface; the processing engine is distributed in compiled form) | GPL-3.0-or-later |
+| [`docs/`](docs) | documentation files (diary example, variable definitions) | |
+| [`LICENSES/`](LICENSES) | full license texts | |
+
+Each folder has a README with a list of its files. See [LICENSE.md](LICENSE.md), [NOTICE.md](NOTICE.md) and [ChangeLog.txt](ChangeLog.txt).

@@ -1,10 +1,10 @@
 Copyright Notices and Attributions
 
-Copyright (c) 2021-2025 Pasan Hettiarachchi & Peter Johansson. All rights reserved.
+Copyright (c) 2021-2026 Pasan Hettiarachchi & Peter Johansson. All rights reserved.
 
 This project includes components under:
-- GPL-3.0-or-later (workflow in ./main)
-- BSD-3-Clause (algorithms, utilities, library, configurations, and statistics)
+- GPL-3.0-or-later (CLI workflow in ./cli, desktop app in ./desktop)
+- BSD-3-Clause (algorithms, utilities, library, configurations, statistics, and the example workflow in ./main)
 
 Attributions:
 - See: [Open source software used by ActiPASS](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS)

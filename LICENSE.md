@@ -3,7 +3,7 @@
 
 **ActiPASS - Thigh accelerometer data processing software**
 
-Copyright 2020-2025 by Pasan Hettiarachchi & Peter Johansson
+Copyright 2020-2026 by Pasan Hettiarachchi & Peter Johansson
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,13 +17,19 @@ licenses below for more details.
   **GNU General Public License, version 3.0 or (at your option) any later version**.
   See `LICENSES/GPL-3.0-or-later.txt` and per-file license headers.
 
+- The **Actipass desktop app code** in `./desktop/` is licensed under the
+  **GNU General Public License, version 3.0 or (at your option) any later version**.
+  See `LICENSES/GPL-3.0-or-later.txt`, `desktop/LICENSE.md` and per-file license headers.
+  The Actipass engine that the desktop app starts is a separate program, distributed in compiled
+  form under the binary release license below; it is not part of this repository.
+
 - The **algorithms, configs, library, statistics, and utility** functionality
   in respective folders are licensed under the **BSD 3-Clause License** or the
   license specified in the individual file.
   See `LICENSES/BSD-3-Clause.txt` and per-file license headers.
 
-When distributing the repository as an integrated tool, the CLI workflow (residing in ./cli) constitutes
-a GPL-licensed program. Original BSD-licensed files remain under BSD, and their
+When distributing the repository as an integrated tool, the CLI workflow (residing in ./cli) and the desktop app (./desktop) constitute
+GPL-licensed programs. Original BSD-licensed files remain under BSD, and their
 copyright and license notices must be preserved.
 
 ——

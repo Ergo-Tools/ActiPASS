@@ -1,5 +1,20 @@
 ## Binary and text loaders for various brands of accelerometers and other utility functions
 
+### Contents
+
+Readers for the supported accelerometer file formats (see [Supported accelerometers](https://github.com/Ergo-Tools/ActiPASS/wiki/Supported-accelerometers)).
+
+| File | What it does |
+|---|---|
+| [`Axivity/CWA_readFile.m`](Axivity/CWA_readFile.m) | Axivity AX3/AX6 CWA files (with the mex helpers parseDate and parseValueBlock) |
+| [`readWAVtoACC.m`](readWAVtoACC.m) | Axivity WAV files exported by OmGui |
+| [`readActivPAL.m`](readActivPAL.m), [`readActivPALcsv.m`](readActivPALcsv.m), [`checkActivPALFile.m`](checkActivPALFile.m) | ActivPAL datx/dat and CSV files |
+| [`readActGT3xcsv.m`](readActGT3xcsv.m) | ActiGraph GT3X files converted to CSV by ActiLife (6.13 or later) |
+| [`readSENSBin.m`](readSENSBin.m) | SENS motion binary (bin/hex) files |
+| [`readMovisensBin.m`](readMovisensBin.m) | Movisens binary files |
+| [`readGenericCSV.m`](readGenericCSV.m) | Generic CSV files with ISO 8601 time stamps |
+| [`readActi4.m`](readActi4.m) | Acti4 .act4 files |
+
 ### License
 Unless otherwise specified in an individual source file, all source code in this repositery are release under **BSD 3-Clause license**. This means if a different license is included in a source file, that license supersedes the BSD 3-Clause license.
 

@@ -65,8 +65,9 @@ trnkETbl=[];
 try
     % remove midnight breaks in events
     if strcmpi(Settings.TblFormat,"EventsNoBreak") && length(evntMeta.Names)>=2
-        indsRLE = [find(evntMeta.Names(1:end-1) ~= evntMeta.Names(2:end));length(evntMeta.Names)]; % find unique consecutive events
-        runL = diff([0;indsRLE ]); % run length of those events
+        runsEvnt = rle(evntMeta.Names); % run-length-encoding of consecutive events
+        indsRLE = runsEvnt{4}'; % last index of each run of the same event
+        runL = runsEvnt{2}'; % run length of those events
         indsDel=setdiff(1:length(evntMeta.Names),indsRLE); % the indices of events to delete
         % if any events should be deleted
         if ~isempty(indsDel)

@@ -3,6 +3,21 @@ function  [QCData,Acc,meanTEMP,status,warnings] = QCFlipRotation(Acc,TEMP,diaryS
 % QCFlipRotation Finds whether thigh accelerometer is incorrectly placed, return corrected data, and 
 % trim non-wear in the begining and at the end
 %
+% How the orientation is decided:
+%   - Worn periods are the runs of worn seconds found by NotWornQC (and the diary).
+%   - Per worn period, walking (FFT of the band-passed vector magnitude, 10 s buckets) gives the mean
+%     X (and Y) while walking, and sitting gives the mean Z.
+%   - 90 degree rotation (Y axis vertical) is tested once per worn period, using only that period, and
+%     only for periods of at least minRot90Period (1 day) with more than minRot90Walk (120 s) of walking.
+%     It is always corrected, also in warn mode, and reported separately (Rot90Time, a warning per period).
+%   - The data are cut into segments at the 4 h boundaries of the day and at every start and end of a
+%     worn period. Each worn segment votes upside-down (X, from walking) and inside-out (Z, from sitting).
+%   - The decision is made per worn period, not per segment: the votes of its segments, weighted by
+%     the walking/sitting seconds behind them, decide for the whole worn period. With no vote, or a
+%     tie, the GUI default (Settings.Rotated/Flipped) is used. Not-worn segments get the GUI default.
+%   - A device turned within a worn period is not followed; when at least minChangeSegs (2 for rotation, 4 for flip) consecutive decided
+%     segments vote against the decision, a warning "Possible ... change within worn period" is given.
+%
 % FunctionCalls:
 %   NotWornQC
 %   WarmNightT
@@ -17,9 +32,10 @@ function  [QCData,Acc,meanTEMP,status,warnings] = QCFlipRotation(Acc,TEMP,diaryS
 %   devType: "Axivity", "ActivPAL" etc passed on to ChangeAxes
 %   Settings [struct] main ActiPASS Settings structure
 %       following fields are used from Settings structure
-%       Settings.FLIPROTATIONS [string] - two options: 'Warn' or 'Full' 
-%         'Warn' - Only find flips/rotations but returns original Acc data,
-%         'Full'- find flips/rotations and return corrected Acc data
+%       Settings.FLIPROTATIONS [string] - two options: 'warn' or 'force' (LoadSettings allows only these)
+%         'warn' - find flips/rotations and report them (QC times, warnings), but transform the whole
+%                  file with the GUI default orientation (the 90 degree correction is still applied)
+%         'force'- find flips/rotations and return the corrected Acc data
 %       [Settings.Rotated, Settings.Flipped] [boolean,boolean] Rotated or Flipped according to ActiPASS default orientation
 %   nwTrimMode: [boolean,boolean] flags for cropping NW at Start/End respectively
 %
@@ -35,7 +51,9 @@ function  [QCData,Acc,meanTEMP,status,warnings] = QCFlipRotation(Acc,TEMP,diaryS
 %           QCData.smpls1S: % the row-index of Acc matrix at every 1s
 %           QCData.TotTime: the total duration of datafile in full seconds
 %           QCData.WornTime: the variable to hold the number of worn seconds
-%           QCData.RotTime: the variable to hold the number of rotated seconds
+%           QCData.RotTime: the variable to hold the number of rotated (upside-down) seconds
+%           QCData.Rot90Time: the number of seconds corrected for a 90 degree rotation (worn periods of at
+%               least one day only; always corrected, also in warn mode; not included in RotTime)
 %           QCData.FlipTime: the variable to hold the number of flipped seconds
 %           QCData.WalkMarker: a logical array containing probable walking data given at smpls1S
 %           QCData.SitMarker: a logical array containing probable sit data given at smpls1S
@@ -43,8 +61,9 @@ function  [QCData,Acc,meanTEMP,status,warnings] = QCFlipRotation(Acc,TEMP,diaryS
 %      The following are vectors of length [numSegs] having data for 4h segments used to determine
 %      flips and rotations. A segment could be shorter than 4h depending on NonWear
 %
-%           QCData.MTimes[numSegs+1]: all transition times of 4h segments including the end points in datenum format
-%           QCData.ElapsedSecs[numSegs+1]: number of seconds elapsed at the transitions of each 4h segment
+%           QCData.MTimes[numSegs+1]: the start time of each segment and, last, the time of the last second (datenum)
+%           QCData.ElapsedSecs[numSegs+1]: the first second of each segment as an index into the 1 s vectors
+%               (smpls1S etc.); the last value is length(smpls1S)+1. Segment k covers ElapsedSecs(k):ElapsedSecs(k+1)-1
 %           QCData.XFlipValue[numSegs]: a flag representing probable rotation, -1-rotated, +1-not_rotated, 0-not_determined
 %           QCData.ZFlipValue[numSegs]: a flag representing probable flips, -1-flipped, +1-not_flipped, 0-not_determined
 %           QCData.XFlipCalc[numSegs]: a flag representing determined rotation, -1-rotated, +1-not_rotated
@@ -88,14 +107,17 @@ twin_wlk = 10; % define the time window for walking detection using FFT profile
 maxNWWin = Settings.NWSHORTLIM*3600; % maximum accepted continuous NW window within active period before triming (in s)
 minActiveWin= Settings.NWTRIMACTLIM*3600; % minimum accepted continuous active window for trimming NW (in s)
 trimBuffer=Settings.NWTRIMBUF*3600; % 0; % time buffer before and after active periods when cropping NW
-minWornT=60; % the minimum duration of an active segment to be considered worn, to be used later in NW detection
 minSitT=120; % the minimum duration of Sitting (per 4h segment) to satisfy sit condition, to be used later in flip detection
 minSitTPD=1800; % the minimum duration of Sitting (per 4h segment) to satisfy sit condition, to be used later in flip detection
 minWalkT=30; % the minimum duration of walking per day (s), for rotation detection
+minRot90Period=86400; % 90 degree rotation is tested only in worn periods of at least this duration (s)
+minRot90Walk=120; % ... and only when more than this much walking (s) is detected in the worn period
+minChangeSegs=[2,4]; % warn of a possible orientation change within a worn period when at least this many consecutive decided 4h segments disagree with its decision: [rotation (upside-down, from walking), flip (inside-out, from sitting; less specific)]
 status=''; % the status flag
 warnings=string([]); % any warnings generated
 QCData=struct; % the structure to hold multiple results
 meanTEMP=[]; % filtered and evenly sampled temperature if exist
+meanTEMPWin=60; % time windoww for finding smoothing temperature
 
 % asign default orinetation from Settings
 if Settings.Rotated
@@ -132,7 +154,7 @@ try
         SamplIntrvlT=86400*mean(diff(TEMP(:,1))); %sampel period T (it is not precise and has some variation)
         %finding true sampel T and sampel f
         
-        meanTEMP=movmean(TEMP(:,2),round(60/SamplIntrvlT)); % Moving mean to calculate the mean temperatures every one minute
+        meanTEMP=movmean(TEMP(:,2),round(meanTEMPWin/SamplIntrvlT)); % Moving mean to calculate the mean temperatures every one minute
         %interpolate at Acc(smpls1S,1)
         meanTEMP = interp1(TEMP(:,1),meanTEMP,Acc(smpls1S,1));
     else
@@ -148,8 +170,8 @@ try
     %% Trim the data based on the NW
     % nwTRIM.mode indicates whether to trim NW from start, end or both ex [1,0],[0,1] or [1,1]
     if any(nwTrimMode)
-        NWFilt=bwareaopen(NotWornLogic ,maxNWWin);
-        NWFilt=~bwareaopen(~NWFilt,minActiveWin);
+        NWFilt=removeShortRuns(NotWornLogic,maxNWWin);
+        NWFilt=~removeShortRuns(~NWFilt,minActiveWin);
         if ~all(NWFilt)
             if nwTrimMode(1)
                 activStart=find(~NWFilt,1,'first'); % find the index of start time of first active period
@@ -247,27 +269,28 @@ try
         rle_W=rle(~NotWornLogic); % run-length-encoding of Wear-Logic
         WornPeriods=find(rle_W{1}==1);
         numPeriod=length(WornPeriods);
-        WornTimes=zeros(1,numPeriod*2); % The start, end and worn-not worn transition times. Should be twice the size of nmber of worn periods
         
         % time of 90 degree rotation
         timeRot90=0;
+
+        % things that do not change between worn periods
+        [B_bp,A_bp] = butter(6,[1.0,3.0]/(Fs/2)); % bandpass filter of 1.0 -3.0 Hz for walking detection
+        numSmpls1S=length(smpls1S);
+        regular1S=smpls1S(1)==1 && all(diff(smpls1S)==Fs); % smpls1S(k)=1+(k-1)*Fs (always, unless Acc was not evenly sampled)
         
         % Now we are iterating through each worn period
         for period=1:numPeriod
             selectPts=rle_W{3}(WornPeriods(period)):rle_W{4}(WornPeriods(period)); % % the indices of the selected worn period (of all main 1 s intervals arrays - (smplPts1S, NotWornLogic etc.)
              
-            selIndsAcc=smpls1S(selectPts(1)):smpls1S(selectPts(end)); % the full range of indices in the original ACC vector
-            WornTimes(2*period-1)=Acc(selIndsAcc(1),1); % the start of current worn period as datetime value
-            WornTimes(2*period)=Acc(selIndsAcc(end),1); % the end of current worn period as datetime value
-            %flipDetails{period,4}=[WornTimes(2*period-1),WornTimes(2*period)]; % also save above to flipDetails cell array
-           
+            % the full range of indices in the original ACC vector, including all samples of the last worn second
+            selIndsAcc=smpls1S(selectPts(1)):min(smpls1S(selectPts(end))+Fs-1,size(Acc,1));
+
             
             %% Find Rotations using walking detection
             
             % finding the VM of thigh acclerometer...
             svm_walk=sqrt(sum(Acc(selIndsAcc,2:4) .^ 2, 2));
-            % filtering data with a bandpass filter of 1.0 -3.0 Hz
-            [B_bp,A_bp] = butter(6,[1.0,3.0]/(Fs/2));
+            % filtering data with a bandpass filter of 1.0 -3.0 Hz (B_bp,A_bp designed before the loop)
             svm_walk_f = filter(B_bp,A_bp,svm_walk);
            
             
@@ -304,8 +327,13 @@ try
             for section=1:length(wlkSections)
                 % the indices of Acc vector corresponding to current walking section
                 wlkSectAccInds=wlkSecStarts(section):wlkSecEnds(section);
-                wlkSmplPtStart=find(smpls1S>=wlkSectAccInds(1),1,'first'); % find corresponding index of main 1S vector
-                wlkSmplPtEnd=find(smpls1S<wlkSectAccInds(end),1,'last'); % find corresponding index of main 1S vector
+                if regular1S % smpls1S(k)=1+(k-1)*Fs: the same as the find calls below, without searching smpls1S
+                    wlkSmplPtStart=ceil((wlkSectAccInds(1)-1)/Fs)+1; % the first second starting at or after the section start
+                    wlkSmplPtEnd=min(ceil((wlkSectAccInds(end)-1)/Fs),numSmpls1S); % the last second starting before the section end
+                else
+                    wlkSmplPtStart=find(smpls1S>=wlkSectAccInds(1),1,'first'); % find corresponding index of main 1S vector
+                    wlkSmplPtEnd=find(smpls1S<wlkSectAccInds(end),1,'last'); % find corresponding index of main 1S vector
+                end
                 % the mean value of X-axis for detected walking segment
                 WalkMarker(wlkSmplPtStart:wlkSmplPtEnd)=mean(Acc(wlkSectAccInds,2)); %assign mean x-value to all seconds in current section 
                 
@@ -313,18 +341,28 @@ try
                 % this error straight-away. We need also the mean values of y-axis during walking segments to do this
                 WalkMarkerY(wlkSmplPtStart:wlkSmplPtEnd)=mean(Acc(wlkSectAccInds,3)); %assign mean y-value to all seconds in current section 
             end
-            nanMeanX=nanmean(WalkMarker); nanMeanY=nanmean(WalkMarkerY);
-            % Test for 90 degree rotation. This is always corrected, even when flip-rotation is set to off or warn
-            if abs(nanMeanX-1)>=0.4 && abs(nanMeanX-1)<=1.6  % this means rotation cannot be detected using X axis.
-                
-                if  abs(nanMeanY-1)<0.35 % x-axis has become positive y-axis
-                    Acc(selIndsAcc,2:3)= [-Acc(selIndsAcc,3),Acc(selIndsAcc,2)];
-                    WalkMarker=-WalkMarkerY; % use the y-axis based walkmaker
-                    timeRot90=timeRot90+length(selectPts);
-                elseif abs(nanMeanY-1)>1.65 % y-axis has become positive x-axis
-                    Acc(selIndsAcc,2:3)= [Acc(selIndsAcc,3),-Acc(selIndsAcc,2)];
-                    WalkMarker=WalkMarkerY; % use the y-axis based walkmaker
-                    timeRot90=timeRot90+length(selectPts);
+            % Test for 90 degree rotation. This is always corrected, even when flip-rotation is set to off or warn.
+            % It is a rare case and the FFT walking detection is too uncertain for short periods, so the test
+            % is done only for worn periods of at least minRot90Period with more than minRot90Walk of walking.
+            % Only the walking of the current worn period is used.
+            nWalkSecs=sum(~isnan(WalkMarker(selectPts))); % seconds of walking in the current worn period
+            if length(selectPts)>=minRot90Period && nWalkSecs>minRot90Walk
+                nanMeanX=mean(WalkMarker(selectPts),'omitnan'); nanMeanY=mean(WalkMarkerY(selectPts),'omitnan');
+                if abs(nanMeanX-1)>=0.4 && abs(nanMeanX-1)<=1.6  % this means rotation cannot be detected using X axis.
+                    timeRot90Before=timeRot90;
+                    if  abs(nanMeanY-1)<0.35 % x-axis has become positive y-axis
+                        Acc(selIndsAcc,2:3)= [-Acc(selIndsAcc,3),Acc(selIndsAcc,2)];
+                        WalkMarker(selectPts)=-WalkMarkerY(selectPts); % use the y-axis based walkmaker (this worn period only)
+                        timeRot90=timeRot90+length(selectPts);
+                    elseif abs(nanMeanY-1)>1.65 % y-axis has become positive x-axis
+                        Acc(selIndsAcc,2:3)= [Acc(selIndsAcc,3),-Acc(selIndsAcc,2)];
+                        WalkMarker(selectPts)=WalkMarkerY(selectPts); % use the y-axis based walkmaker (this worn period only)
+                        timeRot90=timeRot90+length(selectPts);
+                    end
+                    if timeRot90>timeRot90Before % report each corrected worn period
+                        warnings=[warnings,sprintf('90 degree rotation corrected between %s to %s',...
+                            datestr(Time1S(selectPts(1)),'mmm.dd, HH:MM'),datestr(Time1S(selectPts(end)),'mmm.dd, HH:MM'))];
+                    end
                 end
             end
             %% Find Flips by trying to find the sit periods
@@ -333,7 +371,7 @@ try
             % and not-sleeping as well as not standing or wlking (based on median filtered XY vector magnitude.
             
             SitSelect=(StdSum(selectPts) < 0.1) & ~NightLogic(selectPts) & ~(medfiltXY(selectPts)>0.7);
-            SitSelect=bwareaopen(SitSelect,tshort_sit); % remove sit periods shorter than tshort_sit seconds (default 20)
+            SitSelect=removeShortRuns(SitSelect,tshort_sit); % remove sit periods shorter than tshort_sit seconds (default 20)
             
             
             % seperate sections of valid Z data withing the worn period using run-length-encoding 
@@ -355,37 +393,25 @@ try
         end
         
         %% create 4h segments for flips/rotations correction
-        
-        startTime=Time1S(1);
-        endTime=Time1S(end);
-        
-        if (startTime*6) ~= ceil(startTime*6)
-            first4hend=ceil(startTime*6)/6;
-        else
-            first4hend= min(startTime+ 1/6.0,endTime);
-        end
-        %first4hend=dateshift(startDTime,'start','day')+ hours(4*ceil(hour(dateshift(startDTime,'end','hour'))/4)); % find the start of next 4h period from the start time
-        
-        if (endTime*6) ~= floor(endTime*6)
-            last4hstart=floor(endTime*6)/6;
-        else
-            last4hstart= max(endTime -1/6.0,startTime);
-        end
-        %last4hstart=dateshift(endDTime,'start','day')+ hours(4*floor(hour(dateshift(endDTime,'start','hour'))/4)); % find the begining of last 4h period
-        
-        segMarkers=round((first4hend:(1/6):last4hstart)*86400)/86400;
-        QCData.MTimes=[startTime,segMarkers,endTime];
-        QCData.MTimes=unique(sort([QCData.MTimes,WornTimes]))'; % Merge with Worn times, now it contains both 4h intervals and also worn-notWorn transitions, transpose to make it a column vector
-        
-        numSegments=length(QCData.MTimes)-1; % the number of 4h or shorter segments (depending on not-worn gaps)
-        
+        % The segments are kept as indices into the 1 s vectors (Time1S, smpls1S, NotWornLogic etc.): segment k
+        % covers the seconds segEdges(k):segEdges(k+1)-1. A new segment starts at every 4 h boundary of the day
+        % (00, 04, 08, 12, 16 and 20 h) and at every start and end of a worn period, so each segment is either
+        % fully worn or fully not worn. The 4 h boundaries are found on whole seconds (no datenum comparisons).
+        numSecs1S=length(smpls1S);
+        block4h=floor(round(Time1S(:)*86400)/14400); % the 4 h block of the day each second belongs to
+        wornStarts=rle_W{3}(WornPeriods); wornEnds=rle_W{4}(WornPeriods); % first and last second of each worn period
+        segEdges=unique([1; find(diff(block4h)~=0)+1; wornStarts(:); wornEnds(:)+1; numSecs1S+1]);
+        numSegments=length(segEdges)-1; % the number of 4h or shorter segments (depending on not-worn gaps)
+        QCData.ElapsedSecs=segEdges; % the first second (index of the 1 s vectors) of each segment, the last value is numSecs1S+1
+        QCData.MTimes=[Time1S(segEdges(1:end-1)); Time1S(end)]; % segment start times and the time of the last second
+
         % intialise QCData fields to hold various details
-        
+
         QCData.WornTime=0; % the variable to hold the number of worn seconds
-        QCData.RotTime=timeRot90; % the variable to hold the number of rotated seconds (this include previously calculated 90 degree rotations)
+        QCData.RotTime=0; % the variable to hold the number of rotated (upside-down) seconds
+        QCData.Rot90Time=timeRot90; % the number of seconds corrected for a 90 degree rotation (not part of RotTime)
         QCData.FlipTime=0; % the variable to hold the number of flipped seconds
-        QCData.ElapsedSecs=zeros(length(QCData.MTimes),1);
-        
+
         QCData.XFlipValue=zeros(numSegments,1); % a flag representing probable rotation, -1-rotated, +1-not_rotated
         QCData.ZFlipValue=zeros(numSegments,1); % a flag representing probable flips, -1-flipped, +1-not_flipped
         QCData.XFlipCalc=zeros(numSegments,1); % a flag representing determined rotation, -1-rotated, +1-not_rotated
@@ -407,17 +433,13 @@ try
         % decision of flip and rotation.
         
         for segnum=1:numSegments
-            segStartPt=find(Time1S>=QCData.MTimes(segnum),1,'first');
-            segEndPt=find(Time1S< QCData.MTimes(segnum+1),1,'last');
-            QCData.ElapsedSecs(segnum)=segStartPt;
-            
-            segSamplPts=segStartPt:segEndPt;
-            nanMeanX=nanmean(WalkMarker(segSamplPts)); % find the mean value excluding NaN
-            nanMeanZ=nanmean(SitMarker(segSamplPts)); % find the mean value excluding NaN
+            segSamplPts=segEdges(segnum):segEdges(segnum+1)-1;
+            nanMeanX=mean(WalkMarker(segSamplPts),'omitnan'); % find the mean value excluding NaN
+            nanMeanZ=mean(SitMarker(segSamplPts),'omitnan'); % find the mean value excluding NaN
             n_nanZ=sum(~isnan(SitMarker(segSamplPts))); % find the the no of non-NaN
             n_nanX=sum(~isnan(WalkMarker(segSamplPts))); % find the the no of non-NaN
-            
-            IsWornSegment=sum(~NotWornLogic(segSamplPts))>minWornT; % if at least minWornT(s) worn
+
+            IsWornSegment=~NotWornLogic(segSamplPts(1)); % a segment is either fully worn or fully not worn
             QCData.IsWornSeg(segnum)=IsWornSegment; % mark the segment as worn
             
             % the segment is determined to be worn
@@ -448,9 +470,7 @@ try
                 end
             end
         end
-        % set the end of time as the end of ElapsedSecs
-        QCData.ElapsedSecs(end)=segEndPt;
-        
+
         %% Extrapolate the XFlips (rotations) and ZFlips (Flips) for all segments
         % First, Use flip/rotation values for each 4h segment during a single worn
         % period to find the orinentations for that particular worn period. Then
@@ -472,11 +492,9 @@ try
             % use mode to find the whether selected worn period is rotated
             nonZeroXFlpV=tempXFlipV~=0; % the non-zero logical index of tempXFlipV
             if any(nonZeroXFlpV)
-                % before finding the mode, repeat the value found by
-                % the number of seconds used make the decision within each
-                % particular 4h segment. If a decision cannot be made for a
-                % particular worn period XFlipCalc = 0
-                QCData.XFlipCalc(slctSgments)=mode(repelem(tempXFlipV(nonZeroXFlpV),tempXFlipCalcLength(nonZeroXFlpV)));
+                % majority vote of the 4h segments, each weighted by the number of
+                % walking seconds used for its decision (a tie gives the default)
+                QCData.XFlipCalc(slctSgments)=weightedVote(tempXFlipV,tempXFlipCalcLength,defRotation);
                 % check whether at least 'minWalkT' of walking per day detected for rotation detection
                 if sum(tempXFlipCalcLength(nonZeroXFlpV)) < minWalkT*(segTimes(end)-segTimes(1)) % normalized to per/day, i.e. multiplied seg. length in days
                     % find the times of short worn segments
@@ -492,11 +510,9 @@ try
             nonZeroZFlpV=tempZFlipV~=0;% the non-zero logical index of tempZFlipV
             if any(nonZeroZFlpV)
                 
-                % before finding the mode, repeat the value found by
-                % the number of seconds used make the decision within each
-                % particular 4h segment.If a decision cannot be made for a
-                % particular worn period ZFlipCalc = 0
-                QCData.ZFlipCalc(slctSgments)=mode(repelem(tempZFlipV(nonZeroZFlpV),tempZFlipCalcLength(nonZeroZFlpV)));
+                % majority vote of the 4h segments, each weighted by the number of
+                % sitting seconds used for its decision (a tie gives the default)
+                QCData.ZFlipCalc(slctSgments)=weightedVote(tempZFlipV,tempZFlipCalcLength,defFlip);
                 % check whether at least 'minSitTPD' of sitting per day detected for Flip detection
                 if sum(tempZFlipCalcLength(nonZeroZFlpV)) < minSitTPD*(segTimes(end)-segTimes(1)) % normalized to per/day by multiplying segment length in days
                     warnings=[warnings,sprintf('Flip detection between %s to %s uncertain',...
@@ -507,7 +523,21 @@ try
                 warnings=[warnings,sprintf('Flip detection between %s to %s unsuccessful. Defaults assumed',...
                     datestr(segTimes(1),'mmm.dd, HH:MM'),datestr(segTimes(end),'mmm.dd, HH:MM'))];
             end
-            
+            % Diagnostic only (the decision above is kept for the whole worn period): warn when the 4h votes
+            % against the decision form a run of at least minChangeSegs consecutive decided segments, which
+            % suggests that the device was turned within the worn period (e.g. re-attached without a still period)
+            chgTxt=["rotation (upside-down)","flip (inside-out)"];
+            chgVals={tempXFlipV,tempZFlipV};
+            chgDecs=[QCData.XFlipCalc(slctSgments(1)),QCData.ZFlipCalc(slctSgments(1))];
+            for itrChg=1:2
+                chgSeg=orientChangeStart(chgVals{itrChg},chgDecs(itrChg),minChangeSegs(itrChg));
+                if ~isempty(chgSeg)
+                    warnings=[warnings,sprintf('Possible %s change within worn period %s to %s, from about %s',...
+                        chgTxt(itrChg),datestr(segTimes(1),'mmm.dd, HH:MM'),datestr(segTimes(end),'mmm.dd, HH:MM'),...
+                        datestr(QCData.MTimes(slctSgments(chgSeg)),'mmm.dd, HH:MM'))];
+                end
+            end
+
         end
         
         %% Flip-Rotation correction by transforming the raw-data
@@ -522,19 +552,29 @@ try
             end
             
             if strcmpi(exMode,'Force')
-                % Find the orinetation value based on XFlipCalc and ZFlipCalc. The
-                if QCData.XFlipCalc(segnum) == -1 && QCData.ZFlipCalc(segnum)== -1
+                % Find the orinetation value based on XFlipCalc and ZFlipCalc of worn segments. Not-worn
+                % segments get the default orientation of the GUI settings (Settings.Rotated/Flipped)
+                if QCData.IsWornSeg(segnum)
+                    xCalc=QCData.XFlipCalc(segnum); zCalc=QCData.ZFlipCalc(segnum);
+                else
+                    xCalc=defRotation; zCalc=defFlip;
+                end
+                if xCalc == -1 && zCalc== -1
                     Orientation=4; % both flipped and rotated
-                elseif QCData.XFlipCalc(segnum) == -1 && QCData.ZFlipCalc(segnum)== 1
+                elseif xCalc == -1 && zCalc== 1
                     Orientation=3; % Rotated
-                elseif QCData.XFlipCalc(segnum) == 1 && QCData.ZFlipCalc(segnum)== -1
+                elseif xCalc == 1 && zCalc== -1
                     Orientation=2; % flipped
                 else
                     Orientation=1; % no flip or rotation
                 end
                 
-                %Find the indices corresponding to the 4h period in Acc matrix
-                SgtSmplPts=smpls1S(QCData.ElapsedSecs(segnum)):smpls1S(QCData.ElapsedSecs(segnum+1))-1;
+                %Find the indices corresponding to the 4h period in Acc matrix (the last segment runs to the end of Acc)
+                if segnum<numSegments
+                    SgtSmplPts=smpls1S(segEdges(segnum)):smpls1S(segEdges(segnum+1))-1;
+                else
+                    SgtSmplPts=smpls1S(segEdges(segnum)):size(Acc,1);
+                end
                 % call ChangeAxes function to change the orientation
                 Acc(SgtSmplPts,2:4) = ChangeAxes(Acc(SgtSmplPts,2:4),devType,Orientation);
             end
@@ -567,4 +607,32 @@ catch ME
     warnings=[warnings,getReport(ME,'extended','hyperlinks','off')]; % merge any warning with main warnings vector
 end
 
+end
+
+function v = weightedVote(values, secs, defValue)
+% weightedVote  majority of the -1/+1 decisions in values, each weighted by its seconds in secs
+% (0 = no decision, ignored); a tie gives defValue
+wPos=sum(secs(values==1));
+wNeg=sum(secs(values==-1));
+if wPos>wNeg
+    v=1;
+elseif wNeg>wPos
+    v=-1;
+else
+    v=defValue;
+end
+end
+
+function k = orientChangeStart(values, decision, minRun)
+% orientChangeStart  start (index into values) of the longest run of at least minRun consecutive decided
+% votes (-1/+1; 0 = no decision, skipped) against decision; empty if there is no such run
+k=[];
+idx=find(values(:)~=0);
+if isempty(idx), return; end
+r=rle((values(idx)==-decision)');
+runs=find(r{1}==1 & r{2}>=minRun);
+if ~isempty(runs)
+    [~,b]=max(r{2}(runs));
+    k=idx(r{3}(runs(b)));
+end
 end

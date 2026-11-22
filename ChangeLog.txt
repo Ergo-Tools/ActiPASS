@@ -1,3 +1,53 @@
+ActiPASS Version 2026.11.3 (2026-11-22)
+#############################################
+(summary of the private versions 2026.10.1 to 2026.11.3 since the last public release)
+
+New: Actipass desktop app
+1. A new desktop app with a new user interface is released together with the classic app, with the same
+   version number and the same processing. Its source code is published in ./desktop under GPL-3.0-or-later
+   (see desktop/README.md and desktop/CHANGELOG.md); the processing engine it starts is distributed in
+   compiled form under the End-User License Agreement.
+
+Changes and new features:
+1. Stats generation can save a time series output at a given epoch length, and stops early with a clear message
+   when the batch settings conflict with the stats settings.
+2. Integrated whole-body vibration (WBV, ISO 2631) prediction for sitting segments.
+3. Bout variables can be selected in the UI.
+4. "raw+posture" intensity algorithm: the R module is about 7 times faster and needs only the R libraries
+   data.table, earth and R.matlab; a readable run log (<ID> - IntAlgOut.txt); the library check reports an
+   error when a library cannot be installed.
+5. Orientation quality check: the 90 degree rotation test is done per worn period and reported separately;
+   not-worn segments get the default orientation; a possible orientation change within a worn period is warned
+   about.
+6. Diary: diary times are matched to the processed data on whole seconds; diary times that are not on a whole
+   second, or fall on no processed second, are warned about (Diary_Warnings).
+7. Merge sleep data, sit-to-stand angular velocity and clinical sit-to-stand counts: optional file exclusion
+   based on the automatic QC (None, NotOK, Check+NotOK).
+8. The Image Processing Toolbox is no longer needed.
+9. Licence check and request read the network adapters with PowerShell Get-NetAdapter (getmac misses some
+   modern adapters, e.g. Wi-Fi 7).
+10. Newly published source files: mergeSleepData, genClinicSitToStandTable, calculate_wbv_segments,
+    load_AX3_iso2631, iso2631_wbv, FindNonWearTrunk (algorithms); CalibrateData, downsampleTable,
+    matchDiaryTicks, timeToSec, MaxIncTid, movingMode, removeShortRuns, resampleAcc, toActiPASSFrame,
+    readCalFile, VisualizeActvts, findDistributions (library); cli_diary_tick_warnings (cli).
+
+Bugfixes:
+1. Resampling: in about half of the recordings the resampled data had one sample too few, so the samples drifted
+   late by up to one sample by the end of the data. The activity of about 0.2-0.5% of the seconds can differ.
+2. SENS bin/hex files: the time-zone offset is now the offset at the start of the recording, not at the time of
+   processing (recordings made in summer time and processed in winter time, or the reverse, were shifted one hour).
+3. "raw+posture" intensity algorithm: files whose raw data ended a few samples past a whole second got no PAEE;
+   the peak_frequencies_* features were always 1 (not used by the PAEE models).
+4. Diary: an invalid diary no longer gives an error when the reference position is taken from the diary; a first
+   diary event before the data start is moved to the nearest whole second of the data start.
+5. Tools: sit-to-stand angular velocity works with a single subject; clinical sit-to-stand counts keep per-file
+   errors and give correct test start/end times; WBV prediction works for older projects and has fewer edge-case
+   errors.
+6. Device IDs (Movisens serial number, IDs as text), trunk/calf WAV conversion and reference positions, and several
+   robustness fixes in batch processing.
+7. ActiPASS CLI: the same resampling, diary and SENS fixes, plus the missing dependency brewermap.m.
+
+
 ActiPASS Version 2025.12.1 (2025-12-17)
 #############################################
 

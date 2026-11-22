@@ -54,7 +54,7 @@ NightLogic=false(length(Tid),1); % Vector to hold night-time logic either from d
 NWForce=false(length(Tid),1); % Vector to record forced NW times from diary
 
 % also find indices corresponding to the diary transitions if exist
-[~,dTicks,dtickIndices]=intersect(datenum(diaryStrct.Ticks),round(Tid*86400)/86400);
+[dTicks,dtickIndices]=matchDiaryTicks(diaryStrct.Ticks,Tid); % matched on whole seconds
 % merge diary transitions with activity transitions
 eventIndices=unique([1,length(Tid),dtickIndices']);
 
@@ -66,8 +66,8 @@ end
 if ~isempty(Akt) && strcmpi(Settings.NWCORRECTION,"lying")
     lenLieFilt=Settings.BDMINLIET*60; % minimum accepted bedtime
     lenAktFilt=Settings.BDMAXAKTT*60; % maximum active gap within a given bedtime
-    bedLgc=~bwareaopen(Akt~=1 ,lenAktFilt);
-    bedLgc=bwareaopen(bedLgc,lenLieFilt);
+    bedLgc=~removeShortRuns(Akt~=1,lenAktFilt);
+    bedLgc=removeShortRuns(bedLgc,lenLieFilt);
 end
 
 % iterate through each diary Event within the day
@@ -120,9 +120,9 @@ if all(~NightLogic) %no night time at all
     NW=NW | NWForce;
 else
     %Find start and end of night periods (more than 1 is possible)
-    Idiff = diff([false;NightLogic;false]);
-    InightS = find(Idiff==1); %night period starts
-    InightE = find(Idiff==-1)-1; %night period ends
+    runsNL = rle(NightLogic); % run-length-encoding of night logic
+    InightS = runsNL{3}(runsNL{1}==1)'; %night period starts
+    InightE = runsNL{4}(runsNL{1}==1)'; %night period ends
     lenNight=zeros(length(InightS),1);
     for i=1:length(InightS)
         lenNight(i) = InightE(i)-InightS(i)+1;

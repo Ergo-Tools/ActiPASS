@@ -1,4 +1,4 @@
-function [status,fnlPrPSTbl,fnlDlyTbl] = genDlyTable(perSecT,fnlPrPSTbl,fnlDlyTbl,dlyGenStruct)
+function [status,fnlPrPSTbl,fnlDlyTbl,perSecT] = genDlyTable(perSecT,fnlPrPSTbl,fnlDlyTbl,dlyGenStruct)
 % genDlyTable generate ActiPASS daily tables (both ProPASS format and long format)from the given per-sec table
 % Copyright (c) 2023, Pasan Hettiarachchi .
 % All rights reserved.
@@ -80,6 +80,8 @@ analysDays=startDay:endDay;
 numDays=length(analysDays);
 %iterate through the days
 dlyTable=table('Size',[numDays,length(dlyVarNames)],'VariableTypes',dlyVarTypes,'VariableNames',dlyVarNames);
+%create a a new cell array for keeping MET/PAEE values
+dayMET_PAEE=cell(numDays,1);
 
 %intialize the tables to hold domain-specific daily stats and store them in a cellarray
 if dmnStats
@@ -125,7 +127,7 @@ for itrDay=1:numDays
     rows_SI=dayPerSecT.SleepInterval ==1; % find the seconds flagged as sleep-interval
     rows_BT=dayPerSecT.Bedtime ==1; % find the seconds flagged as bedtime
     % call genVariables function
-    dlyTable=genVariables(dlyTable,dayPerSecT.Activity,dayPerSecT.Steps,rows_SI,rows_BT,itrDay,Settings);
+    [dlyTable,dayMET_PAEE]=genVariables(dlyTable,dayMET_PAEE,dayPerSecT,rows_SI,rows_BT,itrDay,Settings);
 
     if dmnStats
         if any(contains(dayPerSecT.Event,StatDomains,'IgnoreCase',true))
@@ -151,10 +153,11 @@ for itrDay=1:numDays
                     % strictly match any event containing the stat-domain names (WorkFromHome, LeisureCommute etc)
                     rowsDomain=strcmpi(dayPerSecT.Event,StatDomains(itrDm));
                 end
-                actDomain=dayPerSecT.Activity;
+                % make a copy of  dayPerSecT
+                actDomainT=dayPerSecT;
                 dlyTblDmns{itrDm}.Duration(itrDay)=round(sum(rowsDomain)/60,Settings.prec_dig_min); % the time duration within this domain
-                actDomain(~rowsDomain)=-1; % exclude epochs other than times of this domain
-                dlyTblDmns{itrDm}=genVariables(dlyTblDmns{itrDm},actDomain,dayPerSecT.Steps,rows_SI,rows_BT,itrDay,Settings);
+                actDomainT.Activity(~rowsDomain)=-1; % exclude epochs other than times of this domain
+                dlyTblDmns{itrDm}=genVariables(dlyTblDmns{itrDm},[],actDomainT,rows_SI,rows_BT,itrDay,Settings);
                 if contains(StatDomains(itrDm),"Work",'IgnoreCase',true) && dlyTblDmns{itrDm}.Duration(itrDay) >0
                     workDays(itrDay)=true;
                 end
@@ -178,6 +181,13 @@ for itrDay=1:numDays
             return;
         end
     end
+end
+
+% add the MET column to perSecT or update paee column
+if ~ismember("paee", perSecT.Properties.VariableNames)
+    perSecT=horzcat(perSecT,table(vertcat(dayMET_PAEE{:}), 'VariableNames', ["MET"]));
+else
+    perSecT.paee=vertcat(dayMET_PAEE{:});
 end
 
 %% find daily DayType, QC-status and fill all QC-flags from metadata

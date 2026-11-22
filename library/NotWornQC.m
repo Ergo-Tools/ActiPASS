@@ -3,7 +3,7 @@ function  [NotWornLogic,NightLogic,StdSum,warning] = NotWornQC(Acc,meanTEMP,diar
 % NotWornQC Estimation of periods of 'not-worn' for quality checking Acc data.
 % Based on the not-worn function in Acti4 with inclusion of temperature profiling.
 % This function uses code from Acti4 non-wear algorithm. 
-% % Copyright (c) 2020, Jørgen Skotte
+% % Copyright (c) 2020, JÃ¸rgen Skotte
 % https://github.com/motus-nfa/Acti4/blob/main/Version%20July%202020/NotWorn.m
 
 % 
@@ -34,7 +34,7 @@ function  [NotWornLogic,NightLogic,StdSum,warning] = NotWornQC(Acc,meanTEMP,diar
 %
 % All periods longer than 90 minuttes with no activity are considered not-worn;
 % periods between 10 to 90 minutes are considered not-worn if a certain amount of movement/acceleration
-% is detection just before (within 10 sec.) and the orientaion deviates less than 5° from horizontal lying.
+% is detection just before (within 10 sec.) and the orientaion deviates less than 5Â° from horizontal lying.
 % above notworn is further adjusted based on temperature profiling if Temperature data exist
 
 
@@ -100,7 +100,7 @@ normAcc = Acc_filt./repmat(SVM_filt,1,3);
 V = [acos(normAcc(:,1)),-asin(normAcc(:,3)),-asin(normAcc(:,2))];
 
 % For not-worn periods the AG normally enters standby state (Std=0 in all axis) or
-% in some cases yield low level noise of ±2-3 LSB:
+% in some cases yield low level noise of Â±2-3 LSB:
 
 StillAcc=[false,StdMean(1:end-1)'< still_thrshld,false];
 MoveAccLgc=StdMean> mov_thrshld;
@@ -121,12 +121,15 @@ else
     %warning=[warning,"NonWear detection: Temperature matrix is empty. Accuracy is reduced."];
 end
 
-OffOn = diff(StillAcc);
-Off = find(OffOn==1);
-On = find(OffOn==-1);
+% runs of still seconds; StillAcc is padded with false at both ends, so StillAcc(k+1) is second k
+numSecsStill=numel(StillAcc)-1; % the number of seconds
+rle_Still=rle(StillAcc(2:end-1));
+stillRuns=find(rle_Still{1}==1);
+Off=rle_Still{3}(stillRuns); % the first still second of each run
+On=rle_Still{4}(stillRuns)+1; % the first non-still second after each run
 OffPerioder = On - Off;
 StartOff = Off(OffPerioder>t_seperation); % 10 minutes
-SlutOff = On(OffPerioder>t_seperation);
+SlutOff = On(OffPerioder>t_seperation)-1; % On is the first non-still second, SlutOff the last still second
 
 % A not-worn period will normally be preceeded by at least a short period of some movement, so if movement is
 % detected within 10 seconds before 'not-worn', it is not accepted as a not-worn period.
@@ -135,13 +138,13 @@ Ok_logic = false(size(StartOff));
 for i=1:length(StartOff)
     % [num2str(max(StdSum(StartOff(i)-15:StartOff(i)-11))) '  '  datestr(T(SF*StartOff(i)),'HH:MM:SS')]
     Ok_logic(i) = max(StdSum(max(StartOff(i)-15,1):max(StartOff(i)-11,5))) > 0.5... %max: problem if StartOff(1)<15
-        || SlutOff(i) - StartOff(i) > tmin_notworn; %over 90min altid off
+        || SlutOff(i) - StartOff(i) + 1 > tmin_notworn; %over 90min altid off
 end
 StartOff = StartOff(Ok_logic);
 SlutOff = SlutOff(Ok_logic);
 
 % Short periods (<1 minut) of activity between not-worn are filtered out
-KortOn = (StartOff(2:end) - SlutOff(1:end-1)) < tShortWorn;
+KortOn = (StartOff(2:end) - SlutOff(1:end-1) - 1) < tShortWorn; % the number of worn seconds between two NW periods
 
 if ~isempty(KortOn)
     SlutOff = SlutOff([~KortOn,true]);
@@ -156,8 +159,8 @@ if  ~isempty(StartOff) && StartOff(1)< tEdgeWorn
     StartOff(1)=1;
 end
 
-if ~isempty(SlutOff) && (length(OffOn)-SlutOff(end))<tEdgeWorn
-    SlutOff(end)=length(OffOn);
+if ~isempty(SlutOff) && (numSecsStill-SlutOff(end)-1)<tEdgeWorn
+    SlutOff(end)=numSecsStill;
 end
 
 
@@ -165,8 +168,8 @@ end
 % than 90 minutes, or for shorter still periods where accelerometer is lying very flat
 for i=1:length(StartOff)
     Vmean = 180*mean(V(StartOff(i):SlutOff(i),:))/pi;
-    if  SlutOff(i)-StartOff(i)>tmin_notworn ... % >90 minuttes,always not-worn
-            || all(abs(Vmean - [90,90,0]) < 5)... % Only not-worn if orientation differs less than 5°
+    if  SlutOff(i)-StartOff(i)+1>tmin_notworn ... % >90 minuttes,always not-worn
+            || all(abs(Vmean - [90,90,0]) < 5)... % Only not-worn if orientation differs less than 5Â°
             || all(abs(Vmean - [90,-90,0]) < 5)   % from "flat" lying orientation (up or down)
         
         NotWornLogic(StartOff(i):SlutOff(i)) = true;
@@ -178,7 +181,7 @@ end
 oldEvent="NE";
 
 % also find indices corresponding to the diary transitions if exist
-[~,dTicks,dtickIndices]=intersect(datenum(diaryStrct.Ticks),round(smplTimes*86400)/86400);
+[dTicks,dtickIndices]=matchDiaryTicks(diaryStrct.Ticks,smplTimes); % matched on whole seconds
 % merge diary transitions with activity transitions
 eventIndices=unique([1,length(smplTimes),dtickIndices']);
 % iterate through each diary Event within the day
@@ -222,9 +225,10 @@ if all(~NightLogic) %no night time at all
     NotWornLogic=NotWornLogic | NWForce;
 else
     %Find start and end of night periods (more than 1 is possible)
-    Idiff = diff([false;NightLogic;false]);
-    InightS = find(Idiff==1); %night period starts
-    InightE = find(Idiff==-1)-1; %night period ends
+    rle_Night=rle(NightLogic);
+    nightRuns=find(rle_Night{1}==1);
+    InightS = rle_Night{3}(nightRuns); %night period starts
+    InightE = rle_Night{4}(nightRuns); %night period ends
     lenNight=zeros(length(InightS),1);
     for i=1:length(InightS)
         lenNight(i) = InightE(i)-InightS(i)+1;

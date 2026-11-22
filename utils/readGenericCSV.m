@@ -14,7 +14,7 @@ function [Data, SF, deviceID, devType] = readGenericCSV(PATH)
 %               orientation (i.e. x-axis pointing down, z-axis inwards towards skin).
 %
 %               The first lines in the CSV file must contain the:
-%               * deviceID (only numeric)
+%               * deviceID (any text, e.g. a serial number or a MAC address)
 %               * the sampling frequency (numeric)
 %               * start-time (ISO8601 format)
 %               * optional device-type. Allow device-type specific changes to algorithms. See supported device-types below
@@ -39,7 +39,7 @@ function [Data, SF, deviceID, devType] = readGenericCSV(PATH)
 %   Output:
 %       Data          [Nx4]  datetime (Matlab datenum format) and 3D acceleration data
 %       SF            [double] the sample frequency
-%       deviceID      [double] the device ID
+%       deviceID      [string] the device ID as written after "ID="
 %       devType       [string] the device type. Set to "Generic" if not specified in CSV file
 
 % Copyright (c) 2024, Claas Lendt & Pasan Hettiarachchi
@@ -120,9 +120,9 @@ try
     % find the start time. If this fails function will return
     startT=datenum(extractBetween(headLs(row_startT),textBoundary+"START=",textBoundary),'yyyymmddTHHMMSS.FFF');
            
-    % convert SF and DeviceID to numbers (ActiPASS only supports numeric device serial-numbers)
+    % SF as a number; the device ID is kept as text
     SF=str2double(SF);
-    deviceID=str2double(deviceID);
+    deviceID=strtrim(string(deviceID));
     
     % Use textscan to read the data, reading datetime as text
     formatSpec = '%f%f%f';

@@ -63,10 +63,8 @@ boutThresh=Settings.boutThresh; % bout threshold value
 boutBreak=Settings.boutBreak; % bout break for all bouts except 1 min bout
 
 
-OnOff = diff([0,Akt,0]);
-On = find(OnOff==1);
-Off = find(OnOff==-1);
-Times = Off-On;
+runsAkt = rle(Akt); % run-length-encoding of the activity
+Times = runsAkt{2}(runsAkt{1}==1); % lengths of the activity periods
 %akt_Pauses = On(2:end)-Off(1:end-1);
 
 if isempty(Times)

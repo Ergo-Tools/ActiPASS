@@ -31,6 +31,7 @@ function exitcode = actipass_cli(acc_file,options)
 % "checkActivPALFile.m"
 % "cli_add_to_sendto.m"
 % "cli_diary_events.m"
+% "cli_diary_tick_warnings.m"
 % "cli_visualize.m"
 % "cli_weekly_plots.m"
 % "CWA_readFile.m" 
@@ -41,6 +42,7 @@ function exitcode = actipass_cli(acc_file,options)
 % "LoadSettings.m"
 % "lyingAlgA.m"
 % "lyingAlgB.m"
+% "matchDiaryTicks.m"
 % "NotWorn.m"
 % "NotWornQC.m"
 % "open_diary.m"
@@ -59,6 +61,7 @@ function exitcode = actipass_cli(acc_file,options)
 % "rgb.m"
 % "rle.m"
 % "SkottesSlp.m"
+% "timeToSec.m"
 % "WarmNightT.m"
 
 
@@ -292,8 +295,8 @@ try
         % loading Axivity WAV file
         fprintf('%s Axivity WAV file loading ....\n',string(datetime,"HH:mm:ss.SSS"));
         cwaData = readWAVtoACC(acc_file,'data');
-        cwaData.ACC = cwaData.AXES(diff(cwaData.ACC(:,1))>0,:);
-        AccData=cwaData.ACC;
+        cwaData.AXES = cwaData.AXES(diff(cwaData.AXES(:,1))>0,:);
+        AccData=cwaData.AXES;
         AccData(:,3:4)=-AccData(:,3:4); % correction to y and z  axes
     elseif ftype==7
         % loading generic CSV file
@@ -375,7 +378,9 @@ try
     end
     
     % create evenly spaced time axis at given samplerate
-    t = linspace(mtStart,mtEnd,(mtEnd-mtStart)*86400*Fs+1)';
+    % (sample count rounded: the float (mtEnd-mtStart)*86400*Fs is not always an exact integer
+    % and linspace would truncate it, giving one sample too few and a stretched grid)
+    t = linspace(mtStart,mtEnd,round((mtEnd-mtStart)*86400*Fs)+1)';
     
     % preaalocate a 4-column vector to hold interpolated acc data
     Dintp=zeros(length(t),4);
@@ -426,8 +431,8 @@ try
         return;
     end
     % display QC data in console
-    fprintf('\t Total_T=%.2fh, Worn_T=%.2fh \n\t Trim_start=%.2fh, Trim_end=%.2fh \n\t Rot_T=%.2fh, Flip_T=%.2fh\n\n',...
-        QCData.TotTime/3600,QCData.WornTime/3600,QCData.cropStart,QCData.cropEnd,QCData.RotTime/3600,QCData.FlipTime/3600);
+    fprintf('\t Total_T=%.2fh, Worn_T=%.2fh \n\t Trim_start=%.2fh, Trim_end=%.2fh \n\t Rot_T=%.2fh, Flip_T=%.2fh, Rot90_T=%.2fh\n\n',...
+        QCData.TotTime/3600,QCData.WornTime/3600,QCData.cropStart,QCData.cropEnd,QCData.RotTime/3600,QCData.FlipTime/3600,QCData.Rot90Time/3600);
     
     
     %% divide data into days and analyse
@@ -560,6 +565,8 @@ try
         noWlkProblem(itrDay) = (valid_T>=Settings.minValidDur)  && (walk_T < Settings.minWlkDur) && (other_T>=Settings.maxOtherDur);
         NoSleepProblem(itrDay) = (valid_T>=Settings.minValidDur)  && (sleep_T == 0);
     end
+    % warn about diary times that are not used as given (not on a whole second, or no processed data)
+    cli_diary_tick_warnings(diaryStrct(1),timeFull,[mtStart,mtEnd]);
     
     %% calculating additional data for exports
     % create activity data based on time-bins (histograms) will be used for daily activity histograms

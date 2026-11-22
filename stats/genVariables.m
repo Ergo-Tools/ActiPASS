@@ -1,7 +1,8 @@
-function statTable = genVariables(statTable,PerSecT,rows_SI,rows_BT,itrSeg,Settings)
+function [statTable,statMET] = genVariables(statTable,statMET,PerSecT,rows_SI,rows_BT,itrSeg,Settings)
 %genVariables generate variables for given activity of a given segment(a day or an Event)
 % INPUTS:
 % statTable - the table to fill data with
+% statMET - A cell array to hold 1s MET or PAEE values
 % PerSecT - ActiPASS 1s activity/posture table
 %    PerSecT.Activity - a vector representing an activity or behaviour for each second
 %    PerSecT.Steps - the steps count (when applicable) for each second
@@ -13,6 +14,7 @@ function statTable = genVariables(statTable,PerSecT,rows_SI,rows_BT,itrSeg,Setti
 
 % OUTPUTS:
 % statTable - the table filled with data for this iteration
+% statMET - A cell array to hold 1s MET values  or PAEE values
 
 % Copyright (c) 2023, Pasan Hettiarachchi .
 % All rights reserved.
@@ -94,15 +96,23 @@ if  strcmpi(Settings.INT_ALG,"posture")
         dayTAI=filter(alpha, [1 alpha-1], dayTAI);
     end
 
+    % store 1s  MET values for current segment
+    if ~isempty(statMET)
+        statMET{itrSeg}=dayTAI;
+    end
+
     %discretaize TAI to intensity classes
     dayPALevels = discretize(dayTAI,[Settings.MET_INT_Slp,Settings.MET_INT_SED,Settings.MET_INT_LPA,Settings.MET_INT_LPA_Amb,Settings.MET_INT_MPA,Settings.MET_INT_VPA, inf],...
         'categorical',["Slp","SED","LPA","LPA_Amb","MPA","VPA"]);
 
 elseif strcmpi(Settings.INT_ALG,"raw+posture")
     % set paee of excluded and non-wear times to -1
-    PerSecT.paee(Activity==-1 | Activity==0)=-1; %excluded or non-wear
-    PerSecT.paee(rows_SI & Activity~=-1 & Activity~=0)=-0.5; %sleep-interval
-    
+    PerSecT.paee(Activity==-1 | Activity==0) = -1; %excluded or non-wear will be assigned -1 (will not be used for discretization)
+    PerSecT.paee(rows_SI & Activity~=-1 & Activity~=0)=0.06; %sleep-interval (0.9 MET)
+    PerSecT.paee(~rows_SI & Activity==1) = 0.06973; % lying
+    PerSecT.paee(~rows_SI & Activity==11 ) = 0.06625; %sleep-outside-bed (called LieStill)
+    PerSecT.paee(~rows_SI & Activity==2 ) = 0.0906; % sitting
+
     % filter (smoothen) PAEE if needed
     if ~strcmpi(Settings.FilterTAI,"off")
         % find the time-constant corresponding to the FilterTAI setting
@@ -112,8 +122,13 @@ elseif strcmpi(Settings.INT_ALG,"raw+posture")
         PerSecT.paee=filter(alpha, [1 alpha-1], PerSecT.paee);
     end
 
+    % store 1s  PAEE values for current segment
+    if ~isempty(statMET)
+        statMET{itrSeg}=PerSecT.paee;
+    end
+
     %discretaize TAI to intensity classes
-    dayPALevels = discretize(PerSecT.paee,[-0.6, 0, 0.0349, 0.2092, 0.4184, inf],...
+    dayPALevels = discretize(PerSecT.paee,[0.06, 0.066, 0.105, 0.2092, 0.4184, inf],...
         'categorical',["Slp","SED","LPA","MPA","VPA"]);
     % add category LPA_Amb in order to match the workflow posture only intensity algorithm
     dayPALevels = addcats(dayPALevels,"LPA_Amb",After="LPA");
@@ -180,7 +195,7 @@ for itrVarN=1:length(statVars)
 
     % call the bouts and segment-time percentile generation function
 
-    if strcmpi(Settings.genBouts,"on") && matches(statVars(itrVarN),Settings.VarsBout)
+    if strcmpi(Settings.genBouts,"on") && matches(statVars(itrVarN),Settings.varsBout)
         % call the stat generation function with seconds flagged with a given activity, combined-activity or intensity class
         [statTable.(statVars(itrVarN)+"_Tmax")(itrSeg),statTable.(statVars(itrVarN)+"_P50")(itrSeg),...
             statTable.(statVars(itrVarN)+"_T50")(itrSeg),statTable.(statVars(itrVarN)+"_P10")(itrSeg),...

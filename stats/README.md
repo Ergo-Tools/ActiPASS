@@ -1,5 +1,17 @@
 ## Source code relevant to ActiPASS stats generation module
 
+### Contents
+
+| File | What it does |
+|---|---|
+| [`genStats.m`](genStats.m) | Main function of the stats generation: reads the master QC table and per-second data, writes the tables |
+| [`genDlyTable.m`](genDlyTable.m) | Daily tables (ProPASS format and long format) |
+| [`genEventTable.m`](genEventTable.m) | Event (diary interval) based tables |
+| [`genVariables.m`](genVariables.m) | Variables of one activity for a segment (a day or an event) |
+| [`genAktStats.m`](genAktStats.m) | Table variables for an activity type |
+| [`findBouts.m`](findBouts.m) | Bouts of an activity |
+| [`genTrnkVariables.m`](genTrnkVariables.m), [`genEmptyTrunkT.m`](genEmptyTrunkT.m) | Trunk variables, and an empty trunk table when there are no trunk data |
+
 See [**ActiPASS variables**](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-variables-and-other-quality-check-files) for more information about the variables and different tables.
 
 ## How stats generation module work
