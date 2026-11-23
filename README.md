@@ -25,9 +25,15 @@ Please report any publications which implement ActiPASS [here](https://doit.medf
 ### ActiPASS graphical user interface
 
 <figure>
-    <img src="https://user-images.githubusercontent.com/26480941/230112571-0baca0d0-957a-4974-b3c9-58d21b1d4678.PNG"
-         alt="ActiPASS GUI">
-    <figcaption>ActiPASS - a user friendly tool to process thigh-worn accelerometer data</figcaption>
+    <img width="841" height="558" alt="image" src="https://github.com/user-attachments/assets/dcfcc005-d0c8-45d7-ac61-dee58910d462" />
+    
+    Actipass desktop app - A modern Rust/Tauri based GUI 
+</figure>
+
+<figure>
+    <img width="655" height="444" alt="image" src="https://github.com/user-attachments/assets/b5710dbc-898e-422a-b7b6-1602f369406a" />
+    
+    ActiPASS classic desktop app 
 </figure>
 
 ### Actipass desktop app (new)
