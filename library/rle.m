@@ -6,6 +6,7 @@ function data = rle(x)
 %      data{2} contains the run lenths
 %      data{3} contains the starting-indices of each run
 %      data{4} contains the end-indices of each run
+%      an empty x gives four empty (1x0) cells (no runs)
 %
 %   Decompression:
 %      if x is a cell array, data contains the uncompressed values
@@ -50,6 +51,10 @@ if iscell(x) % decoding
 	data = x{1}(cumsum(j));
 else % encoding
 	if size(x,1) > size(x,2), x = x'; end % if x is a column vector, tronspose
+    if isempty(x) % empty input: no runs (1x0 values of the same class, 1x0 lengths/indices)
+        data = {x(1:0), zeros(1,0), zeros(1,0), zeros(1,0)};
+        return
+    end
     i = [ find(x(1:end-1) ~= x(2:end)) length(x) ];
 	data{2} = diff([ 0 i ]);
 	data{1} = x(i);

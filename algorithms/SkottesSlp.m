@@ -50,11 +50,11 @@ if length(Akt)>floor(size(Acc,1)/SF)
 end
 %depending on opMode both sitting/lying or only lying is considered for sleep detection
 if opMode==1
-    DiffLie = diff([0;Akt'==1;0]);
+    runsLie = rle(Akt'==1); % run-length-encoding of lying
 elseif opMode==2
-    DiffLie = diff([0;(Akt'==1 | Akt'==2);0]);
+    runsLie = rle(Akt'==1 | Akt'==2); % run-length-encoding of sitting/lying
 end
-LieInt = [find(DiffLie==1),find(DiffLie==-1)-1];
+LieInt = [reshape(runsLie{3}(runsLie{1}),[],1),reshape(runsLie{4}(runsLie{1}),[],1)]; % start and end of each period (Nx2)
 Int15 = LieInt(LieInt(:,2)-LieInt(:,1)>60*15,:);
 if isempty(Int15) %return if no lying periods longer than 15 minutes are found (all awake)
     return

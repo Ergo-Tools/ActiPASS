@@ -40,25 +40,28 @@ tic; % start a timer
 fprintf('%s Intialized.\n',string(datetime,"HH:mm:ss.SSS"));
 
 % load default settings
-[Settings,SettingsAkt] = LoadSettings("","");
+[Settings,ParamsAP] = LoadSettings("","");
 fprintf('%s Loaded settings.\n',string(datetime,"HH:mm:ss.SSS"));
 
-% define extra settings not saved/loaded from config files
-Fs=25; % The resample frequency
-Fc=2; % the cutoff frequency for angle and vector-magnitude finding (primary filter)
+% The resample frequency for raw accelerometer data
+Fs=ParamsAP.Fs; 
+
+% the cutoff frequency for angle and vector-magnitude finding (primary filter)
+Fc=ParamsAP.Fc; 
 
 % give a dummy subject-ID to the data
 subjectIDs="S001"; % normally a vector of strings. See open_accfiles.m 
 % the device type is "Generic" for generic CSV files. Will be used if necessary in quality check function
 devType="Generic";
 % also specify the file/devtype in SettingsAkt struct (used for any device specific correction like for SENS accelerometers)
+
 % for more info see open_accfiles.m
-SettingsAkt.ftype=7; % ftype is set to generic CSV files
+ParamsAP.ftype=7; % ftype is set to generic CSV files
 
 % reference position values min, max and defaults
-VrefThighMin = (pi/180)*[0,-32,-15];
-VrefThighMax = (pi/180)*[32,0,15];
-VrefThighDef = (pi/180)*[16,-16,0];
+VrefThighMin = (pi/180)*ParamsAP.VrefThighMin;
+VrefThighMax = (pi/180)*ParamsAP.VrefThighMax;
+VrefThighDef = (pi/180)*ParamsAP.VrefThighDef;
 
 %an empty vector to hold the activity classification of each second
 actFull=[];
@@ -89,7 +92,7 @@ mtEnd = round(genCSVData(end,1)*86400)/86400;
 
 
 % create evenly spaced time axis at given samplerate
-t = linspace(mtStart,mtEnd,(mtEnd-mtStart)*86400*Fs+1)';
+t = linspace(mtStart,mtEnd,round((mtEnd-mtStart)*86400*Fs)+1)'; % rounded sample count (see resampleAcc)
 
 % preaalocate a 4-column vector to hold interpolated acc data
 Dintp=zeros(length(t),4);
@@ -158,7 +161,7 @@ for itrDay=1:length(MesDays)
     [Vthigh,AccFilt,SVM,~] = FindAnglesAndVM(dataTH.AXES(dayStartIndx:dayEndIndx,2:4),Fs,Fc);
     
     % calculate individual ref-position for this day
-    VrefThigh = EstimateRefThigh1(dataTH.AXES(dayStartIndx:dayEndIndx,:),Vthigh,VrefThigh,VrefThighDef,Fs,SettingsAkt);
+    VrefThigh = EstimateRefThigh1(dataTH.AXES(dayStartIndx:dayEndIndx,:),Vthigh,VrefThigh,VrefThighDef,Fs,ParamsAP);
     refPosStr=string(sprintf('def:[%.2f, %.2f]',VrefThigh(2:3)*180/pi));
     
     % warn if ref-position cannot be found
@@ -173,14 +176,14 @@ for itrDay=1:length(MesDays)
     
     %call the main activity detection algorithm
     [Akt,Tid,FBthigh,Std2Sec] = ActivityDetect(dataTH.AXES(dayStartIndx:dayEndIndx,2:4),...
-        Fs,dataTH.AXES(dayStartIndx:dayEndIndx,1),VrefThigh,SettingsAkt);
+        Fs,dataTH.AXES(dayStartIndx:dayEndIndx,1),VrefThigh,ParamsAP);
     
     % Lying Detection using lying-down algorithm AlgA
     Akt=lyingAlgA(AccFilt,VrefThigh,Akt,Fs);
     
     % after differentiating 'Sit' and 'Lie' we need to median filter once again these two activities
-    Akt = AktFilt(Akt,'sit',SettingsAkt);
-    Akt = AktFilt(Akt,'lie',SettingsAkt);
+    Akt = AktFilt(Akt,'sit',ParamsAP);
+    Akt = AktFilt(Akt,'lie',ParamsAP);
     
     % Find non-wear and process night/bed times for thigh accelerometer
     Akt = ProcessNonWearAndBedtime(itrDay==1,Vthigh,dataTH.AXES(dayStartIndx:dayEndIndx,2:4),Fs,Tid,Akt,diaryStrct(1),Settings);

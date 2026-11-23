@@ -7,7 +7,7 @@ function [Data,SF,deviceID] = readActGT3xcsv(Fil)
 %   Output:
 %       Data          [Nx4]  datetime (Matlab datenum format) and triaxial Acc data
 %       SF            [double] sample frequency
-%       deviceID      [string] the device ID
+%       deviceID      [string] the device serial number as written in the header
 %
 %
 % Copyright (c) 2021, Pasan Hettiarachchi .
@@ -50,9 +50,7 @@ try
     dataFmtL=extractBetween(headLs(1),"date format","Hz",'Boundaries','inclusive');
     dateFormat=strip(extractBetween(dataFmtL,"date format","at"));
     SF=str2double(extractBetween(dataFmtL,dateFormat+" at","Hz"));
-    deviceID=extractAfter(headLs(2),"Serial Number: ");
-    deviceID=regexp(deviceID,'\d+','match');
-    deviceID=str2double(deviceID(end));
+    deviceID=strtrim(extractAfter(headLs(2),"Serial Number: ")); % full serial, e.g. "MOS2C18152579"
     startTime=extractAfter(headLs(3),"Start Time ");
     startDate=extractAfter(headLs(4),"Start Date ");
     

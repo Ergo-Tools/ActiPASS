@@ -8,7 +8,7 @@ function [Data,SF,deviceID,ID] = readActivPALcsv(Fil)
 %   Output:
 %       Data          [Nx4]  datetime (Matlab datenum format) and triaxial Acc data
 %       SF            [double] sample frequency
-%       deviceID      [string] the device ID
+%       deviceID      [string] the device serial number from the filename (digits after "-AP"); NaN if not found
 %       ID            [string] the participant ID
 %
 % Copyright (c) 2023, Pasan Hettiarachchi .
@@ -41,11 +41,11 @@ function [Data,SF,deviceID,ID] = readActivPALcsv(Fil)
 [~,FileName,ext] = fileparts(Fil);
 
 try
-    patSN_ID = (textBoundary|"-")+alphanumericsPattern+"-AP" + digitsPattern(6) + whitespaceBoundary;
+    patSN_ID = (textBoundary|"-")+alphanumericsPattern+"-AP" + digitsPattern(5,8) + whitespaceBoundary;
     textSN_ID=extract(FileName,patSN_ID);
     if ~isempty(textSN_ID)
-        deviceID=str2double(extractAfter(textSN_ID,"-AP"));
-        ID=extractBetween(textSN_ID,("-"|textBoundary),"-AP" + digitsPattern(6));
+        deviceID=string(extractAfter(textSN_ID,"-AP")); % serial digits as text (leading zeros kept); string also for char input
+        ID=extractBetween(textSN_ID,("-"|textBoundary),"-AP" + digitsPattern(5,8));
     else
         warning('Unsupported ActivPAL filename: %s',FileName);
         

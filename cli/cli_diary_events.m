@@ -15,7 +15,7 @@ function [evntMeta,eventsVis] = cli_diary_events(firstDay,diaryStrct,refPosStr,e
 % keep previous event and comments persistent
 persistent oldEvent oldCmmnt
 % also find indices corresponding to the diary transitions if exist
-[~,dTicks,dtickIndices]=intersect(datenum(diaryStrct.Ticks),round(timeFull(indsAktDay)*86400)/86400);
+[dTicks,dtickIndices]=matchDiaryTicks(diaryStrct.Ticks,timeFull(indsAktDay)); % matched on whole seconds
 % merge diary transitions with activity transitions
 eventIndices=unique([indsAktDay(1),indsAktDay(end),(dtickIndices'+indsAktDay(1)-1)]);
 

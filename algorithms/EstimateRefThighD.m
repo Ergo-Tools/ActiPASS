@@ -85,16 +85,14 @@ else
         movStdAcc=movstd(Acc(indAccStart:indAccEnd,2:4),Fs,1);
         movStdAcc=movStdAcc(1:Fs:size(movStdAcc,1),:);
         sumMovStdAcc=sum(movStdAcc,2);
-        StandSegs=bwconncomp(AktWin==3 & sumMovStdAcc' < 0.05); % find segments of standing
-        StndSgsLnths=cellfun(@length,StandSegs.PixelIdxList);
-        SelSegIdxs=find(StndSgsLnths>tMinStand);%  find segments of standing with duration larger than tMinStand
+        runsStand=rle(AktWin==3 & sumMovStdAcc' < 0.05); % find segments of standing using run-length-encoding
+        SelSegIdxs=find(runsStand{1} & runsStand{2}>tMinStand);%  find segments of standing with duration larger than tMinStand
         
         if length(SelSegIdxs) >=1  % if there are at least one segment of standing with duration larger than tMinStand
-            StandSegs.PixelIdxList=StandSegs.PixelIdxList(SelSegIdxs); %only select standing with duration larger than tMinStand
-            funSumMovStd=@(x) mean(sumMovStdAcc(x)); %define a anonymous function to be used in cellfun to find mean values of sumMovStdAcc in each segment
-            [~,segNum]=min(cellfun(funSumMovStd,StandSegs.PixelIdxList)); % find the  standing segment with minimum standard deviation during the given time window
-            indStartStand=StandSegs.PixelIdxList{segNum}(1);% The first second of standing segment
-            indEndStand=StandSegs.PixelIdxList{segNum}(end); % The last second of standing segment
+            segMeans=arrayfun(@(i) mean(sumMovStdAcc(runsStand{3}(i):runsStand{4}(i))),SelSegIdxs); % mean of sumMovStdAcc in each selected segment
+            [~,segNum]=min(segMeans); % find the  standing segment with minimum standard deviation during the given time window
+            indStartStand=runsStand{3}(SelSegIdxs(segNum));% The first second of standing segment
+            indEndStand=runsStand{4}(SelSegIdxs(segNum)); % The last second of standing segment
             [~,indMinSumStd]=min(sumMovStdAcc(indStartStand:indEndStand)); % find the second with minimum sumMovStdAcc
             indMidStand=indStartStand+indMinSumStd-1; % find the second with minimum sumMovStdAcc
             indStartStand=max(indMidStand-floor(tMinStand/2),indStartStand); %define a timewindow centered around the minimum sumMovStdAcc second

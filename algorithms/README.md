@@ -1,5 +1,47 @@
 ## Various classifications algorithms used by ActiPASS software
 
+### Contents
+
+The classification and analysis algorithms: activity types, reference positions, lying, time-in-bed and sleep,
+kneeling, trunk variables, sit-to-stand and whole-body vibration (WBV).
+
+| File | What it does |
+|---|---|
+| [`ActivityDetect.m`](ActivityDetect.m) | Activity types (sit, stand, move, walk, run, stairs, cycle, row) from the thigh acceleration (based on Acti4) |
+| [`AktFilt.m`](AktFilt.m) | Additional filtering of the activities |
+| [`EstimateRefThigh1.m`](EstimateRefThigh1.m) | Thigh reference angle from walking |
+| [`EstimateRefThigh2.m`](EstimateRefThigh2.m) | Thigh reference angle from the DFT of the vector magnitude |
+| [`EstimateRefThighD.m`](EstimateRefThighD.m) | Thigh reference angle from diary reference (Ref) events |
+| [`EstimateRefTrunk1.m`](EstimateRefTrunk1.m) | Trunk reference angle from walking |
+| [`EstimateRefTrunkD.m`](EstimateRefTrunkD.m) | Trunk reference angle from diary reference events |
+| [`EstimateRefCalfD.m`](EstimateRefCalfD.m) | Calf reference angle from diary reference events |
+| [`lyingAlgA.m`](lyingAlgA.m), [`lyingAlgB.m`](lyingAlgB.m) | Lying periods from thigh rotation during sit/lie bouts (lying algorithms A and B) |
+| [`trunkLying.m`](trunkLying.m) | Lying from the trunk (or hip) accelerometer |
+| [`FindNonWearTrunk.m`](FindNonWearTrunk.m) | Non-wear periods of trunk, hip or arm accelerometers |
+| [`calcBedLgc.m`](calcBedLgc.m) | Time-in-bed logic by filtering the activities |
+| [`calcBedtime.m`](calcBedtime.m) | Time-in-bed (from lying or the diary) and sleep |
+| [`SkottesSlp.m`](SkottesSlp.m) | Sleep estimation during lying or given times-in-bed |
+| [`detectKneeling.m`](detectKneeling.m) | Kneeling/squatting from the calf and thigh accelerometers |
+| [`genTrnkVariables.m`](genTrnkVariables.m) | Daily and interval based trunk variables (as Acti4) |
+| [`genSitToStandTable.m`](genSitToStandTable.m) | Tool: sit-to-stand transition speeds (angular velocity) of a project |
+| [`genClinicSitToStandTable.m`](genClinicSitToStandTable.m) | Tool: sit-to-stand counts in a clinical test |
+| [`mergeSleepData.m`](mergeSleepData.m) | Tool: merge the sleep data of a project into one table |
+| [`calculate_wbv_segments.m`](calculate_wbv_segments.m) | Tool: whole-body vibration (ISO 2631) prediction for sitting segments |
+| [`load_AX3_iso2631.m`](load_AX3_iso2631.m) | Loads an Axivity CWA file with calibration and ISO 2631 frequency weighting (WBV) |
+| [`iso2631_wbv.m`](iso2631_wbv.m) | ISO 2631-1 frequency weighting filters (WBV) |
+
+## Wavelet cadence algorithms (not included)
+
+The cadence algorithms `Wavelet1` and `Wavelet2` (setting `CADALG`) use a modified version of `find_walking.m` and
+`find_continuous_dominant_peaks.m` by Marcin Straczkiewicz, the MATLAB implementation of:
+
+> Straczkiewicz M., Huang E.J., Onnela J.-P. A "one-size-fits-most" walking recognition method for smartphones,
+> smartwatches, and wearable accelerometers. npj Digital Medicine 6, 29 (2023). https://doi.org/10.1038/s41746-022-00745-z
+
+These files are not published here. The original code can be found at the author's repository:
+https://github.com/MStraczkiewicz/find_walking
+
+
 ### License
 
 Unless otherwise specified in an individual source file, all source code in this repositery are release under **BSD 3-Clause license**. This means if a different license is included in a source file, that license supersedes the BSD 3-Clause license.

@@ -82,8 +82,7 @@ eventTable.SubjectID=repmat(subjctID,[numEvents,1]);
 eventTable.QC_Status=repmat(QC_Status,[numEvents,1]);
 eventTable.Batch=repmat(qcBatch,[numEvents,1]);
 
-
-
+% iterate through each event
 for itrEvent=1:numEvents
     %% update progress dialog
     uiPgDlg.Value=(itrFil-1)/totFiles+(1/totFiles)*(0.6+(itrEvent/numEvents)*0.2);
@@ -112,7 +111,7 @@ for itrEvent=1:numEvents
     rows_SI=evntPerSecT.SleepInterval ==1; % find the seconds flagged as sleep-interval
     rows_BT=evntPerSecT.Bedtime ==1; % find the seconds flagged as bedtime
     % call genVariables function
-    eventTable=genVariables(eventTable,evntPerSecT.Activity,evntPerSecT.Steps,rows_SI,rows_BT,itrEvent,Settings);
+    eventTable=genVariables(eventTable,[],evntPerSecT,rows_SI,rows_BT,itrEvent,Settings);
    
     if uiPgDlg.CancelRequested
         status="Canceled";

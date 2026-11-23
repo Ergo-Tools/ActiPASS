@@ -1,0 +1,17 @@
+# Node / front end
+node_modules/
+dist/
+.svelte-kit/
+# Rust / Tauri
+target/
+app/src-tauri/gen/
+# MATLAB
+*.asv
+*.mex*
+engine-matlab/build/
+engine-matlab/paths.local.json
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

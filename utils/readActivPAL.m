@@ -27,7 +27,8 @@ function Data = readActivPAL(filePath, varargin)
 %           duration - the length of the recording (Matlab duration type)
 %           stopCondition - Trigger, Immediately, Set Time
 %           startCondition - Memory Full, Low Battery, USB, Programmed Time
-%           deviceID - ActivPAL serial number read from filename (may be inaccurate)
+%           deviceID - ActivPAL serial number read from filename, as text (digits
+%                      after "-AP"; may be inaccurate); NaN if not found
 %
 %   EXAMPLE:
 %       [fileName, fileDir] = uigetfile( ...
@@ -107,7 +108,7 @@ Data.meta = extract_metadata_ActivPAL(fileContents(1:headerEnd));
 patSN_ID = (textBoundary|"-")+alphanumericsPattern+"-AP" + digitsPattern(5,8) + whitespaceBoundary;
 textSN_ID=extract(FileName,patSN_ID);
 if ~isempty(textSN_ID)
-    deviceID=str2double(extractAfter(textSN_ID,"-AP"));
+    deviceID=string(extractAfter(textSN_ID,"-AP")); % serial digits as text (leading zeros kept); string also for char input
 else
     warning('Unsupported ActivPAL filename: %s',FileName);
     deviceID=NaN;

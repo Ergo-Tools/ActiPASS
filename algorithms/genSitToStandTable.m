@@ -1,4 +1,4 @@
-function status = genSitToStandTable(projectDir,outDir,AP_MQCT,Fs,AX_Orient,filt_mode,cal_mode,uiPgDlg)
+function status = genSitToStandTable(projectDir,outDir,AP_MQCT,Fs,AX_Orient,filt_mode,cal_mode,uiPgDlg,exclusions)
 %GENSITTOSTANDTABLE generate sit-to-stand transition table for currently loaded project
 
 % INPUTS
@@ -10,6 +10,8 @@ function status = genSitToStandTable(projectDir,outDir,AP_MQCT,Fs,AX_Orient,filt
 % cal_mode [string]: specify whch upright activities considered as "Stand" in sit-to-stand
 % Fs [double]: resampling frequency used in ActiPASS while processing data
 % uiPgDlg: a handle to UI-progress-dialog to show updates
+% exclusions [string, optional]: files left out by QC_Status: "Check+NotOK" (default, only
+%   OK files, as before), "NotOK" or "None" (all files)
 
 % OUTPUT
 % status [string]: "OK": everything went well, "Check": only some files processed,  "Error": none of the files processed
@@ -72,26 +74,47 @@ varT_SS=["string","string",repmat("double",1,length(varN_SS)-2)];
 varNLog=["DateTime","Process_Time","processing_status"];
 ProcLogT=[AP_MQCT(:,"SubjectID"),table('size',[height(AP_MQCT),3],'VariableTypes',repmat("string",1,3),'VariableNames',varNLog)];
 
-% if QC_Status is not "OK" skip this file from stat generation
-indsNotOk=find(AP_MQCT.QC_Status~="OK");
-indsOk=find(AP_MQCT.QC_Status=="OK");
-AP_MQCT(indsNotOk,:)=[]; % delete cases where QC_Status is not OK
+% leave out files by their QC_Status (default: all but OK files, as before)
+if nargin<9 || isempty(exclusions), exclusions="Check+NotOK"; end
+if exclusions=="Check+NotOK"
+    excluded=AP_MQCT.QC_Status~="OK"; exclMsg="QC_Status is not ""OK""";
+elseif exclusions=="NotOK"
+    excluded=AP_MQCT.QC_Status=="NotOK"; exclMsg="QC_Status is ""NotOK""";
+elseif exclusions=="None"
+    excluded=false(height(AP_MQCT),1); exclMsg="";
+else
+    error("exclusions must be None, NotOK or Check+NotOK");
+end
+indsNotOk=find(excluded);
+indsOk=find(~excluded);
+AP_MQCT(indsNotOk,:)=[]; % delete the excluded cases
 % log deleted cases to the ProcLogT table
-ProcLogT{indsNotOk,2:end}=repmat([string(datetime("now")),"0.0","QC_Status is not ""OK"""],size(indsNotOk));
+ProcLogT{indsNotOk,2:end}=repmat([string(datetime("now")),"0.0",exclMsg],numel(indsNotOk),1); % numel: find on a single row gives 1x0
 
 % detect orientation changes during measurement
 pcnt_rot=str2double(extractAfter(AP_MQCT.("TimeRot(h,%)"),",")); % percentage_rotated
 pcnt_flp=str2double(extractAfter(AP_MQCT.("TimeFlip(h,%)"),",")); % percentage_rotated
 
+% files with a 90 degree rotation correction cannot be reproduced from the QC table (QC tables from older
+% versions have no TimeRot90 column; there the 90 degree time was part of TimeRot)
+if ismember("TimeRot90(h,%)",AP_MQCT.Properties.VariableNames)
+    rot90=str2double(extractBefore(AP_MQCT.("TimeRot90(h,%)"),","))>0;
+else
+    rot90=false(height(AP_MQCT),1);
+end
+% log deleted cases to the ProcLogT table
+ProcLogT{indsOk(rot90),2:end}=repmat([string(datetime("now")),"0.0","90 degree rotation"],nnz(rot90),1);
+
 % only select cases where orinetation doesn't change during the measurement
-slct=ismember(pcnt_rot,[0,100]) & ismember(pcnt_flp,[0,100]);
+slctOrient=ismember(pcnt_rot,[0,100]) & ismember(pcnt_flp,[0,100]);
+slct=slctOrient & ~rot90;
 pcnt_rot=pcnt_rot(slct);
 pcnt_flp=pcnt_flp(slct);
 
 % delete rows with partially rotated or flipped data
 AP_MQCT(~slct,:)=[];
 % log deleted cases to the ProcLogT table
-ProcLogT{indsOk(~slct),2:end}=repmat([string(datetime("now")),"0.0","Orientation change during measurements"],size(indsOk(~slct)));
+ProcLogT{indsOk(~slctOrient & ~rot90),2:end}=repmat([string(datetime("now")),"0.0","Orientation change during measurements"],nnz(~slctOrient & ~rot90),1);
 indsOk=indsOk(slct);
 
 % we are going to derive final orientation based on rotated and flipped data
@@ -176,7 +199,7 @@ for itrFil=1:height(AP_MQCT)
                 mtEnd = round(dataTH.AXES(end,1)*86400)/86400;
                 
                 % create evenly spaced time axis at given samplerate
-                t = linspace(mtStart,mtEnd,(mtEnd-mtStart)*86400*Fs+1);
+                t = linspace(mtStart,mtEnd,round((mtEnd-mtStart)*86400*Fs)+1); % rounded sample count (see resampleAcc)
                 
                 % interpolate Acc. data at evenly spaced samples
                 % Axivity ProPASS default orientations are different from Acti4 default orientation therefor we need to inverse y and z axes
@@ -218,7 +241,7 @@ for itrFil=1:height(AP_MQCT)
                 mtEnd = round(time_activPAL(end)*86400)/86400;
                 
                 % create evenly spaced time axis at given samplerate
-                t = linspace(mtStart,mtEnd,(mtEnd-mtStart)*86400*Fs+1);
+                t = linspace(mtStart,mtEnd,round((mtEnd-mtStart)*86400*Fs)+1); % rounded sample count (see resampleAcc)
                 
                 % interpolate Acc. data at evenly spaced samples
                 Dintp=zeros(length(t),4);
@@ -299,7 +322,7 @@ for itrFil=1:height(AP_MQCT)
             % calculate the speed by dividing difference of adjacent values by sampling interval
             ang_speed=-diff(angle)*Fs; % angle is going down, therefore negate it for speed calculation
             
-            %update sit_stand_matrix
+            %update sit_stand_matrix for later plotting cumulated mean +/- std plots
             sit_stand_data(itrTrns,:)=ang_speed;
             
             % calculate fall-time (for sit-to-stand transitions angle decreases)
@@ -327,6 +350,9 @@ for itrFil=1:height(AP_MQCT)
                 SiSt_T.ut(itrTrns)=ut;
                 SiSt_T.ll(itrTrns)=ll;
                 SiSt_T.ul(itrTrns)=ul;
+                % shift sit_stand_data such that peak falls at t=0
+                % timeAxShifted=timeAx(1:end-1)-(ut+(lt-ut)/2);
+                % sit_stand_data(itrTrns,:)=interp1(timeAx(1:end-1),sit_stand_data(itrTrns,:),timeAxShifted,"linear","extrap");
             end
             
             % check for cancelation

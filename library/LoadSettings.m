@@ -3,13 +3,13 @@ function [Settings,ParamsAP] = LoadSettings(ActiPASSConfig,ParamsConfig)
 
 % Input:
 %   ActiPASSConfig: full file-path of config file containing GUI, workflow, and Stats module settings
-%   AktConfig: full file-path of config file containing main activity detection parameters
+%   ParamsConfig: full file-path of config file containing algorithm parameters and cut-offs
 
 % Output:
-%   Settings: A structure with loaded UI, workflow, and Statssettings.
+%   Settings: A structure with loaded UI, workflow, and Stats-gen settings.
 %             If empty ActiPASSConfig is given, default settings are returned
-%   SettingsAkt: A structure with loaded activity-detection settings.
-%                If empty ActiPASSConfig is given, default settings are returned
+%   ParamsAP: A structure with algorithm specific parameters and cut-offs.
+%             If empty ParamsConfig is given, default settings are returned
 
 % Copyright (c) 2021, Pasan Hettiarachchi .
 % All rights reserved.
@@ -54,7 +54,10 @@ paramNms=["Fs","Fc","VrefThighMin","VrefThighMax","VrefThighDef","VrefTrunkMin",
     "Threshold_standmove","Threshold_walkrun","Threshold_slowfastwalk","Threshold_veryfastwalk","Threshold_kneel",...
     "Threshold_HF_energy","Threshold_SDMax_Acc","MET_SI","MET_LieStill","MET_Lie","MET_Sit","MET_Stand",...
     "MET_Move","Wlk_Low_MET","Wlk_Fast_MET","Wlk_VFast_MET","MET_Running","MET_Stairs","MET_Cycle","MET_Other",...
-    "MET_INT_Slp","MET_INT_SED","MET_INT_LPA","MET_INT_LPA_Amb","MET_INT_MPA","MET_INT_VPA","VarsBout"];
+    "MET_INT_Slp","MET_INT_SED","MET_INT_LPA","MET_INT_LPA_Amb","MET_INT_MPA","MET_INT_VPA"];
+
+statVars=["Lie","Sit","SitLie","Stand","Move","StandMove","Walk","Walk_Slow","Walk_Fast",...
+    "Run","Stair","Cycle","Upright","Other","INT1","INT2","INT2_Amb","INT3","INT4","INT34"];
 
 % if parametrs config file exists and all parameters are defined load config data
 if isfile(ParamsConfig)
@@ -94,9 +97,6 @@ if isempty(ParamsAP) || ~all(matches(paramNms,fieldnames(ParamsAP)))
     % transport algorithm related settings
     ParamsAP.Threshold_HF_energy = 0.1;
     ParamsAP.Threshold_SDMax_Acc = 0.015;
-
-    % stat generation: behaviours/int-classes for which bouts/percentiles are generated
-    ParamsAP.VarsBout=["SitLie","Upright","INT34"];
 
     % stat generation MET cutoffs for behaviours
     ParamsAP.MET_SI=0.90;
@@ -501,6 +501,7 @@ if ~isfield(Settings,'PIECHARTS')
 else
     Settings.PIECHARTS=logical(Settings.PIECHARTS);
 end
+
 % flag for Diary comments
 if ~isfield(Settings,'PRINTCOMMNTS')
     Settings.PRINTCOMMNTS=true;
@@ -508,6 +509,11 @@ else
     Settings.PRINTCOMMNTS=logical(Settings.PRINTCOMMNTS);
 end
 
+% flag for thigh based intensity-class detection based on raw-data
+if ~isfield(Settings,'INT_ALG')|| ismissing(Settings.INT_ALG)||...
+        ~matches(Settings.INT_ALG,["posture","raw+posture"])
+    Settings.INT_ALG="posture";
+end
 
 %% Settings related to outlier detection and stage3 stats generation
 
@@ -579,6 +585,13 @@ if ~isfield(Settings,'genBouts')|| ismissing( Settings.genBouts)||...
         ~matches(Settings.genBouts,["on","off"])
     Settings.genBouts="off";   % alternatives 'on', 'off'
 end
+
+% select variables for bouts generation'
+if ~isfield(Settings,'varsBout')|| any(ismissing( Settings.varsBout))||...
+        ~all(ismember(Settings.varsBout, statVars))
+    Settings.varsBout=["SitLie","Upright","INT34"];
+end
+
 % bout threshold value
 if ~isfield(Settings,'boutThresh')
     Settings.boutThresh=0; % default is 0 which disables the bout-threshold.
@@ -606,6 +619,27 @@ end
 if ~isfield(Settings,'FilterTAI')|| ismissing( Settings.FilterTAI)||...
         ~matches(Settings.FilterTAI,["off","TC10","TC20","TC30","TC60","TC90","TC120"])
     Settings.FilterTAI="off";  % apply exponential smoothing on TAI options 'off', 'TC10',"TC20","TC30","TC60","TC90","TC120" - default off
+end
+
+% use personal data (SubjectID, Age, Sex, Height, Weight table, chosen at stats generation):
+% the height replaces the default 170 cm in the cadence based MET regression (WalkMET "regression")
+if ~isfield(Settings,'PERSDATA')
+    Settings.PERSDATA=false;
+else
+    Settings.PERSDATA=logical(Settings.PERSDATA);
+end
+% with personal data and the raw+posture intensity algorithm: individual resting metabolic rate
+% (Mifflin-St Jeor) as 1 MET for the PAEE intensity cut-offs (fixed cut-offs when data are missing)
+if ~isfield(Settings,'PERSRMR')
+    Settings.PERSRMR=false;
+else
+    Settings.PERSRMR=logical(Settings.PERSRMR);
+end
+% the last personal data file
+if ~isfield(Settings,'pers_file') || isempty(Settings.pers_file) || any(ismissing(Settings.pers_file))
+    Settings.pers_file="";
+else
+    Settings.pers_file=string(Settings.pers_file);
 end
 
 % load stat-generation table format options

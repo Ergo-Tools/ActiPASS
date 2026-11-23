@@ -60,9 +60,9 @@ CombNew = Comb;
 
 Akt = zeros(size(Comb))';
 Akt(Comb==No) = 1;
-DiffAkt = diff([0;Akt;0]);
-Start = find(DiffAkt==1);
-Slut = find(DiffAkt==-1)-1;
+runsAkt = rle(Akt); % run-length-encoding of the activity
+Start = runsAkt{3}(runsAkt{1}==1)'; % activity period starts
+Slut = runsAkt{4}(runsAkt{1}==1)'; % activity period ends
 Korte = find(Slut-Start<bout); %fejl
 %Korte = find(Slut-Start<bout-1); %rigtig
 SS = [Start(Korte),Slut(Korte)];

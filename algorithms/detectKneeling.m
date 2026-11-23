@@ -169,9 +169,9 @@ StdMeanCalf = movstd(AccCalf,Fs*2);
 StdMeanCalf=mean(StdMeanCalf(1:Fs:end,:),2); % mean across axes of standard deviation of 2s window
 % For not-worn periods the AG normally enters standby state (Std=0 in all axis) or
 % in some cases yield low level noise of ±2-3 LSB:
-OffOn = diff([false,StdMeanCalf(1:end-1)'<.01,false]);
-Off = find(OffOn==1);
-On = find(OffOn==-1);
+runsOff = rle(StdMeanCalf(1:end-1)'<.01); % run-length-encoding of still seconds
+Off = runsOff{3}(runsOff{1}); % start of still periods
+On = runsOff{4}(runsOff{1})+1; % first second after still periods
 OffPerioder = On - Off;
 StartOff = Off(OffPerioder>180); % 3 minutes
 SlutOff = On(OffPerioder>180);

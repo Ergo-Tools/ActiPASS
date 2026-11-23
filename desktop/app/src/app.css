@@ -1,0 +1,92 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+:root {
+  --bg: #f5f7f9;
+  --surface: #ffffff;
+  --surface-2: #eef2f5;
+  --border: #d8dee4;
+  --text: #1c2630;
+  --muted: #5d6b78;
+  --accent: #0b6e79;
+  --accent-text: #ffffff;
+  --accent-soft: #d9eff1;
+  --nav-bg: #0d3b52;
+  --nav-text: #d6e6ee;
+  --nav-active: #165a78;
+  --ok: #1f8a4c;
+  --warn: #b26a00;
+  --err: #c0392b;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+  --radius: 6px;
+  color-scheme: light dark;
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12171c;
+    --surface: #1a2128;
+    --surface-2: #222b33;
+    --border: #2e3943;
+    --text: #e3e9ee;
+    --muted: #94a3b1;
+    --accent: #2bb3bf;
+    --accent-text: #08262a;
+    --accent-soft: #163a3e;
+    --nav-bg: #0b1e29;
+    --nav-text: #b8ccd7;
+    --nav-active: #15384a;
+    --ok: #4cc27c;
+    --warn: #e0a040;
+    --err: #ef6b5c;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); }
+h1, h2, h3 { margin: 0 0 0.5em; font-weight: 600; }
+h1 { font-size: 1.45rem; }
+h2 { font-size: 1.1rem; }
+p { margin: 0 0 0.75em; }
+code, .mono { font-family: var(--mono); font-size: 0.92em; }
+
+button {
+  font: inherit;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.4em 0.9em;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.5; cursor: default; }
+button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+button.danger { color: var(--err); }
+button.link { border: none; background: none; padding: 0; color: var(--accent); }
+
+input, select {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.35em 0.5em;
+}
+input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+}
+.row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+.muted { color: var(--muted); }
+.warn { color: var(--warn); }
+.err { color: var(--err); }
+.ok { color: var(--ok); }

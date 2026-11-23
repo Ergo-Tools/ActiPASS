@@ -1,9 +1,24 @@
 function status = genStats(statStruct,uiFig)
-% genTables generate ActiPASS variables
+% genStats generate ActiPASS stats tables (variables) from processed per-second data
+%
+% Reads the project's master QC table, keeps the IDs selected for stats (batch and QC-status
+% filters), and checks that the batch processing settings of those IDs are compatible with the
+% stats settings. For each ID it loads the per-second activity data and metadata (plus PAEE and
+% trunk tables when enabled) and generates the variables for the chosen table format: Daily
+% (long-format and wide-format ProPASS tables), Events, EventsNoBreak, Daily+Events or Hourly.
+% Optionally saves per-second epoch data as CSV. The new rows are merged into the master stats
+% tables in the project folder (rows of the same IDs are replaced; an incompatible existing
+% table is backed up). Progress is shown in a cancelable progress dialog on uiFig.
+%
 % INPUT:
-% statStruct: a structure containing all information for stat generation
+% statStruct: structure with the stats settings and project paths (from the ActiPASS GUI)
+% uiFig: the UI figure that hosts the progress dialog and alerts, or a progress object with
+%        Value, Message and CancelRequested (e.g. IpcProgress); its warn(msg) method, if any,
+%        receives the warnings otherwise shown as alerts
+%
 % OUTPUT:
-% status: status of function execution ('OK', 'Canceled' etc)
+% status: "OK", "Canceled", or a message describing why stats generation stopped or failed
+%         (on errors a 2x1 string: message and full error report)
 
 % Copyright (c) 2023, Pasan Hettiarachchi .
 % All rights reserved.
@@ -45,6 +60,7 @@ Settings.validDayHrs=statStruct.minValidDur; % minimum duration in hrs for a val
 Settings.StatsVldD=statStruct.StatsVldD; %daily validity criteria (only wear time or ProPASS mode)
 Settings.projectDir=statStruct.projectDir; % analysis directory
 Settings.backupDir=statStruct.backupDir; % the backup directory for creating table backups
+Settings.save_CSV_epoch=statStruct.save_CSV_epoch; % flag for saving 1s epoch level data as CSV
 
 Settings.Batch=statStruct.Batch; % the selected batch
 Settings.indvDirOut=statStruct.indvDirOut; % the directory name of individual output
@@ -59,13 +75,18 @@ Settings.WalkMET=statStruct.WalkMET; % how to calculate MET values for walking- 
 Settings.CADPMIN=statStruct.CADPMIN; % flag to calculate cadence per minute instead of per second (before slow/fast walking detection and INT classes)
 Settings.FilterTAI=statStruct.FilterTAI; % apply exponential smoothing on TAI options 'off' 'TC2' 'TC5', 'TC10' - default off
 Settings.genBouts=statStruct.genBouts; % enable/disable bouts generation
-Settings.VarsBout=statStruct.ParamsAP.VarsBout; % behaviours/int-classes for which bouts/percentiles are generated
+Settings.varsBout=statStruct.varsBout; % behaviours/int-classes for which bouts/percentiles are generated
 Settings.boutThresh=statStruct.boutThresh; % bout threshold value
 Settings.boutBreak=statStruct.boutBreak; % bout break for all bouts except 1 min bout in seconds
 Settings.SAVETRNKD=statStruct.SAVETRNKD; % flag for saving trunk variables
 Settings.TRUNKPOS=statStruct.TRUNKPOS; % indicate whether trunk acc is used
 Settings.CALFPOS=statStruct.CALFPOS; % indicate whether calf acc is used
 Settings.INT_ALG=statStruct.INT_ALG; % intensity algorithm selection posture or posture+raw-data
+% personal data (optional): height for the cadence based MET regression, individual RMR for the
+% raw+posture PAEE cut-offs; statStruct.persDataFile is the table (see readPersonalData)
+Settings.PERSDATA=isfield(statStruct,'PERSDATA') && logical(statStruct.PERSDATA);
+Settings.PERSRMR=isfield(statStruct,'PERSRMR') && logical(statStruct.PERSRMR);
+Settings.paeeScale=1; % 1 MET as individual RMR relative to 1 kcal/kg/h (1 = the fixed cut-offs)
 
 
 % activity to MET translation
@@ -154,7 +175,7 @@ end
 
 % bouts and time-percentile variables for behavours/int-classes enabled for bout generation
 for itrVar=1:length(varN_Behvs_Classes)
-    if matches(varN_Behvs_Classes(itrVar),Settings.VarsBout)
+    if matches(varN_Behvs_Classes(itrVar),Settings.varsBout)
         varN_Behvs_Classes=[varN_Behvs_Classes,varN_Behvs_Classes(itrVar)+"_"+[varN_Akt,varN_Bouts]];
     end
 end
@@ -192,8 +213,14 @@ evntVarTypes=[repmat("string",[1,NumStringVars]),repmat("double",[1,length(evntV
 %% loading master QC table
 try
 
-    uiPgDlg = uiprogressdlg(uiFig,'Title','Generating Stats. Please wait.',...
-        'Message','Loading Master QC Table...','Cancelable','on');
+    if isobject(uiFig) && isprop(uiFig, 'CancelRequested')
+        uiPgDlg = uiFig; % a progress object (e.g. the desktop engine's IpcProgress)
+        uiPgDlg.Message = "Loading Master QC Table...";
+    else
+        uiPgDlg = uiprogressdlg(uiFig,'Title','Generating Stats. Please wait.',...
+            'Message','Loading Master QC Table...','Cancelable','on');
+    end
+    closeDlg = onCleanup(@() closeProgressDlg(uiPgDlg)); % close the progress dialog on every exit (return, cancel, error)
     %fPrgBar = waitbar(0,'Finding per_sec activity files...');
     %     perSecFs=dir(fullfile(Settings.projectDir,"*","*-Activity_per_s.csv"));
 
@@ -228,12 +255,12 @@ try
 
     % check calf acc data available in the project
     if strcmpi(Settings.CALFPOS,"on") && ~ismember("Calf_File",masterQCTbl.Properties.VariableNames)
-        status="No valid data for calf accelerometer found. Disable Calf acceerometer under Kneeling Detection";
+        status="No valid data for calf accelerometer found. Disable Calf accelerometer under Kneeling Detection";
         return;
     end
     % check trunk acc data available in the project
     if ~strcmpi(Settings.TRUNKPOS,"off") && ~ismember("Trunk_File",masterQCTbl.Properties.VariableNames)
-        status="No valid data for calf accelerometer found. Disable Calf acceerometer under Kneeling Detection";
+        status="No valid data for trunk accelerometer found. Set ""Trunk Acc"" to off under Trunk Acc. Options";
         return;
     end
     if strcmpi(Settings.INT_ALG,"raw+posture")
@@ -246,6 +273,30 @@ try
                 "Make sure all batches are processed with ""raw+posture"" setting.";
             return;
 
+        end
+    end
+
+    % check that the processing settings of the selected batches do not conflict with these stats settings
+    confMsg=checkBatchSettings(masterQCTbl,Settings,statStruct.projectDir);
+    if confMsg~=""
+        close(uiPgDlg);
+        status=confMsg;
+        return;
+    end
+
+    % personal data table (optional): height and individual RMR per ID
+    persT=[];
+    persUsed=strings(0,1); % IDs that used personal data
+    persMissing=strings(0,1); % IDs without (usable) personal data: defaults
+    if Settings.PERSDATA
+        persFile="";
+        if isfield(statStruct,'persDataFile'), persFile=string(statStruct.persDataFile); end
+        [persT,pStatus]=readPersonalData(persFile);
+        if ~startsWith(pStatus,"OK")
+            status=pStatus;
+            return;
+        elseif pStatus~="OK"
+            statsWarning(uiFig,extractAfter(pStatus,"OK: "));
         end
     end
 
@@ -290,6 +341,9 @@ try
         subjctID=masterQCTbl.SubjectID(itrFil);
         % define locations of 1s data file and events metadata file
         perSecF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Activity_per_s.mat");
+        % define a new file for saving 1s time series data 
+        persecF_CSV=fullfile(statStruct.projectDir,"epoch_data",subjctID+" - epoch_data.csv");
+
         metaF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Metadata.mat");
         paeeF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - PAEE.csv");
         % define trunk daily and event data files if trunk data is saved
@@ -326,6 +380,18 @@ try
             perSecT=horzcat(perSecT,table(paee));
         end
 
+        % personal data of this ID (height, individual RMR); the defaults when there are none
+        [SettingsID,hasPers]=personalSettings(Settings,persT,subjctID);
+        dlyGenStruct.Settings=SettingsID;
+        evntGenStruct.Settings=SettingsID;
+        if Settings.PERSDATA
+            if hasPers
+                persUsed(end+1)=subjctID; %#ok<AGROW>
+            else
+                persMissing(end+1)=subjctID; %#ok<AGROW>
+            end
+        end
+
         % generating daily tables
         if matches(Settings.TblFormat,["Daily","Daily+Events"],'IgnoreCase',true)
 
@@ -341,7 +407,18 @@ try
             end
 
             % call genDlyTable function for this ID
-            [status,fnlPrPSTbl,fnlDlyTbl] = genDlyTable(perSecT,fnlPrPSTbl,fnlDlyTbl,dlyGenStruct);
+            [status,fnlPrPSTbl,fnlDlyTbl,perSecT] = genDlyTable(perSecT,fnlPrPSTbl,fnlDlyTbl,dlyGenStruct);
+
+            %save epoch level data as CSV if enabled
+          
+            if strcmp(Settings.save_CSV_epoch, "1s")
+                writetable(perSecT,persecF_CSV,"WriteMode","overwrite");
+            elseif strcmp(Settings.save_CSV_epoch, "10s")
+                writetable(downsampleTable(perSecT,10),persecF_CSV,"WriteMode","overwrite");
+            elseif strcmp(Settings.save_CSV_epoch, "60s")
+                writetable(downsampleTable(perSecT,60),persecF_CSV,"WriteMode","overwrite");
+            end
+
             % give the user chance to cancel before next iteration
             if status=="Canceled"
                 return;
@@ -375,8 +452,9 @@ try
             evntMeta=metaOBJ.evntMeta;
             % remove midnight breaks in events
             if strcmpi(Settings.TblFormat,"EventsNoBreak") && length(evntMeta.Names)>=2
-                indsRLE = [find(evntMeta.Names(1:end-1) ~= evntMeta.Names(2:end));length(evntMeta.Names)]; % find unique consecutive events
-                runL = diff([0;indsRLE ]); % run length of those events
+                runsEvnt = rle(evntMeta.Names); % run-length-encoding of consecutive events
+                indsRLE = runsEvnt{4}'; % last index of each run of the same event
+                runL = runsEvnt{2}'; % run length of those events
                 indsDel=setdiff(1:length(evntMeta.Names),indsRLE); % the indices of events to delete
                 % if any events should be deleted
                 if ~isempty(indsDel)
@@ -410,6 +488,15 @@ try
                     opt_trnk2=detectImportOptions(trunkEF,'VariableNamingRule','preserve');
                     opt_trnk2=setvartype(opt_trnk2,"string");
                     tmpTrnkT=readtable(trunkEF,opt_trnk2);
+                    % the trunk event rows must match the events of this ID (see checkBatchSettings)
+                    if height(tmpTrnkT)~=length(evntMeta.Names)
+                        close(uiPgDlg);
+                        status="Stats aborted: the trunk event table of "+subjctID+" has "+height(tmpTrnkT)+...
+                            " events but the stats found "+length(evntMeta.Names)+" events. The ID was probably "+...
+                            "processed with a different table format (""EventsNoBreak"" or not). Reprocess it with "+...
+                            "table format """+Settings.TblFormat+""", or disable trunk variables (SAVETRNKD).";
+                        return;
+                    end
                     % otherwise create an empty table with correct number of rows
                 else
                     tmpTrnkT=genEmptyTrunkT(length(evntMeta.StartTs)); % create an empty table with correct height
@@ -455,8 +542,7 @@ try
                     [~,oldPrPSTFName,oldPrPSTExt]=fileparts(fnlPrPSTblF);
                     oldPrPSTblF=oldPrPSTFName+"_Renamed_Old_"+datestr(now,'yyyymmdd HHMMSS')+oldPrPSTExt;
 
-                    uialert(uiFig,"Incompatiable ProPASS table found. Old table is saved as: "+oldPrPSTblF,"Stats Warning",...
-                        "Icon","warning");
+                    statsWarning(uiFig,"Incompatiable ProPASS table found. Old table is saved as: "+oldPrPSTblF);
                     copyfile(fnlPrPSTblF,fullfile(Settings.backupDir,oldPrPSTblF));
                 end
             end
@@ -490,8 +576,7 @@ try
                     [~,oldDlyTFName,oldDlyTExt]=fileparts(fnlDlyTblF);
                     oldDlyTblF=oldDlyTFName+"_Renamed_Old_"+datestr(now,'yyyymmdd HHMMSS')+oldDlyTExt;
 
-                    uialert(uiFig,"Incompatiable long format daily table found. Old table is saved as: "+oldDlyTblF,"Stats Warning",...
-                        "Icon","warning");
+                    statsWarning(uiFig,"Incompatiable long format daily table found. Old table is saved as: "+oldDlyTblF);
                     copyfile(fnlDlyTblF,fullfile(Settings.backupDir,oldDlyTblF));
                 end
             end
@@ -533,8 +618,7 @@ try
                     [~,oldVertFName,oldVertTExt]=fileparts(fnlEvntTblF);
                     oldVertTblF=oldVertFName+"_Renamed_Old_"+datestr(now,'yyyymmdd HHMMSS')+oldVertTExt;
 
-                    uialert(uiFig,"Incompatiable Events table found. Old table is saved as: "+oldVertTblF,"Stats Warning",...
-                        "Icon","warning");
+                    statsWarning(uiFig,"Incompatiable Events table found. Old table is saved as: "+oldVertTblF);
                     copyfile(fnlEvntTblF,fullfile(Settings.backupDir,oldVertTblF));
                 end
             end
@@ -545,16 +629,152 @@ try
         end
     end
 
+    if Settings.PERSDATA && ~isempty(persMissing)
+        statsWarning(uiFig,sprintf(['Personal data used for %d ID(s). No usable personal data for %d ID(s) ' ...
+            '(default height 170 cm and fixed PAEE cut-offs used): %s'],numel(persUsed),numel(persMissing),...
+            join(persMissing,", ")));
+    end
     if any(allMsgs~="")
         status=join(allMsgs(allMsgs~=""));
     end
     %close(fPrgBar);
     close(uiPgDlg);
 catch ME
-    close(uiPgDlg);
+    if exist('uiPgDlg','var')
+        closeProgressDlg(uiPgDlg); % the dialog does not exist if creating it failed
+    end
     status=[string(ME.message);string(getReport(ME,'extended','hyperlinks','off'))];
 
 end
 
+end
+
+
+function [S,has]=personalSettings(S,persT,subjctID)
+% personalSettings the stats settings of one ID with its personal data (readPersonalData)
+% Height replaces the default height of the cadence based MET regression (O'Brien et al. 2020).
+% With PERSRMR and the raw+posture algorithm, the resting metabolic rate (Mifflin-St Jeor, from
+% age, sex, height and weight) is 1 MET of the PAEE cut-offs: paeeScale = RMR (kcal/day)/(24*weight),
+% i.e. the individual MET relative to 1 kcal/kg/h. has: personal data were used for this ID.
+has=false;
+if ~S.PERSDATA || isempty(persT)
+    return;
+end
+r=find(persT.SubjectID==string(subjctID),1);
+if isempty(r)
+    return;
+end
+p=persT(r,:);
+if ~isnan(p.Height)
+    S.wlkHeight=p.Height;
+    has=true;
+end
+if S.PERSRMR && strcmpi(S.INT_ALG,"raw+posture") && ~any(isnan([p.Age,p.Height,p.Weight])) && ~ismissing(p.Sex)
+    if p.Sex=="M", s=5; else, s=-161; end
+    rmr=10*p.Weight+6.25*p.Height-5*p.Age+s; % kcal/day (Mifflin-St Jeor)
+    S.paeeScale=rmr/(24*p.Weight);
+    has=true;
+end
+end
+
+
+function closeProgressDlg(uiPgDlg)
+% closeProgressDlg close the progress dialog if it is still open
+if isvalid(uiPgDlg)
+    close(uiPgDlg);
+end
+end
+
+
+function statsWarning(uiFig,msg)
+% statsWarning show a warning: an alert on the GUI figure, or the progress object's warn method
+if isobject(uiFig) && isprop(uiFig,'CancelRequested')
+    if ismethod(uiFig,'warn')
+        uiFig.warn(msg);
+    else
+        warning('genStats:warning','%s',msg);
+    end
+else
+    uialert(uiFig,msg,"Stats Warning","Icon","warning");
+end
+end
+
+
+function msg = checkBatchSettings(masterQCTbl,Settings,projectDir)
+% checkBatchSettings check the processing settings of the selected batches against the stats settings.
+%
+% The settings of each batch are read from BatchOut/<Batch>/Actipass_BatchSettings.txt in the project directory.
+% Batches without that file (or without a setting needed by a rule) cannot be checked and are skipped.
+%
+% INPUTS:
+% masterQCTbl: master QC table rows selected for stats generation (column Batch gives each ID's batch)
+% Settings: stats settings
+% projectDir: project (output) directory
+%
+% OUTPUT:
+% msg: "" when no conflict is found, otherwise a message naming the conflicting batches
+%
+% Conflicts checked:
+% 1. Trunk event variables (Event_TrunkData.csv) are generated during processing, and their events are merged across
+%    midnight only when the batch is processed with table format "EventsNoBreak". When the stats merge trunk event
+%    variables (trunk on, SAVETRNKD, an events table format other than "Hourly"), every batch processed with trunk
+%    variables must use "EventsNoBreak" exactly when the stats do; otherwise thigh and trunk event rows do not match.
+
+msg="";
+batches=unique(masterQCTbl.Batch(~ismissing(masterQCTbl.Batch) & masterQCTbl.Batch~=""));
+useTrnkEvnts=~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD && ...
+    matches(Settings.TblFormat,["Events","EventsNoBreak","Daily+Events"],'IgnoreCase',true);
+if ~useTrnkEvnts || isempty(batches)
+    return;
+end
+statsNoBreak=strcmpi(Settings.TblFormat,"EventsNoBreak");
+
+conflicts=strings(0,1);
+for itrB=1:length(batches)
+    settF=fullfile(projectDir,"BatchOut",batches(itrB),"Actipass_BatchSettings.txt");
+    if ~isfile(settF)
+        continue; % settings of this batch are unknown
+    end
+    btchSett=readBatchSettings(settF);
+    if ~all(isKey(btchSett,["TRUNKPOS","SAVETRNKD"]))
+        continue;
+    end
+    % only batches processed with trunk data and saved trunk variables have trunk event tables
+    btchTrnkEvnts=~strcmpi(btchSett("TRUNKPOS"),"off") && matches(btchSett("SAVETRNKD"),["1","true"],'IgnoreCase',true);
+    btchFormat="";
+    if isKey(btchSett,"TblFormat")
+        btchFormat=btchSett("TblFormat");
+    end
+    if btchTrnkEvnts && strcmpi(btchFormat,"EventsNoBreak")~=statsNoBreak
+        numIDs=sum(masterQCTbl.Batch==batches(itrB));
+        conflicts(end+1)=""""+batches(itrB)+""" ("+numIDs+" IDs, table format """+btchFormat+""")"; %#ok<AGROW>
+    end
+end
+
+if ~isempty(conflicts)
+    msg="Stats aborted: trunk event variables of batch(es) "+join(conflicts,", ")+" do not match the stats "+...
+        "table format """+Settings.TblFormat+""". Trunk events are merged across midnight only when a batch "+...
+        "is processed with ""EventsNoBreak"". Reprocess these batches with a matching table format, choose "+...
+        "another stats table format, or disable trunk variables (SAVETRNKD).";
+end
+end
+
+
+function btchSett = readBatchSettings(settF)
+% readBatchSettings read a batch settings file (struct display text "Name: value" per line) into a dictionary of
+% strings. Quotes around values are removed; values spanning several lines keep only their first line.
+btchSett=dictionary(string.empty,string.empty);
+lines=readlines(settF);
+for itrL=1:length(lines)
+    tok=regexp(lines(itrL),'^\s*(\w+):\s*(.*?)\s*$','tokens','once');
+    if isempty(tok)
+        continue;
+    end
+    val=tok(2);
+    if strlength(val)>=2 && any(startsWith(val,["'",""""])) && extractAfter(val,strlength(val)-1)==extractBefore(val,2)
+        val=extractBetween(val,2,strlength(val)-1);
+    end
+    btchSett(tok(1))=val;
+end
 end
 

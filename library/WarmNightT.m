@@ -74,8 +74,8 @@ end
 %% Main Night adjustment
 
 % first filter WarmNightLogic with JoinTimerActive
-WarmNightLogic=~bwareaopen(~WarmNightLogic, JoinTimerActive); % join groups togheter
-WarmNightLogic=bwareaopen(WarmNightLogic, JoinTimerSleep); % remove lonly small groups
+WarmNightLogic=~removeShortRuns(~WarmNightLogic, JoinTimerActive); % join groups togheter
+WarmNightLogic=removeShortRuns(WarmNightLogic, JoinTimerSleep); % remove lonly small groups
 
 
 % Now remove short sleep sections.
