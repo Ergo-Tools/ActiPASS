@@ -1,7 +1,6 @@
 # ActiPASS
-![actipass_Horizontal](https://github.com/user-attachments/assets/4d99b707-bcc7-4f6d-a65c-6d9c9134034a)
 
-<!--![ActiPASS logo blue](https://user-images.githubusercontent.com/26480941/170669286-19ad73a9-df25-4903-ad07-29746b6ca0c8.PNG)--> 
+<img width="1200" height="495" alt="image" src="https://github.com/user-attachments/assets/8570104e-eafb-4dec-a3b5-4362a15937cc" />
 
 ### About ActiPASS
 
