@@ -59,7 +59,9 @@
           "with Host-Details.txt is shown. Attach the file to the mail, or send it yourself to the addresses below.";
       addLog("info", `Licence request written: ${r.file}`);
     } catch (e) {
-      error = errorText(e);
+      // show the licence folder anyway (an older request file, or to send the files by hand)
+      error = errorText(e) + (lic?.folder ? ` The licence folder is shown: ${lic.folder}` : "");
+      if (lic?.folder) revealItemInDir(lic.folder).catch(() => {});
     } finally {
       busy = "";
     }

@@ -71,9 +71,17 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   console.log(`build-release: app version ${appVersion}`);
   fs.writeFileSync(versionConf, JSON.stringify({ version: appVersion }) + "\n");
 
+  // the engine build the app is released with (engine file version, e.g. 2026.11.3.32718):
+  // the app warns when the installed engine is another build (VITE_ENGINE_BUILD)
+  const distBuild = path.join(engineDir, "build", "dist", "build.txt");
+  const engineBuild = !dev && fs.existsSync(distBuild) ? fs.readFileSync(distBuild, "utf8").trim() : "";
+  if (!dev && !engineBuild) fail("engine-matlab/build/dist/build.txt is missing: rebuild the engine (cd tools; build_engine)");
+  if (engineBuild) console.log(`build-release: engine build ${engineBuild}`);
+
   const extra = process.argv.slice(2).filter((a) => a !== "--dev");
   const args = dev ? ["tauri", "dev", "--config", versionConf, ...extra]
     : ["tauri", "build", "--config", "src-tauri/tauri.release.conf.json", "--config", versionConf, ...extra];
-  const r = spawnSync("npx", args, { cwd: appDir, stdio: "inherit", shell: process.platform === "win32" });
+  const r = spawnSync("npx", args, { cwd: appDir, stdio: "inherit", shell: process.platform === "win32",
+    env: { ...process.env, VITE_ENGINE_BUILD: engineBuild } });
   process.exit(r.status ?? 1);
 }

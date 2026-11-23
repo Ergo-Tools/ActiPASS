@@ -1,103 +1,96 @@
-# Building Actipass desktop
+# Building the Actipass desktop app from source
 
-How to run the desktop app for development, build the compiled engine and build the Windows
-installer. Commands are for Windows PowerShell; run them in a fresh shell after installing the tools
-(or put Node and cargo on `PATH`: `$env:Path = "$env:LOCALAPPDATA\Programs\nodejs;$env:USERPROFILE\.cargo\bin;$env:Path"`).
+This guide is for anyone who wants to build the Actipass desktop app (the user interface) from its
+source code. It builds the app's executable only. The app does no processing itself: it needs the
+**Actipass Engine**, a separate program that is not part of this source code. Install the engine once
+with the official Actipass installer (it installs the app and the engine); the app you build then uses
+that engine. See the [Actipass desktop app user manual](https://github.com/Ergo-Tools/ActiPASS/wiki/Desktop-App-User-Manual)
+and [Actipass engine and protocol](https://github.com/Ergo-Tools/ActiPASS/wiki/Desktop-App-Engine-and-protocol).
 
-## 1. Tools
+The commands below are for Windows PowerShell.
 
-| Tool | Used for | Notes |
-|---|---|---|
-| [Node.js](https://nodejs.org/) LTS | front end (Vite, SvelteKit), Tauri CLI, build scripts | per-user install is fine |
-| [Rust](https://rustup.rs/) stable, MSVC toolchain | Tauri shell (`app/src-tauri`) | `rustup default stable-x86_64-pc-windows-msvc` |
-| Visual Studio Build Tools, "Desktop development with C++" | Rust linker, Windows SDK | |
-| MATLAB R2024b + MATLAB Compiler | compiled engine and its installer | the release the classic GUI is built with (`ActiPASS_UI_MATLAB2024.prj`) |
-| MATLAB (any recent release) | engine during development | the app starts `matlab -batch` |
-| R (64-bit), optional | the `raw+posture` intensity algorithm | only to test that algorithm |
+## 1. Install the tools
 
-WebView2 is part of Windows 10/11.
+| Tool | Notes |
+|---|---|
+| [Node.js](https://nodejs.org/) (LTS) | builds the user interface (Svelte, TypeScript) |
+| [Rust](https://rustup.rs/) (stable) | builds the small native shell; on Windows choose the MSVC toolchain |
+| [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), workload "Desktop development with C++" | the linker and Windows SDK that Rust needs |
 
-## 2. Checkouts
+Microsoft Edge WebView2, which the app uses to show its pages, is part of Windows 10 and 11.
 
-Next to each other (the defaults of `engine-matlab/paths.example.json`):
-
-```
-Ergo-Tools/
-  actipass-desktop/     this repository
-  ActiPASSV2/           branch desktop-engine
-  Utils/
-  BinaryFileSupport/
-```
-
-Copy `engine-matlab/paths.example.json` to `engine-matlab/paths.local.json` (not tracked) and adjust the
-folders if they are elsewhere. Then install the front-end packages once:
+Check the installation in a new PowerShell window:
 
 ```powershell
-cd actipass-desktop\app
-npm install
+node --version
+cargo --version
 ```
 
-## 3. Development
+## 2. Get the source
+
+Download or clone the [ActiPASS repository](https://github.com/Ergo-Tools/ActiPASS). The app is in the
+folder `desktop/app`:
 
 ```powershell
-cd actipass-desktop\app
-npm run dev:app
+git clone https://github.com/Ergo-Tools/ActiPASS.git
+cd ActiPASS\desktop\app
+npm ci
 ```
 
-This runs `tauri dev` with the ActiPASS version in the title (`2026.11.3-alpha (development build)`).
-The app starts MATLAB (`matlab -batch`, MATLAB must be on `PATH` or set on the Engine page) and runs the
-engine from `engine-matlab/` directly, so MATLAB changes need only an engine restart (Engine page:
-Stop, Start). Front-end changes reload at once; Rust changes rebuild and restart the app.
+`npm ci` installs the packages listed in `package-lock.json` (once, and again after an update of the source).
 
-To debug the engine in MATLAB: Engine page > "Attach to a MATLAB I start myself", paste the shown
-command in your MATLAB session (breakpoints work).
+## 3. Build the executable
 
-Checks: `npx svelte-check --tsconfig ./tsconfig.json` (in `app/`), `cargo check` (in `app/src-tauri/`),
-`node tools/engine-smoke.mjs` (engine protocol test, from the repository root).
+```powershell
+Set-Content version.json '{"version": "2026.11.3"}'
+npx tauri build --no-bundle --config version.json
+```
 
-## 4. Release
+Write the ActiPASS version of the source (see `ChangeLog.txt` in the repository root) in `version.json`
+instead of 2026.11.3: the app compares it with the engine's version. Without `--config`, the app has the
+placeholder version 0.1.0 and warns that the engine has another version.
 
-The version has one source: `<param.version>` in `ActiPASSV2/ActiPASS_UI_MATLAB2024.prj`. The engine and
-its installer get that version; the app gets `<version>-<PRERELEASE>` (`PRERELEASE` in
-`tools/build-release.mjs`: `"alpha"` now, `""` for a final release).
+The first build takes several minutes (Rust compiles all its packages); later builds are faster. The
+result is
 
-1. **Compiled engine** (MATLAB R2024b, about 10 minutes):
+```
+desktop\app\src-tauri\target\release\actipass-desktop.exe
+```
 
-   ```powershell
-   cd actipass-desktop\tools
-   & "C:\Program Files\MATLAB\R2024b\bin\matlab.exe" -batch "build_engine"
-   ```
+`--no-bundle` builds only the executable, without an installer. Copy it anywhere and start it.
 
-   Output: `engine-matlab/build/<version>/exe/actipass_engine.exe`, the "Actipass Engine" installer
-   (downloads the MATLAB Runtime when installed) and a copy of it with `version.txt` in
-   `engine-matlab/build/dist/`. Rebuild the engine after every change in `engine-matlab/` (including
-   `settings.schema.json`) or in ActiPASSV2.
+## 4. Run it with the installed engine
 
-2. **App installer**:
+The app looks for the engine at `C:\Program Files\Ergo-Tools\Actipass Engine\application\actipass_engine.exe`,
+where the official installer puts it, and starts it automatically. If the engine is somewhere else, choose
+it on the app's **Engine** page (**Installed engine**, then the engine file). The engine must have the same
+ActiPASS version as the app source (the title bar and the About page show the app version); otherwise the
+app shows a warning.
 
-   ```powershell
-   cd actipass-desktop\app
-   npm run build:release
-   ```
+To try changes while you work on the user interface, start the app in development mode instead:
 
-   Output: `app/src-tauri/target/release/bundle/nsis/Actipass_<version>-alpha_x64-setup.exe`. It contains
-   the engine installer from `engine-matlab/build/dist` and runs it during setup
-   (`app/src-tauri/windows/engine-hooks.nsh`). The script stops if that engine installer has another version.
+```powershell
+npx tauri dev
+```
 
-Close the development app before a release build: the running app locks `target/`, and the release build
-regenerates `.svelte-kit/`, which makes a running development app reload.
+The window reloads when you change a file under `src/`. A development build starts MATLAB by default
+(this is how the developers run the engine source); on the **Engine** page choose **Installed engine**
+to use the installed engine instead.
 
 ## 5. Where things are
 
 | Path | Contents |
 |---|---|
-| `app/src/routes/+page.svelte` | the window layout: top bar, sidebar, page area, log strip; page switching |
-| `app/src/lib/stages/*.svelte` | one file per page (Project, Data, Diary, Settings, Process, Qc, Stats, Tools, Engine, About) |
-| `app/src/lib/components/*.svelte` | shared parts: TopBar, Sidebar, LogStrip, SettingsSections/SettingField (forms from the schema), ToolCard, HelpLink, LicenceDialog, LicenceBanner |
-| `app/src/lib/*.svelte.ts`, `*.ts` | state and logic: engine connection (`engine.svelte.ts`), project, batch and settings (`batch.svelte.ts`), checks, QC, licence, help links (`help.ts`), sidebar pages (`stages.ts`) |
+| `app/src/routes/+page.svelte` | the window layout: top bar, sidebar, page area, log strip |
+| `app/src/lib/stages/` | one file per page (Project, Data, Diary, Settings, Process, Quality check, Statistics, Tools, Engine, About) |
+| `app/src/lib/components/` | shared parts: top bar, sidebar, log, settings forms, tool cards, licence dialog |
+| `app/src/lib/*.ts` | state and logic: engine connection, project, batch and settings, checks, quality check, help links |
 | `app/src/app.css` | colours (light and dark), fonts, buttons, cards |
-| `app/static/` | images (About picture, favicon); the app icons are in `app/src-tauri/icons/` |
-| `app/src-tauri/` | Rust shell: engine process and socket (`src/engine.rs`), QC figures (`src/qc.rs`), mail (`src/mail.rs`), `tauri.conf.json`, installer hooks |
-| `engine-matlab/` | MATLAB engine: `actipass_engine.m`, `cmd_*.m` method handlers, `settings.schema.json` (settings pages) |
-| `tools/` | build scripts and engine test clients |
-| `docs/plan.md` | design and plan |
+| `app/src-tauri/` | Rust shell: starts the engine and talks to it (`src/engine.rs`), QC figures, mail; `tauri.conf.json` |
+| `protocol/` | the protocol between the app and the engine |
+
+## License
+
+The desktop app source is licensed under the GNU General Public License, version 3.0 or later (see
+`../LICENSE.md`). The Actipass Engine is distributed in compiled form under the
+[ActiPASS End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement).

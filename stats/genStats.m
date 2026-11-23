@@ -82,6 +82,11 @@ Settings.SAVETRNKD=statStruct.SAVETRNKD; % flag for saving trunk variables
 Settings.TRUNKPOS=statStruct.TRUNKPOS; % indicate whether trunk acc is used
 Settings.CALFPOS=statStruct.CALFPOS; % indicate whether calf acc is used
 Settings.INT_ALG=statStruct.INT_ALG; % intensity algorithm selection posture or posture+raw-data
+% personal data (optional): height for the cadence based MET regression, individual RMR for the
+% raw+posture PAEE cut-offs; statStruct.persDataFile is the table (see readPersonalData)
+Settings.PERSDATA=isfield(statStruct,'PERSDATA') && logical(statStruct.PERSDATA);
+Settings.PERSRMR=isfield(statStruct,'PERSRMR') && logical(statStruct.PERSRMR);
+Settings.paeeScale=1; % 1 MET as individual RMR relative to 1 kcal/kg/h (1 = the fixed cut-offs)
 
 
 % activity to MET translation
@@ -279,6 +284,22 @@ try
         return;
     end
 
+    % personal data table (optional): height and individual RMR per ID
+    persT=[];
+    persUsed=strings(0,1); % IDs that used personal data
+    persMissing=strings(0,1); % IDs without (usable) personal data: defaults
+    if Settings.PERSDATA
+        persFile="";
+        if isfield(statStruct,'persDataFile'), persFile=string(statStruct.persDataFile); end
+        [persT,pStatus]=readPersonalData(persFile);
+        if ~startsWith(pStatus,"OK")
+            status=pStatus;
+            return;
+        elseif pStatus~="OK"
+            statsWarning(uiFig,extractAfter(pStatus,"OK: "));
+        end
+    end
+
     %% Daily and interval based tables generation
 
     % create dlyGenStruct with parameters needed for horizontal table generation
@@ -357,6 +378,18 @@ try
             paee=interp1(tPAEE,paeeT.paee,perSecT.DateTime,"nearest","extrap");
             % add 'paee' column to perSecT 
             perSecT=horzcat(perSecT,table(paee));
+        end
+
+        % personal data of this ID (height, individual RMR); the defaults when there are none
+        [SettingsID,hasPers]=personalSettings(Settings,persT,subjctID);
+        dlyGenStruct.Settings=SettingsID;
+        evntGenStruct.Settings=SettingsID;
+        if Settings.PERSDATA
+            if hasPers
+                persUsed(end+1)=subjctID; %#ok<AGROW>
+            else
+                persMissing(end+1)=subjctID; %#ok<AGROW>
+            end
         end
 
         % generating daily tables
@@ -596,6 +629,11 @@ try
         end
     end
 
+    if Settings.PERSDATA && ~isempty(persMissing)
+        statsWarning(uiFig,sprintf(['Personal data used for %d ID(s). No usable personal data for %d ID(s) ' ...
+            '(default height 170 cm and fixed PAEE cut-offs used): %s'],numel(persUsed),numel(persMissing),...
+            join(persMissing,", ")));
+    end
     if any(allMsgs~="")
         status=join(allMsgs(allMsgs~=""));
     end
@@ -609,6 +647,34 @@ catch ME
 
 end
 
+end
+
+
+function [S,has]=personalSettings(S,persT,subjctID)
+% personalSettings the stats settings of one ID with its personal data (readPersonalData)
+% Height replaces the default height of the cadence based MET regression (O'Brien et al. 2020).
+% With PERSRMR and the raw+posture algorithm, the resting metabolic rate (Mifflin-St Jeor, from
+% age, sex, height and weight) is 1 MET of the PAEE cut-offs: paeeScale = RMR (kcal/day)/(24*weight),
+% i.e. the individual MET relative to 1 kcal/kg/h. has: personal data were used for this ID.
+has=false;
+if ~S.PERSDATA || isempty(persT)
+    return;
+end
+r=find(persT.SubjectID==string(subjctID),1);
+if isempty(r)
+    return;
+end
+p=persT(r,:);
+if ~isnan(p.Height)
+    S.wlkHeight=p.Height;
+    has=true;
+end
+if S.PERSRMR && strcmpi(S.INT_ALG,"raw+posture") && ~any(isnan([p.Age,p.Height,p.Weight])) && ~ismissing(p.Sex)
+    if p.Sex=="M", s=5; else, s=-161; end
+    rmr=10*p.Weight+6.25*p.Height-5*p.Age+s; % kcal/day (Mifflin-St Jeor)
+    S.paeeScale=rmr/(24*p.Weight);
+    has=true;
+end
 end
 
 

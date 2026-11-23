@@ -106,12 +106,16 @@ if  strcmpi(Settings.INT_ALG,"posture")
         'categorical',["Slp","SED","LPA","LPA_Amb","MPA","VPA"]);
 
 elseif strcmpi(Settings.INT_ALG,"raw+posture")
+    % 1 MET of the cut-offs and fixed values: 1 kcal/kg/h (paeeScale 1), or the individual
+    % resting metabolic rate from personal data (genStats personalSettings)
+    sc=1;
+    if isfield(Settings,'paeeScale'), sc=Settings.paeeScale; end
     % set paee of excluded and non-wear times to -1
     PerSecT.paee(Activity==-1 | Activity==0) = -1; %excluded or non-wear will be assigned -1 (will not be used for discretization)
-    PerSecT.paee(rows_SI & Activity~=-1 & Activity~=0)=0.06; %sleep-interval (0.9 MET)
-    PerSecT.paee(~rows_SI & Activity==1) = 0.06973; % lying
-    PerSecT.paee(~rows_SI & Activity==11 ) = 0.06625; %sleep-outside-bed (called LieStill)
-    PerSecT.paee(~rows_SI & Activity==2 ) = 0.0906; % sitting
+    PerSecT.paee(rows_SI & Activity~=-1 & Activity~=0)=0.06*sc; %sleep-interval (0.9 MET)
+    PerSecT.paee(~rows_SI & Activity==1) = 0.06973*sc; % lying
+    PerSecT.paee(~rows_SI & Activity==11 ) = 0.06625*sc; %sleep-outside-bed (called LieStill)
+    PerSecT.paee(~rows_SI & Activity==2 ) = 0.0906*sc; % sitting
 
     % filter (smoothen) PAEE if needed
     if ~strcmpi(Settings.FilterTAI,"off")
@@ -128,7 +132,7 @@ elseif strcmpi(Settings.INT_ALG,"raw+posture")
     end
 
     %discretaize TAI to intensity classes
-    dayPALevels = discretize(PerSecT.paee,[0.06, 0.066, 0.105, 0.2092, 0.4184, inf],...
+    dayPALevels = discretize(PerSecT.paee,[[0.06, 0.066, 0.105, 0.2092, 0.4184]*sc, inf],...
         'categorical',["Slp","SED","LPA","MPA","VPA"]);
     % add category LPA_Amb in order to match the workflow posture only intensity algorithm
     dayPALevels = addcats(dayPALevels,"LPA_Amb",After="LPA");

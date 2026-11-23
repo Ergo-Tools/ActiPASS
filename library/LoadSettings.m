@@ -621,6 +621,27 @@ if ~isfield(Settings,'FilterTAI')|| ismissing( Settings.FilterTAI)||...
     Settings.FilterTAI="off";  % apply exponential smoothing on TAI options 'off', 'TC10',"TC20","TC30","TC60","TC90","TC120" - default off
 end
 
+% use personal data (SubjectID, Age, Sex, Height, Weight table, chosen at stats generation):
+% the height replaces the default 170 cm in the cadence based MET regression (WalkMET "regression")
+if ~isfield(Settings,'PERSDATA')
+    Settings.PERSDATA=false;
+else
+    Settings.PERSDATA=logical(Settings.PERSDATA);
+end
+% with personal data and the raw+posture intensity algorithm: individual resting metabolic rate
+% (Mifflin-St Jeor) as 1 MET for the PAEE intensity cut-offs (fixed cut-offs when data are missing)
+if ~isfield(Settings,'PERSRMR')
+    Settings.PERSRMR=false;
+else
+    Settings.PERSRMR=logical(Settings.PERSRMR);
+end
+% the last personal data file
+if ~isfield(Settings,'pers_file') || isempty(Settings.pers_file) || any(ismissing(Settings.pers_file))
+    Settings.pers_file="";
+else
+    Settings.pers_file=string(Settings.pers_file);
+end
+
 % load stat-generation table format options
 if ~isfield(Settings,'TblFormat')|| ismissing( Settings.TblFormat) || ...
         ~matches(Settings.TblFormat,["Daily","Events","EventsNoBreak","Daily+Events","Hourly"])

@@ -17,6 +17,8 @@ export interface EngineStatus {
   hello: {
     engine?: string;
     engineVersion?: string;
+    /** compiled engine: <version>.<build number>, the file version of its exe ("" in MATLAB) */
+    engineBuild?: string;
     matlabVersion?: string;
     deployed?: boolean;
     pid?: number;
@@ -69,14 +71,25 @@ export interface EngineInfo {
   appVersion: string;
 }
 
-/** Warning when a release app and its engine have different ActiPASS versions */
+/** the engine build this release app came with (tools/build-release.mjs; "" in development) */
+export const EXPECTED_ENGINE_BUILD: string = import.meta.env.VITE_ENGINE_BUILD ?? "";
+
+const REINSTALL = "Install the engine that came with this app: run engine\\Actipass_Engine_Installer.exe in the " +
+  "Actipass installation folder (usually C:\\Program Files\\Ergo-Tools\\Actipass), or install Actipass again.";
+
+/** Warning when a release app and its compiled engine have different ActiPASS versions, or
+ *  the same version but another engine build (an older engine lacks newer methods) */
 export function versionMismatch(): string {
-  const ev = engine.status.hello?.engineVersion;
+  const hello = engine.status.hello;
+  const ev = hello?.engineVersion;
   const av = engine.info?.appVersion;
+  if (!ev || !av || engine.info?.devBuild) return "";
   // the app may carry a pre-release suffix (2026.11.3-alpha); the engine has the plain version
-  if (!ev || !av || engine.info?.devBuild || ev === av.replace(/-.*$/, "")) return "";
-  return `The engine is version ${ev}, this app is ${av}. Install the engine that came with this app ` +
-    `(run its installer again: Actipass folder, engine\\Actipass_Engine_Installer.exe).`;
+  if (ev !== av.replace(/-.*$/, "")) return `The engine is version ${ev}, this app is ${av}. ${REINSTALL}`;
+  if (hello?.deployed && EXPECTED_ENGINE_BUILD && hello.engineBuild !== EXPECTED_ENGINE_BUILD)
+    return `The installed engine (build ${hello.engineBuild || "unknown, an older engine"}) is not the engine build of this app ` +
+      `(${EXPECTED_ENGINE_BUILD}): some functions may be missing. ${REINSTALL}`;
+  return "";
 }
 
 export const engine = $state({
@@ -248,8 +261,16 @@ export async function cancelJob() {
   }
 }
 
+export const METHOD_NOT_FOUND = -32601;
+
 export function errorText(e: unknown): string {
-  if (e && typeof e === "object" && "message" in e) return String((e as RpcError).message);
+  if (e && typeof e === "object" && "message" in e) {
+    const err = e as RpcError;
+    // a method the installed engine does not have: it is older than the app
+    if (err.code === METHOD_NOT_FOUND)
+      return `${err.message}. The installed engine is older than this app. ${REINSTALL}`;
+    return String(err.message);
+  }
   return String(e);
 }
 

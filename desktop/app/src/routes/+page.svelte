@@ -21,6 +21,7 @@
   import { resetQc } from "$lib/qc.svelte";
   import { project } from "$lib/project.svelte";
   import LicenceBanner from "$lib/components/LicenceBanner.svelte";
+  import EngineBanner from "$lib/components/EngineBanner.svelte";
   import LicenceDialog from "$lib/components/LicenceDialog.svelte";
   import { licenceWarning } from "$lib/licence";
 
@@ -81,6 +82,7 @@
   <Sidebar bind:current />
   <main>
     <div class="content" class:wide={current === "qc"}>
+      <EngineBanner />
       <LicenceBanner />
       {#if current === "project"}
         <ProjectStage />

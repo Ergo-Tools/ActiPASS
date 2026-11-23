@@ -26,10 +26,13 @@ Changes and new features:
 8. The Image Processing Toolbox is no longer needed.
 9. Licence check and request read the network adapters with PowerShell Get-NetAdapter (getmac misses some
    modern adapters, e.g. Wi-Fi 7).
-10. Newly published source files: mergeSleepData, genClinicSitToStandTable, calculate_wbv_segments,
+10. Stats generation with personal data (optional): a table with SubjectID, Age, Sex, Height and Weight. Each
+    person's height replaces 170 cm in the height-adjusted cadence-MET equation (O'Brien et al. 2020), and for
+    raw+posture the person's resting metabolic rate (Mifflin-St Jeor) can be 1 MET of the PAEE intensity cut-offs.
+11. Newly published source files: mergeSleepData, genClinicSitToStandTable, calculate_wbv_segments,
     load_AX3_iso2631, iso2631_wbv, FindNonWearTrunk (algorithms); CalibrateData, downsampleTable,
     matchDiaryTicks, timeToSec, MaxIncTid, movingMode, removeShortRuns, resampleAcc, toActiPASSFrame,
-    readCalFile, VisualizeActvts, findDistributions (library); cli_diary_tick_warnings (cli).
+    readCalFile, VisualizeActvts, findDistributions, readPersonalData (library); cli_diary_tick_warnings (cli).
 
 Bugfixes:
 1. Resampling: in about half of the recordings the resampled data had one sample too few, so the samples drifted

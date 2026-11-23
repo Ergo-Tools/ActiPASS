@@ -1,8 +1,9 @@
 ; engine-hooks.nsh  NSIS hooks of the Actipass installer (tauri.release.conf.json).
 ;
 ; After the app is installed, runs the bundled Actipass Engine installer (compiled MATLAB
-; engine; it downloads the MATLAB Runtime when missing), unless the same engine version is
-; already installed. The engine is a separate program in "Apps"; uninstalling Actipass
+; engine; it downloads the MATLAB Runtime when missing), unless the same engine build
+; (file version <ActiPASS version>.<build number>) is already installed. The engine is a
+; separate program in "Apps"; uninstalling Actipass
 ; leaves it (other Actipass versions may use it).
 ;
 ; SPDX-License-Identifier: GPL-3.0-or-later
@@ -27,22 +28,32 @@ FunctionEnd
 !define ENGINE_EXE "$PROGRAMFILES64\Ergo-Tools\Actipass Engine\application\actipass_engine.exe"
 
 !macro NSIS_HOOK_POSTINSTALL
-  ; bundled engine version (version.txt has no newline)
+  ; bundled engine build = the file version of its exe, e.g. 2026.11.3.32718 (build.txt;
+  ; older bundles have only version.txt: <version>.0). Each engine build has its own
+  ; number, so a newer build of the same ActiPASS version is installed too.
   StrCpy $R0 ""
   ClearErrors
-  FileOpen $R1 "$INSTDIR\engine\version.txt" r
+  FileOpen $R1 "$INSTDIR\engine\build.txt" r
   ${IfNot} ${Errors}
     FileRead $R1 $R0
     FileClose $R1
+  ${Else}
+    ClearErrors
+    FileOpen $R1 "$INSTDIR\engine\version.txt" r
+    ${IfNot} ${Errors}
+      FileRead $R1 $R0
+      FileClose $R1
+      StrCpy $R0 "$R0.0"
+    ${EndIf}
   ${EndIf}
 
-  ; installed engine version ("2026.11.3.0"), empty if not installed
+  ; installed engine version ("2026.11.3.32718"), empty if not installed
   StrCpy $R2 ""
   ${If} ${FileExists} "${ENGINE_EXE}"
     ${GetFileVersion} "${ENGINE_EXE}" $R2
   ${EndIf}
 
-  ${If} "$R2" == "$R0.0"
+  ${If} "$R2" == "$R0"
     DetailPrint "Actipass Engine $R0 is already installed"
   ${ElseIf} ${Silent}
     DetailPrint "Silent install: Actipass Engine $R0 not installed (run $INSTDIR\engine\Actipass_Engine_Installer.exe)"

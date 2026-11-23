@@ -11,6 +11,7 @@ non-wear, orientation checks, synchronisation, figures and small helpers.
 | [`open_accfiles.m`](open_accfiles.m) | Information about the chosen accelerometer files (type, subject IDs, trunk/calf files) |
 | [`open_diary.m`](open_diary.m) | Reads an ActiPASS diary for given subject IDs |
 | [`readCalFile.m`](readCalFile.m) | Reads a device calibration file (device IDs as text) |
+| [`readPersonalData.m`](readPersonalData.m) | Reads the personal data table (SubjectID, Age, Sex, Height, Weight) of the stats generation |
 | [`AutoCalibrate.m`](AutoCalibrate.m) | Automatic calibration of triaxial accelerometer data |
 | [`CalibrateData.m`](CalibrateData.m) | Applies calibration coefficients (from the calibration file or auto-calibration) |
 | [`toActiPASSFrame.m`](toActiPASSFrame.m) | Maps the raw axes of a device to the ActiPASS frame |

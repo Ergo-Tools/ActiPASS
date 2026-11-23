@@ -5,6 +5,7 @@
   import HelpLink from "../components/HelpLink.svelte";
   import { manual } from "../help";
   import { revealItemInDir } from "@tauri-apps/plugin-opener";
+  import { open } from "@tauri-apps/plugin-dialog";
   import { engine, runJob, cancelJob, addLog, errorText, CANCELED, type RpcError } from "../engine.svelte";
   import { project } from "../project.svelte";
   import { batch, settingsProjectDir } from "../batch.svelte";
@@ -35,11 +36,23 @@
     if (!batches.includes(chosenBatch)) chosenBatch = project.batch || batches[batches.length - 1] || "";
   });
 
+  // personal data table (setting "Use personal data"): the project's last file, or a new choice
+  let persOn = $derived(!!s?.PERSDATA);
+  let persChosen = $state("");
+  let persFile = $derived(persChosen || String(s?.pers_file ?? ""));
+  $effect(() => { void settingsProjectDir(); persChosen = ""; }); // another project: its own file
+  async function choosePers() {
+    const f = await open({ title: "Personal data table (SubjectID, Age, Sex, Height, Weight)", defaultPath: persFile || settingsProjectDir() || undefined,
+      filters: [{ name: "CSV or Excel", extensions: ["csv", "txt", "xlsx", "xls"] }] });
+    if (typeof f === "string") persChosen = f;
+  }
+
   let blocked = $derived(
     !settingsProjectDir() ? "Open a project (Project)." :
     !project.info?.hasMasterQC ? "This project has no processed data yet: run a batch first (Process)." :
     s?.EVALV ? "Actipass is running in evaluation mode: statistics generation is disabled." :
-    scope === "batch" && !chosenBatch ? "Choose a batch." : "");
+    scope === "batch" && !chosenBatch ? "Choose a batch." :
+    persOn && !persFile ? "\"Use personal data\" is on (Settings > Statistics options): choose the personal data file." : "");
 
   async function run() {
     result = null;
@@ -49,6 +62,7 @@
         projectDir: settingsProjectDir(),
         batch: scope === "batch" ? chosenBatch : "",
         epochCSV: epoch,
+        ...(persOn ? { persFile } : {}),
       });
     } catch (e) {
       const err = e as RpcError;
@@ -83,9 +97,16 @@
           <option value="No">No</option><option value="1s">1 s</option><option value="10s">10 s</option><option value="60s">60 s</option>
         </select>
       </label>
+      {#if persOn}
+        <div class="row">
+          <button onclick={choosePers} disabled={!!engine.busy}>Personal data file…</button>
+          <span class="mono small">{persFile || "not chosen"}</span>
+          <HelpLink doc={manual("stats", "personal-data")} label="Personal data" />
+        </div>
+      {/if}
     </div>
     <p class="muted small">Options used as well (Settings page): table format {s.TblFormat}, TAI filter {s.FilterTAI}, walk MET {s.WalkMET},
-      bouts {s.genBouts}; valid duration {s.minValidDur} h.</p>
+      bouts {s.genBouts}; valid duration {s.minValidDur} h{#if persOn}; personal data{s.PERSRMR ? " with individual RMR" : ""}{/if}.</p>
     {#if blocked}<p class="warn">{blocked}</p>{/if}
     <div class="row">
       <button class="primary" onclick={run} disabled={!!blocked || running || otherJob}>Generate statistics</button>
