@@ -24,7 +24,7 @@ Please report any publications which implement Actipass [here](https://doit.medf
 ### Actipass graphical user interface
 
 <figure>
-    <img width="841" height="558" alt="image" src="https://github.com/user-attachments/assets/dcfcc005-d0c8-45d7-ac61-dee58910d462" />
+    <img width="655" alt="image" src="https://github.com/user-attachments/assets/dcfcc005-d0c8-45d7-ac61-dee58910d462" />
     
     Actipass desktop app - A modern Rust/Tauri based GUI 
 </figure>
