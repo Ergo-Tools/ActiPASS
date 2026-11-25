@@ -20,10 +20,11 @@
   let proLocked = $derived(!!s?.PROPASS);
 
   const filters = [
-    { name: "Accelerometer files", extensions: ["cwa", "wav", "datx", "dat", "csv", "bin", "hex", "npy", "xml"] },
+    { name: "Accelerometer files", extensions: ["cwa", "wav", "datx", "dat", "csv", "gt3x", "bin", "hex", "npy", "xml"] },
     { name: "Axivity CWA", extensions: ["cwa"] },
     { name: "Axivity WAV", extensions: ["wav"] },
     { name: "ActivPAL DATX", extensions: ["datx", "dat"] },
+    { name: "ActiGraph GT3X", extensions: ["gt3x"] },
     { name: "CSV (ActivPAL, ActiGraph, generic)", extensions: ["csv"] },
     { name: "SENS Motion", extensions: ["bin", "hex"] },
   ];

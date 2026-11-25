@@ -52,7 +52,7 @@ calf_files=[];
 if ~ispc
     % for MacOS file opening dialog does not contain a title and file-type selection. Therefore display a seperate menu 
     fTypes=["*.cwa","Axivity AX3/AX6 CWA Files";"*.wav","Axivity AX3/AX6 WAV Files";"*.datx;*.dat","ActivPAL 3 DATX Files";....
-        "*.csv","ActivPAL CSV files";"*.csv","Actigraph CSV Files";"*.bin;*.hex","SENS Motion BIN or HEX file";"*.csv","Generic Actipass CSV file";"*.xlsx","List of Acc Files"];
+        "*.csv","ActivPAL CSV files";"*.gt3x;*.csv","ActiGraph GT3X or CSV Files";"*.bin;*.hex","SENS Motion BIN or HEX file";"*.csv","Generic Actipass CSV file";"*.xlsx","List of Acc Files"];
     indFT=menu("Select Acc data file type to open a maximum of "+maxfiles+" Axivity, ActivPAL, Actigraph or SENS Files.",fTypes(:,2));
     ftype=indFT; % filetype index will be used in main script
     if indFT~=0 % if menu dialog is not closed by clicking x
@@ -67,7 +67,7 @@ if ~ispc
 else
     [files,path,ftype] = uigetfile(["*.cwa","Axivity AX3/AX6 CWA Files";"*.wav","Axivity AX3/AX6 WAV Files";...
         "*.datx;*.dat","ActivPAL 3 DATX Files";"*.csv;","ActivPAL CSV files";...
-        "*.csv","Actigraph CSV Files";"*.bin;*.hex","SENS Motion BIN or HEX Files";"*.csv","Generic Actipass CSV file";"*.xlsx","List of Acc Files"],...
+        "*.gt3x;*.csv","ActiGraph GT3X or CSV Files";"*.bin;*.hex","SENS Motion BIN or HEX Files";"*.csv","Generic Actipass CSV file";"*.xlsx","List of Acc Files"],...
         ("Select a maximum of "+maxfiles+" Axivity, ActivPAL, Actigraph or SENS Files."),'MultiSelect', 'on',rootfolder );
 end
 
@@ -143,6 +143,8 @@ else % One or more file selected
                             status="Unknown CSV filetype. Only ActivPAL, ActiGraph or Generic CSV files supported";
                             return;
                         end
+                    elseif strcmpi(acc_filexts(1),".gt3x")
+                        ftype=5;
                     elseif strcmpi(acc_filexts(1),".npy")
                         ftype=4;
                     elseif strcmpi(acc_filexts(1),".bin") || strcmpi(acc_filexts(1),".hex")
@@ -153,7 +155,7 @@ else % One or more file selected
                         acc_filenames=string([]);
                         acc_files=string([]);
                         subjectIDs="";
-                        status="Unknown filetype. Only CWA, WAV, DAT, DATX, CSV, NPY, BIN or XML files supported";
+                        status="Unknown filetype. Only CWA, WAV, DAT, DATX, CSV, GT3X, NPY, BIN or XML files supported";
                         return;
                     end
                     % if the file list also contains the SubjectIDs we do not need to find them from filenames

@@ -51,6 +51,7 @@ function exitcode = actipass_cli(acc_file,options)
 % "parseValueBlock.mexw64"
 % "ProcessNonWearAndBedtime.m"
 % "QCFlipRotation.m"
+% "readActGT3x.m"
 % "readActGT3xcsv.m"
 % "readActi4.m"
 % "readActivPAL.m"
@@ -58,6 +59,7 @@ function exitcode = actipass_cli(acc_file,options)
 % "readGenericCSV.m"
 % "readMovisensBin.m"
 % "readSENSBin.m"
+% "readGT3xMex.mexw64"
 % "readWAVtoACC.m"
 % "removeShortRuns.m"
 % "rgb.m"
@@ -80,7 +82,7 @@ arguments
 end
 
 %% intialize actipass_cli
-version="2026.11.4"; % actipass_cli version string
+version="2026.11.5"; % actipass_cli version string
 exitcode=0; % set exit code to zero
 
 % define ProPASS or Advanced mode
@@ -225,6 +227,9 @@ try
     elseif strcmpi(fext,".dat") || strcmpi(fext,".datx")
         ftype=3;
         devType="ActivPAL";
+    elseif strcmpi(fext,".gt3x")
+        ftype=5;
+        devType="ActiGraph";
     elseif strcmpi(fext,".csv")
         fidTmp=fopen(acc_file,'r');
         headLines=fgetl(fidTmp);
@@ -310,9 +315,15 @@ try
         fprintf('%s ActivPAL CSV file loading ....\n',string(datetime,"HH:mm:ss.SSS"));
         AccData = readActivPALcsv(acc_file);
     elseif ftype==5
-        % loading ActiGraph GT3x CSV file
-        fprintf('%s ActiGraph CSV file loading ....\n',string(datetime,"HH:mm:ss.SSS"));
-        AccData=readActGT3xcsv(acc_file);
+        if strcmpi(fext,".gt3x")
+            % loading native ActiGraph .gt3x file
+            fprintf('%s ActiGraph GT3X file loading ....\n',string(datetime,"HH:mm:ss.SSS"));
+            AccData=readActGT3x(acc_file);
+        else
+            % loading ActiGraph GT3x CSV file
+            fprintf('%s ActiGraph CSV file loading ....\n',string(datetime,"HH:mm:ss.SSS"));
+            AccData=readActGT3xcsv(acc_file);
+        end
     elseif ftype==3
         % loading ActivPAL 3 DATX file
         fprintf('%s ActivPAL 3 DATX file loading ....\n',string(datetime,"HH:mm:ss.SSS"));

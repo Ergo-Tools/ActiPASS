@@ -1,4 +1,4 @@
-Actipass CLI version 2026.11.4
+Actipass CLI version 2026.11.5
 
 WARNING:
 Use the CLI version only to quickly preview accelerometer files or to give participant feedback.
@@ -19,11 +19,13 @@ Licensing:
   https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement
 * The source of Actipass CLI is licensed under GPL-3.0-or-later (see LICENSE.md); the Actipass algorithms it uses
   are licensed under BSD-3-Clause.
+* The ActiGraph .gt3x reader readGT3xMex (ported from the R package read.gt3x) is licensed under the EUPL v1.2
+  (see LICENSE-EUPL-1.2.txt and NOTICE-readGT3xMex.txt; its source readGT3xMex.cpp is included).
 
 Supported accelerometer files:
 * Axivity CWA (.cwa) and WAV exported by OmGui (.wav)
 * ActivPAL (.datx, .dat, .npy and CSV)
-* ActiGraph CSV exported by ActiLife (.csv)
+* ActiGraph .gt3x and CSV exported by ActiLife (.csv)
 * SENS motion (.bin, .hex)
 * Movisens (.xml with its binary data)
 * Acti4 (.act4)

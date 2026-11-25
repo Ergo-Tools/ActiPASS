@@ -1,3 +1,20 @@
+Actipass Version 2026.11.5 (2026-11-25)
+#############################################
+
+Changes:
+1. ActiGraph .gt3x files are read directly, without an ActiLife CSV export (new utils/readActGT3x.m with the MEX
+   reader utils/ActiGraph/readGT3xMex, ported from the R package read.gt3x). The file dialog option "ActiGraph
+   GT3X or CSV Files" (library/open_accfiles.m) and Excel file lists accept .gt3x; the data are processed as
+   ActiGraph CSV files are (same axes and lying algorithm). Also in Actipass CLI 2026.11.5 (cli/) and the
+   desktop app.
+2. readGT3xMex is licensed under the EUPL v1.2 (utils/ActiGraph/LICENSE-EUPL-1.2.txt and
+   NOTICE-readGT3xMex.txt, LICENSES/EUPL-1.2.txt); the rest of utils/ stays BSD 3-Clause (see utils/README.md).
+   The licence, notice and source readGT3xMex.cpp are installed next to the Actipass, Actipass CLI and Actipass
+   Engine programs.
+3. Actipass desktop app 2026.11.5-alpha (desktop/): .gt3x files in the file dialog ("ActiGraph GT3X" filter)
+   and Excel file lists (see desktop/CHANGELOG.md).
+
+
 Actipass Version 2026.11.4 (2026-11-25)
 #############################################
 

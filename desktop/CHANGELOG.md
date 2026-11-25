@@ -1,5 +1,15 @@
 # Actipass desktop app: change log
 
+## 2026.11.5-alpha (2026-11-25)
+
+Released together with the classic Actipass app 2026.11.5.
+
+Changes:
+1. ActiGraph .gt3x files are read directly (no ActiLife CSV export needed): they can be chosen in the file
+   dialog ("ActiGraph GT3X" filter) and in Excel file lists, and are processed as ActiGraph CSV files are.
+2. The .gt3x reader (readGT3xMex, ported from the R package read.gt3x) is licensed under the EUPL v1.2: its
+   licence, notice and source are installed in the app's `licenses` folder and next to the engine.
+
 ## 2026.11.4-alpha (2026-11-25)
 
 Released together with the classic Actipass app 2026.11.4.
