@@ -1,6 +1,6 @@
 # Actipass
 
-<img width="1200" height="495" alt="image" src="https://github.com/user-attachments/assets/8570104e-eafb-4dec-a3b5-4362a15937cc" />
+<img width="1200" alt="image" src="https://github.com/user-attachments/assets/8570104e-eafb-4dec-a3b5-4362a15937cc" />
 
 ### About Actipass
 
@@ -30,7 +30,7 @@ Please report any publications which implement Actipass [here](https://doit.medf
 </figure>
 
 <figure>
-    <img width="655" height="444" alt="image" src="https://github.com/user-attachments/assets/b5710dbc-898e-422a-b7b6-1602f369406a" />
+    <img width="655" alt="image" src="https://github.com/user-attachments/assets/b5710dbc-898e-422a-b7b6-1602f369406a" />
     
     Actipass classic desktop app 
 </figure>
