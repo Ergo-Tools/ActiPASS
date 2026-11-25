@@ -178,7 +178,7 @@ varn_1S=["DateTime","Activity","Steps","SVM","Event","TimeInBed","SleepInterval"
 %define location of configuration and license files
 appDDir=fullfile(getenv('APPDATA'),'ActiPASS');
 ParamsConfig=fullfile(appDDir,'AktDetect_UI.conf');
-ActiPASSConfig=fullfile(appDDir,'ActiPASS_UI.conf');
+ActiPASSConfig=fullfile(appDDir,'Actipass_UI.conf');
 
 
 % empty vectors to hold the activity  classification of each second

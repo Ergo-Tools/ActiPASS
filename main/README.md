@@ -1,6 +1,6 @@
 ## Example workflow
 
-[`ActiPASS_example_workflow.m`](ActiPASS_example_workflow.m) shows, step by step, how the Actipass functions in this
+[`Actipass_example_workflow.m`](Actipass_example_workflow.m) shows, step by step, how the Actipass functions in this
 repository process one accelerometer file: loading the data and an optional diary, calibration, the quality check with
 automatic flip/rotation correction, activity classification per day, time-in-bed and sleep, and writing the detected
 activity time series to a file. It is a basic example: the workflow of the apps is more robust (error handling,

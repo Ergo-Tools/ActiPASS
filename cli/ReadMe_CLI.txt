@@ -32,7 +32,7 @@ Supported accelerometer files:
 Execution settings:
 * mode "PROPASS" (default) uses the Actipass default settings and algorithm parameters.
 * mode "ADVANCED" or "CLI" uses the settings and parameters of the Actipass config files
-  (%APPDATA%\Actipass\ActiPASS_UI.conf and AktDetect_UI.conf); change them with the Actipass app.
+  (%APPDATA%\Actipass\Actipass_UI.conf and AktDetect_UI.conf); change them with the Actipass app.
 * Figures are always the quality-check figures (the Visualizations setting is not used).
 
 Usage via Windows File Explorer:

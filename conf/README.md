@@ -4,7 +4,7 @@ Example configuration files in the JSON format Actipass uses (read by [`LoadSett
 
 | File | Contents |
 |---|---|
-| [`ActiPASS_UI.conf`](ActiPASS_UI.conf) | Settings of the workflow and the user interface (IDs, orientation, processing options, statistics options) |
+| [`Actipass_UI.conf`](Actipass_UI.conf) | Settings of the workflow and the user interface (IDs, orientation, processing options, statistics options) |
 | [`AktDetect_UI.conf`](AktDetect_UI.conf) | Algorithm parameters (thresholds, reference angles, bout lengths, MET values) |
 
 The apps keep these files in `%APPDATA%\Actipass` (the user's last used settings); the desktop app also keeps a copy per

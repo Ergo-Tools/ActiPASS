@@ -1,7 +1,7 @@
-function xyz = toActiPASSFrame(xyz, srcFormat, loc)
-% toActiPASSFrame  Map raw accelerometer axes of a device to the Actipass frame.
+function xyz = toActipassFrame(xyz, srcFormat, loc)
+% toActipassFrame  Map raw accelerometer axes of a device to the Actipass frame.
 %
-%   xyz = toActiPASSFrame(xyz, srcFormat, loc)
+%   xyz = toActipassFrame(xyz, srcFormat, loc)
 %
 %   xyz       : [n,3] raw x, y, z samples as returned by the file reader
 %   srcFormat : data format/brand the axes come from: "Axivity" (CWA, WAV),

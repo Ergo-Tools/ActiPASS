@@ -2,10 +2,11 @@ Actipass Version 2026.11.4 (2026-11-25)
 #############################################
 
 Changes:
-1. The name is written "Actipass" in the documentation, messages and the apps. File names, folder names and code
-   identifiers are unchanged.
+1. The name is written "Actipass" in the documentation, messages and the apps. Renamed: library/toActipassFrame.m
+   (was toActiPASSFrame.m), main/Actipass_example_workflow.m and conf/Actipass_UI.conf; the CLI reads
+   Actipass_UI.conf (the same file on Windows). Licence file names (ActiPASS.lic/.key) are unchanged.
 2. The "raw+posture" intensity algorithm is marked as experimental: check its results before you use them.
-3. Example configuration files (conf/): ActiPASS_UI.conf has the settings INT_ALG, varsBout and the personal data
+3. Example configuration files (conf/): Actipass_UI.conf has the settings INT_ALG, varsBout and the personal data
    settings PERSDATA, PERSRMR and pers_file; the unused VarsBout was removed from AktDetect_UI.conf.
 4. Actipass desktop app 2026.11.4-alpha (desktop/): Actipass icon for the app and its installer, new About logo,
    a shortcut from the Statistics page to the statistics options, help for the automatic time-in-bed settings and
