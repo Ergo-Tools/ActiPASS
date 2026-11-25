@@ -83,7 +83,8 @@ if  strcmpi(Settings.INT_ALG,"posture")
         Settings.MET_Running*(~rows_SI & Activity==6)+... %running
         Settings.MET_Stairs*(~rows_SI & Activity==7)+... % stair-walking
         Settings.MET_Cycle*(~rows_SI & Activity==8)+... & cycling
-        genMETOther(~rows_SI & Activity==9,Steps*60,Settings); % other
+        genMETOther(~rows_SI & Activity==9,Steps*60,Settings)+... % other
+        genMETOther(~rows_SI & Activity==12,Steps*60,Settings,Settings.MET_Kneel); % kneeling (as other: replaced activity unknown)
     % all remaining seconds (non-wear or excluded) are flagged as -1
     dayTAI(dayTAI==0)=-1;
 
@@ -116,6 +117,13 @@ elseif strcmpi(Settings.INT_ALG,"raw+posture")
     PerSecT.paee(~rows_SI & Activity==1) = 0.06973*sc; % lying
     PerSecT.paee(~rows_SI & Activity==11 ) = 0.06625*sc; %sleep-outside-bed (called LieStill)
     PerSecT.paee(~rows_SI & Activity==2 ) = 0.0906*sc; % sitting
+    % kneeling is detected after the activity the R models used, so it gets the MET of the posture
+    % algorithm (MET_Kneel, or walking MET when there is a cadence) as PAEE (1 MET = 0.06973 kJ/kg/min)
+    rowsKneel=~rows_SI & Activity==12;
+    if any(rowsKneel)
+        kneelMET=genMETOther(rowsKneel,Steps*60,Settings,Settings.MET_Kneel);
+        PerSecT.paee(rowsKneel) = kneelMET(rowsKneel)*0.06973*sc;
+    end
 
     % filter (smoothen) PAEE if needed
     if ~strcmpi(Settings.FilterTAI,"off")
@@ -225,6 +233,16 @@ for itrVarN=1:length(statVars)
     end
 end
 
+% a participant without calf data (calf accelerometer on in the stats, but no calf file or calf errors):
+% kneeling was not measured, so Kneel and its percentile and bout variables are NaN instead of 0
+if isfield(Settings,'noCalfData') && Settings.noCalfData && ismember("Kneel",statVars)
+    kneelVars=string(statTable.Properties.VariableNames);
+    kneelVars=kneelVars(kneelVars=="Kneel" | startsWith(kneelVars,"Kneel_"));
+    for itrK=1:length(kneelVars)
+        statTable.(kneelVars(itrK))(itrSeg)=NaN;
+    end
+end
+
 
 end
 
@@ -240,10 +258,14 @@ elseif strcmpi(Settings.WalkMET,"regression")
 end
 end
 
-function otherMET=genMETOther(OtherLgc,Cadence,Settings)
-% genMETOther calculate MET based on cadence for "Other" activities
+function otherMET=genMETOther(OtherLgc,Cadence,Settings,MET_Other)
+% genMETOther calculate MET based on cadence for "Other" activities (and kneeling): seconds with a
+% cadence get the walking MET of that cadence, seconds without one get MET_Other (default
+% Settings.MET_Other; Settings.MET_Kneel for kneeling)
+if nargin<4
+    MET_Other=Settings.MET_Other;
+end
 height=Settings.wlkHeight;
-MET_Other=Settings.MET_Other;
 if strcmpi(Settings.WalkMET,"fixed")
     otherMET_Cadence=(OtherLgc & Cadence~=0).* ...
         ((Cadence<Settings.Wlk_Slow_Cad)*Settings.Wlk_Low_MET+...

@@ -12,6 +12,17 @@ Changes:
    a shortcut from the Statistics page to the statistics options, help for the automatic time-in-bed settings and
    the quality check thresholds. The generic protocol layer of the engine is now published in
    desktop/engine-matlab/ (see desktop/CHANGELOG.md and desktop/engine-matlab/README.md).
+5. Fixed (stats/genStats.m): generating statistics crashed ("Unrecognized function or variable 'finlTrnkDT'")
+   when the trunk accelerometer was off but "Save trunk angle data" (SAVETRNKD) was on.
+6. Kneeling (calf accelerometer) gets an intensity: the new algorithm parameter MET_Kneel (default 1.55 MET, as
+   standing; in the 2024 Adult Compendium static kneeling equals standing quietly) or, with a cadence, the walking
+   MET of that cadence, as for "Other". Before, kneeling time was in none of the intensity classes. With the
+   raw+posture algorithm kneeling gets the same values as PAEE. conf/AktDetect_UI.conf has MET_Kneel.
+7. Statistics of projects with batches processed with and without the trunk or calf accelerometer: participants
+   without calf data get empty (NaN) kneeling variables (Kneel, TooMuchKneel, AngleCalfWalk) instead of 0, and
+   participants processed without the trunk get empty trunk variables (trunk data files of an earlier batch are
+   no longer used); a warning lists them. A warning also names batches processed with the trunk or calf
+   accelerometer when it is off in the statistics.
 
 
 Actipass Version 2026.11.3 (2026-11-22)

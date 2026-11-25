@@ -138,6 +138,15 @@ if isempty(ParamsAP) || ~all(matches(paramNms,fieldnames(ParamsAP)))
     ParamsAP.VrefCalfDef = [0,0,0];
 end
 
+% parameters added after the list above: filled in when missing, so that an existing parameters file
+% (which may have changed values) is kept instead of being replaced by all defaults
+% MET of kneeling without a cadence: as standing (MET_Stand). In the 2024 Adult Compendium static kneeling
+% (20025, 1.3) equals standing quietly (07040, 1.3); kneeling is not a sedentary posture, so like standing
+% it is put in light physical activity (kneeling tasks are 2-4.5 MET, e.g. 05131, 06140)
+if ~isfield(ParamsAP,'MET_Kneel') || ~isnumeric(ParamsAP.MET_Kneel) || ~isscalar(ParamsAP.MET_Kneel)
+    ParamsAP.MET_Kneel=1.55;
+end
+
 
 %% check if the main config file exist and load last settings
 % create an empty Settings structure

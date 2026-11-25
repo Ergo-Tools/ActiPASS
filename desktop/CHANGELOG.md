@@ -12,6 +12,16 @@ Changes:
    page and in the Start dialog).
 4. Statistics page: a "Statistics options…" link opens the Settings page at its Statistics options section.
 5. Settings help for the Automatic time-in-bed settings and the Quality check thresholds.
+6. The engine installer shows the Actipass splash image (as the classic app's installer).
+7. Fixed: generating statistics stopped with "Unrecognized function or variable 'finlTrnkDT'" when the trunk
+   accelerometer was off but "Save trunk angle data" was on (for example after turning the trunk off in a
+   project processed with it). The setting is hidden while the trunk is off, so this could not be undone in the
+   app.
+8. Kneeling gets an intensity: the algorithm parameter MET_Kneel (default 1.55, as standing), or the walking MET
+   when there is a cadence. Before, kneeling time was in none of the intensity classes.
+9. Statistics of projects with batches processed with and without the trunk or calf accelerometer: empty
+   (NaN) kneeling or trunk variables for the participants without those data, with a warning; a warning also
+   names batches processed with the trunk or calf accelerometer when it is off in the statistics.
 
 ## 2026.11.3-alpha (2026-11-23)
 

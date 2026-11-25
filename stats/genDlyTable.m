@@ -204,8 +204,15 @@ if height(dlyTable)>1
 end
 
 % check calf related QC flags
+% (participants without calf data, or metadata of files processed before kneeling detection, have no
+% TooMuchKneel flag: no kneeling QC for them)
+noCalfData=isfield(Settings,'noCalfData') && Settings.noCalfData;
 if strcmpi(Settings.CALFPOS,"on")
-    KneelQC=qcMeta.TooMuchKneel;
+    if ~noCalfData && ismember("TooMuchKneel",qcMeta.Properties.VariableNames)
+        KneelQC=qcMeta.TooMuchKneel==1;
+    else
+        KneelQC=false(height(dlyTable),1);
+    end
     Calf_Errs_day=repmat(strcmpi(dlyGenStruct.Calf_Errs,"Yes"),height(dlyTable),1); % consider file-level Sensor_Errs into account for each day
     Calf_Errs=dlyGenStruct.Calf_Errs;
 else
@@ -223,6 +230,13 @@ dlyTable.Day_QC(ismissing(dlyTable.Day_QC ))="OK";
 %fill daily QC flags from metadata file
 varN_DlyQC=intersect(varN_DlyQC,qcMeta.Properties.VariableNames); % find the quality check variables which actually exists
 dlyTable(:,varN_DlyQC)=qcMeta(:,varN_DlyQC);
+% calf QC variables of a participant without calf data: not measured (NaN)
+if strcmpi(Settings.CALFPOS,"on") && noCalfData
+    calfQCVars=intersect(["TooMuchKneel","AngleCalfWalk"],string(dlyTable.Properties.VariableNames));
+    for itrCV=1:length(calfQCVars)
+        dlyTable.(calfQCVars(itrCV))(:)=NaN;
+    end
+end
 
 %% merge dlyTable and  domain-specific table dlyTblDmns to mgdLngDlyTbl
 

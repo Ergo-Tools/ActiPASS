@@ -103,6 +103,9 @@ Settings.MET_Running = statStruct.ParamsAP.MET_Running; % 10;
 Settings.MET_Stairs = statStruct.ParamsAP.MET_Stairs; % 8;
 Settings.MET_Cycle = statStruct.ParamsAP.MET_Cycle; % 7;
 Settings.MET_Other = statStruct.ParamsAP.MET_Other; % 2; % "Other" with no periodicity falls into light physical activity
+% kneeling without a cadence (as "Other": the activity kneeling replaced is not known); 1.55 as standing
+Settings.MET_Kneel = 1.55;
+if isfield(statStruct.ParamsAP,'MET_Kneel'), Settings.MET_Kneel = statStruct.ParamsAP.MET_Kneel; end
 
 % MET cutoffs for intensity classes
 Settings.MET_INT_Slp= statStruct.ParamsAP.MET_INT_Slp; % 0.0;
@@ -141,7 +144,7 @@ varN_Comm=["Duration","NonWear","AwakeNW","SlpIntNW","ValidDuration","Awake","Sl
 if strcmpi(Settings.CALFPOS,"on")
     varN_Kneel="Kneel";
     varN_QCKneel=["TooMuchKneel","AngleCalfWalk"];
-    varT_QCKneel=["logical","double"];
+    varT_QCKneel=["double","double"]; % TooMuchKneel as 0/1 (written as before), NaN when not measured
     varN_Sbjct=[varN_Sbjct,"Calf_Errs"];
 else
 
@@ -283,11 +286,18 @@ try
         status=confMsg;
         return;
     end
+    % batches processed with the trunk or calf accelerometer while it is off in these stats: warn
+    btchMsgs=batchSettingsWarnings(masterQCTbl,Settings,statStruct.projectDir);
+    for itrM=1:length(btchMsgs)
+        statsWarning(uiFig,btchMsgs(itrM));
+    end
 
     % personal data table (optional): height and individual RMR per ID
     persT=[];
     persUsed=strings(0,1); % IDs that used personal data
     persMissing=strings(0,1); % IDs without (usable) personal data: defaults
+    noCalfIDs=strings(0,1); % IDs without calf data (calf on in the stats): calf variables NaN
+    noTrunkIDs=strings(0,1); % IDs without trunk variables (trunk on in the stats): trunk variables empty
     if Settings.PERSDATA
         persFile="";
         if isfield(statStruct,'persDataFile'), persFile=string(statStruct.persDataFile); end
@@ -382,6 +392,29 @@ try
 
         % personal data of this ID (height, individual RMR); the defaults when there are none
         [SettingsID,hasPers]=personalSettings(Settings,persT,subjctID);
+        % calf on in the stats, but this ID has no calf data (processed without the calf accelerometer, no
+        % calf file found, or calf errors): its kneeling variables are NaN (not measured) instead of 0
+        SettingsID.noCalfData=false;
+        if strcmpi(Settings.CALFPOS,"on")
+            calfF=masterQCTbl.Calf_File(itrFil);
+            calfErr=ismember("Calf_Errs",masterQCTbl.Properties.VariableNames) && ...
+                strcmpi(masterQCTbl.Calf_Errs(itrFil),"Yes");
+            if ismissing(calfF) || strtrim(calfF)=="" || calfErr
+                SettingsID.noCalfData=true;
+                noCalfIDs(end+1)=subjctID; %#ok<AGROW>
+            end
+        end
+        % trunk on in the stats, but this ID was last processed without trunk data (no trunk file in the master
+        % QC table) or no trunk variables were saved: its trunk variables stay empty. The master QC table
+        % decides, not the trunk data files: files of an earlier batch with the trunk can still be there.
+        noTrunkData=false;
+        if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD
+            trnkF=masterQCTbl.Trunk_File(itrFil);
+            if ismissing(trnkF) || strtrim(trnkF)=="" || (~isfile(trunkDF) && ~isfile(trunkEF))
+                noTrunkData=true;
+                noTrunkIDs(end+1)=subjctID; %#ok<AGROW>
+            end
+        end
         dlyGenStruct.Settings=SettingsID;
         evntGenStruct.Settings=SettingsID;
         if Settings.PERSDATA
@@ -427,7 +460,7 @@ try
             % if additional trunk variables are enabled merge with seperately saved daily-trunk-data
             if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD
                 % if a trunk-daily-data file exist reat it
-                if isfile(trunkDF)
+                if isfile(trunkDF) && ~noTrunkData
                     opt_trnk=detectImportOptions(trunkDF,'VariableNamingRule','preserve');
                     opt_trnk=setvartype(opt_trnk,"string");
                     tmpTrnkT=readtable(trunkDF,opt_trnk);
@@ -484,7 +517,7 @@ try
             % if additional trunk variables are enabled merge with seperately saved interval-trunk-data
             if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD && ~strcmpi(Settings.TblFormat,"Hourly")
                 % if a trunk-daily-data file exist reat it
-                if isfile(trunkEF)
+                if isfile(trunkEF) && ~noTrunkData
                     opt_trnk2=detectImportOptions(trunkEF,'VariableNamingRule','preserve');
                     opt_trnk2=setvartype(opt_trnk2,"string");
                     tmpTrnkT=readtable(trunkEF,opt_trnk2);
@@ -557,8 +590,8 @@ try
             %writetable(finalHozTbl,finalHorzTblF,'WriteMode','overwritesheet');
             % find the rows masterQCTbl with the same subjectIDs as current batch (only with non-missimng QC_status)
             fnlDlyTbl=movevars(fnlDlyTbl,4:length(varN_Sbjct),'After',"Day_QC"); %move Sensor_Errs next to other daily QC flags (table looks nice this way)
-            % merge trunk-variables with thigh-variables
-            if Settings.SAVETRNKD
+            % merge trunk-variables with thigh-variables (finlTrnkDT exists only with the trunk on)
+            if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD
                 fnlDlyTbl=horzcat(fnlDlyTbl,finlTrnkDT);
             end
             if isfile(fnlDlyTblF)
@@ -595,8 +628,8 @@ try
         uiPgDlg.Value=(itrFil-1)/height(masterQCTbl)+(0.9/height(masterQCTbl));
         uiPgDlg.Message="Saving the final events table to file..";
 
-        % merge trunk-variables with thigh-variables
-        if Settings.SAVETRNKD
+        % merge trunk-variables with thigh-variables (finlTrnkET exists only with the trunk on)
+        if ~strcmpi(Settings.TRUNKPOS,'off') && Settings.SAVETRNKD
             finalEvntTbl=horzcat(finalEvntTbl,finlTrnkET);
         end
 
@@ -633,6 +666,15 @@ try
         statsWarning(uiFig,sprintf(['Personal data used for %d ID(s). No usable personal data for %d ID(s) ' ...
             '(default height 170 cm and fixed PAEE cut-offs used): %s'],numel(persUsed),numel(persMissing),...
             join(persMissing,", ")));
+    end
+    if ~isempty(noCalfIDs)
+        statsWarning(uiFig,sprintf(['No calf data for %d ID(s) (processed without the calf accelerometer, no calf ' ...
+            'file, or calf errors): their kneeling variables are empty: %s'],numel(noCalfIDs),join(noCalfIDs,", ")));
+    end
+    if ~isempty(noTrunkIDs)
+        statsWarning(uiFig,sprintf(['No trunk variables for %d ID(s) (processed without the trunk accelerometer ' ...
+            'or without "Save trunk angle data"): their trunk variables are empty: %s'],numel(noTrunkIDs),...
+            join(noTrunkIDs,", ")));
     end
     if any(allMsgs~="")
         status=join(allMsgs(allMsgs~=""));
@@ -756,6 +798,42 @@ if ~isempty(conflicts)
         "table format """+Settings.TblFormat+""". Trunk events are merged across midnight only when a batch "+...
         "is processed with ""EventsNoBreak"". Reprocess these batches with a matching table format, choose "+...
         "another stats table format, or disable trunk variables (SAVETRNKD).";
+end
+end
+
+
+function msgs = batchSettingsWarnings(masterQCTbl,Settings,projectDir)
+% batchSettingsWarnings warnings (not errors) about batches processed with the trunk or calf accelerometer
+% while it is off in these stats: their trunk variables or kneeling time are then not reported. (The other
+% direction, the accelerometer on in the stats but not used for some IDs, is reported per ID by genStats.)
+%
+% INPUT: masterQCTbl (master QC table with a Batch column), Settings (stats settings), projectDir
+% OUTPUT: msgs: string array of warnings (empty when the batches agree with the stats settings)
+msgs=strings(0,1);
+batches=unique(masterQCTbl.Batch(~ismissing(masterQCTbl.Batch) & masterQCTbl.Batch~=""));
+trnkOn=strings(0,1);
+calfOn=strings(0,1);
+for itrB=1:length(batches)
+    settF=fullfile(projectDir,"BatchOut",batches(itrB),"Actipass_BatchSettings.txt");
+    if ~isfile(settF)
+        continue; % settings of this batch are unknown
+    end
+    btchSett=readBatchSettings(settF);
+    if isKey(btchSett,"TRUNKPOS") && ~strcmpi(btchSett("TRUNKPOS"),"off") && strcmpi(Settings.TRUNKPOS,"off")
+        trnkOn(end+1)=""""+batches(itrB)+""""; %#ok<AGROW>
+    end
+    if isKey(btchSett,"CALFPOS") && strcmpi(btchSett("CALFPOS"),"on") && ~strcmpi(Settings.CALFPOS,"on")
+        calfOn(end+1)=""""+batches(itrB)+""""; %#ok<AGROW>
+    end
+end
+if ~isempty(trnkOn)
+    msgs(end+1)="Batch(es) "+join(trnkOn,", ")+" were processed with the trunk accelerometer, but it is off in "+...
+        "these stats: no trunk variables are made.";
+end
+if ~isempty(calfOn)
+    msgs(end+1)="Batch(es) "+join(calfOn,", ")+" were processed with the calf accelerometer, but it is off in "+...
+        "these stats: kneeling time is not reported as a variable (it is still counted in Awake and the "+...
+        "intensity classes).";
 end
 end
 
