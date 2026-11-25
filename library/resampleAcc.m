@@ -4,7 +4,7 @@ function [AXES, mtStart, mtEnd] = resampleAcc(time, xyz, mtStart, mtEnd, Fs)
 %   [AXES, mtStart, mtEnd] = resampleAcc(time, xyz, mtStart, mtEnd, Fs)
 %
 %   time    : [n,1] sample times (datenum), increasing
-%   xyz     : [n,3] samples (already mapped to the ActiPASS frame)
+%   xyz     : [n,3] samples (already mapped to the Actipass frame)
 %   mtStart, mtEnd : requested window (datenum). It is clamped to the data and
 %             rounded to whole seconds; pass -Inf/Inf to use the data limits.
 %   Fs      : output sample frequency (Hz)
@@ -14,7 +14,7 @@ function [AXES, mtStart, mtEnd] = resampleAcc(time, xyz, mtStart, mtEnd, Fs)
 
 % Copyright (c) 2026, Pasan Hettiarachchi and Peter Johansson
 % SPDX-License-Identifier: BSD-3-Clause
-% See LICENSES/BSD-3-Clause.txt of the ActiPASS repository (https://github.com/Ergo-Tools/ActiPASS).
+% See LICENSES/BSD-3-Clause.txt of the Actipass repository (https://github.com/Ergo-Tools/ActiPASS).
 
 mtStart = round(max(mtStart, time(1))*86400)/86400;
 mtEnd = round(min(mtEnd, time(end))*86400)/86400;

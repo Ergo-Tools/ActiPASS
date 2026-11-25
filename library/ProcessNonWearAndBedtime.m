@@ -15,7 +15,7 @@ function Akt = ProcessNonWearAndBedtime(firstday,V,Acc,SF,Tid,Akt,diaryStrct,Set
 % Tid [n]: Time array (1 sec. step, datenum values).
 % Akt [n]: Activity array (1 sec. step)
 % diaryStrct: The diary structure containing manual NW and Night time data
-% Settings: The Settings structure form main ActiPASS program
+% Settings: The Settings structure form main Actipass program
 %
 % Output:
 % Akt [n]: redefined activity array including NW and/or diary defined lying

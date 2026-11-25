@@ -1,5 +1,5 @@
 function [status,fnlPrPSTbl,fnlDlyTbl,perSecT] = genDlyTable(perSecT,fnlPrPSTbl,fnlDlyTbl,dlyGenStruct)
-% genDlyTable generate ActiPASS daily tables (both ProPASS format and long format)from the given per-sec table
+% genDlyTable generate Actipass daily tables (both ProPASS format and long format)from the given per-sec table
 % Copyright (c) 2023, Pasan Hettiarachchi .
 % All rights reserved.
 %

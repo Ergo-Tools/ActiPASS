@@ -27,7 +27,7 @@ export interface Licence {
   requestFile?: string;
 }
 
-/** licence requests go to the developers (ActiPASS README) */
+/** licence requests go to the developers (Actipass README) */
 export const LICENCE_TO = ["pasan.hettiarachchi@medsci.uu.se"];
 export const LICENCE_CC = ["peter.johansson@medsci.uu.se"];
 export const LICENCE_AGREEMENT = "https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement";

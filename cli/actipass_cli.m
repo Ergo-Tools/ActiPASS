@@ -1,5 +1,5 @@
 function exitcode = actipass_cli(acc_file,options)
-% actipass_cli simple CLI version of ActiPASS for quick activity classification
+% actipass_cli simple CLI version of Actipass for quick activity classification
 %
 % SPDX-License-Identifier: GPL-3.0-or-later
 % Copyright (c) 2021-2025 Pasan Hettiarachchi and Peter Johansson
@@ -80,7 +80,7 @@ arguments
 end
 
 %% intialize actipass_cli
-version="2026.11.3"; % actipass_cli version string
+version="2026.11.4"; % actipass_cli version string
 exitcode=0; % set exit code to zero
 
 % define ProPASS or Advanced mode
@@ -92,7 +92,7 @@ out_file=options.out;
 diary_file=options.diary;
 
 % print Version to console
-fprintf("ActiPASS CLI version: "+version+newline);
+fprintf("Actipass CLI version: "+version+newline);
 
 % find executable path when deployed
 if isdeployed
@@ -190,9 +190,9 @@ svmFull=[];
 try
      
     %% load settings
-    % use ActiPASS GUI to change settings
+    % use Actipass GUI to change settings
     if matches(opmode,["CLI","ADVANCED"],"IgnoreCase",true)
-        % ADVANCED or CLI mode: settings and parameters from the ActiPASS config files
+        % ADVANCED or CLI mode: settings and parameters from the Actipass config files
         [Settings,ParamsAP] = LoadSettings(ActiPASSConfig,ParamsConfig);
         fprintf('%s %s mode. Settings and parameters are loaded from config files.\n',string(datetime,"HH:mm:ss.SSS"),opmode);
     elseif matches(opmode,"PROPASS","IgnoreCase",true)

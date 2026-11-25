@@ -2,7 +2,7 @@
 ;
 ; After the app is installed, runs the bundled Actipass Engine installer (compiled MATLAB
 ; engine; it downloads the MATLAB Runtime when missing), unless the same engine build
-; (file version <ActiPASS version>.<build number>) is already installed. The engine is a
+; (file version <Actipass version>.<build number>) is already installed. The engine is a
 ; separate program in "Apps"; uninstalling Actipass
 ; leaves it (other Actipass versions may use it).
 ;
@@ -11,7 +11,7 @@
 !include "FileFunc.nsh"
 
 ; Default install folder %ProgramFiles%\Ergo-Tools\Actipass (next to the engine and the
-; MATLAB-only ActiPASS) instead of Tauri's %ProgramFiles%\Actipass. Tauri's template
+; MATLAB-only Actipass) instead of Tauri's %ProgramFiles%\Actipass. Tauri's template
 ; (2.12) has no hook in .onInit, so this uses MUI's GUI-init callback, which runs after
 ; .onInit and before the directory page. Only Tauri's fresh default is changed: a /D=
 ; folder or the folder of an earlier install (it has uninstall.exe) is kept. Silent
@@ -30,7 +30,7 @@ FunctionEnd
 !macro NSIS_HOOK_POSTINSTALL
   ; bundled engine build = the file version of its exe, e.g. 2026.11.3.32718 (build.txt;
   ; older bundles have only version.txt: <version>.0). Each engine build has its own
-  ; number, so a newer build of the same ActiPASS version is installed too.
+  ; number, so a newer build of the same Actipass version is installed too.
   StrCpy $R0 ""
   ClearErrors
   FileOpen $R1 "$INSTDIR\engine\build.txt" r

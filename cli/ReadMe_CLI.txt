@@ -1,12 +1,12 @@
-ActiPASS CLI version 2026.11.3
+Actipass CLI version 2026.11.4
 
 WARNING:
 Use the CLI version only to quickly preview accelerometer files or to give participant feedback.
-For physical activity and sedentary behaviour variables in studies use only the full version of ActiPASS
+For physical activity and sedentary behaviour variables in studies use only the full version of Actipass
 (desktop app or classic app).
 
 See the wiki page for more information:
-https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-CLI-%E2%80%90-for-CLI-workflows-and-quick%E2%80%90previewing-accelerometer-files
+https://github.com/Ergo-Tools/ActiPASS/wiki/Actipass-CLI-%E2%80%90-for-CLI-workflows-and-quick%E2%80%90previewing-accelerometer-files
 
 Installation:
 * Compile from source (MATLAB R2024b with MATLAB Compiler) or contact the developers to obtain the binary files.
@@ -17,7 +17,7 @@ Installation:
 Licensing:
 * Binary executables are licensed according to the agreement at
   https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement
-* The source of ActiPASS CLI is licensed under GPL-3.0-or-later (see LICENSE.md); the ActiPASS algorithms it uses
+* The source of Actipass CLI is licensed under GPL-3.0-or-later (see LICENSE.md); the Actipass algorithms it uses
   are licensed under BSD-3-Clause.
 
 Supported accelerometer files:
@@ -30,9 +30,9 @@ Supported accelerometer files:
 * Generic CSV with ISO 8601 time stamps (.csv)
 
 Execution settings:
-* mode "PROPASS" (default) uses the ActiPASS default settings and algorithm parameters.
-* mode "ADVANCED" or "CLI" uses the settings and parameters of the ActiPASS config files
-  (%APPDATA%\ActiPASS\ActiPASS_UI.conf and AktDetect_UI.conf); change them with the ActiPASS app.
+* mode "PROPASS" (default) uses the Actipass default settings and algorithm parameters.
+* mode "ADVANCED" or "CLI" uses the settings and parameters of the Actipass config files
+  (%APPDATA%\Actipass\ActiPASS_UI.conf and AktDetect_UI.conf); change them with the Actipass app.
 * Figures are always the quality-check figures (the Visualizations setting is not used).
 
 Usage via Windows File Explorer:
@@ -41,7 +41,7 @@ In this situation
  b) the quality-check figures (<ID>_QC-1.png, ...)
 are created in the same folder as the source file (<ID> is the file name).
 * Drag and drop a supported accelerometer raw data file onto "actipass_cli.exe"
-* Right click an accelerometer file and "Send to" ActiPASS CLI
+* Right click an accelerometer file and "Send to" Actipass CLI
 * Associate supported accelerometer files with "actipass_cli.exe" (right click an accelerometer file and select "Open with")
 
 Syntax for usage via command line:
@@ -57,7 +57,7 @@ actipass_cli.exe "file_in" out "file_or_folder_out" ID "ID" diary "file_diary" d
             with "out", they go to the output folder.
             The 1 s table has the columns DateTime, Activity, Steps, SVM, Event, TimeInBed and SleepInterval.
    ID:      optional participant ID. Default: the file name of file_in
-   diary:   optional ActiPASS formatted diary (Excel, .xlsx or .xls)
+   diary:   optional Actipass formatted diary (Excel, .xlsx or .xls)
    daily:   optional. Default "on". "off" disables the daily activity table
    vis:     optional. Default "on". "off" disables the quality-check figures
    loc:     optional device location: "front" (default), "right" or "left"
@@ -74,7 +74,7 @@ Examples:
   - quality-check figure is saved as "testdata_QC-1.png" in the same folder as testdata.cwa
 
 * actipass_cli.exe "C:\Users\UNAME\Desktop\testdata.csv" out "C:\Users\UNAME\Downloads" mode "ADVANCED"
-  - settings and algorithm parameters are loaded from the ActiPASS json config files
+  - settings and algorithm parameters are loaded from the Actipass json config files
   - 1 s output is saved to "C:\Users\UNAME\Downloads\testdata_actipass_1s.mat"
   - daily activity table is saved to "C:\Users\UNAME\Downloads\testdata_dailyact.xlsx"
   - quality-check figure is saved as "C:\Users\UNAME\Downloads\testdata_QC-1.png"
@@ -119,7 +119,7 @@ Example: 100100000 = possible misclassification combined with reference position
 
 
 Copyright notice:
-ActiPASS CLI is developed by: Pasan Hettiarachchi pasan.hettiarachchi@medsci.uu.se
+Actipass CLI is developed by: Pasan Hettiarachchi pasan.hettiarachchi@medsci.uu.se
 at Occupational and Environmental Medicine, Department of Medical Sciences, Uppsala University
 
 See full license agreement:

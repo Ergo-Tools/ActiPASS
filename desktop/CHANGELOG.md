@@ -1,10 +1,23 @@
 # Actipass desktop app: change log
 
+## 2026.11.4-alpha (2026-11-25)
+
+Released together with the classic Actipass app 2026.11.4.
+
+Changes:
+1. The name is written "Actipass" in the app, its messages and the user manual links.
+2. App and installer icon: the Actipass logo mark (transparent background) instead of the splash image; the
+   engine exe and its installer use it too. New Actipass logo on the About page.
+3. The raw+posture intensity algorithm is marked as experimental (Settings help, and a warning on the Process
+   page and in the Start dialog).
+4. Statistics page: a "Statistics options…" link opens the Settings page at its Statistics options section.
+5. Settings help for the Automatic time-in-bed settings and the Quality check thresholds.
+
 ## 2026.11.3-alpha (2026-11-23)
 
-First release of the Actipass desktop app, a new user interface for ActiPASS, released together with the classic
-ActiPASS app 2026.11.3 (same processing, same results). The app is licensed under GPL-3.0-or-later; the processing
-engine is a separate, compiled program under the ActiPASS End-User License Agreement.
+First release of the Actipass desktop app, a new user interface for Actipass, released together with the classic
+Actipass app 2026.11.3 (same processing, same results). The app is licensed under GPL-3.0-or-later; the processing
+engine is a separate, compiled program under the Actipass End-User License Agreement.
 
 Features:
 1. Workflow pages in a sidebar: Project, Data, Diary & calibration, Settings, Process, Quality check, Statistics,
@@ -31,8 +44,8 @@ Features:
     as 1 MET of the PAEE intensity cut-offs (Settings > Statistics options; the file on the Statistics page).
 
 Fixes:
-1. Every engine build has its own version (ActiPASS version plus a build number, e.g. 2026.11.3.32718): the
-   installer now installs a newer engine of the same ActiPASS version (before, a computer with an earlier
+1. Every engine build has its own version (Actipass version plus a build number, e.g. 2026.11.3.32718): the
+   installer now installs a newer engine of the same Actipass version (before, a computer with an earlier
    2026.11.3 engine kept it, and the licence request failed with "Method not found: licence.request"). The app
    warns when the installed engine is not the one it came with, and explains a "Method not found" error.
 2. Licence request: when the request cannot be made, the licence folder (%APPDATA%\Actipass) is shown.

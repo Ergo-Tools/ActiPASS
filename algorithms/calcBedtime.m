@@ -109,7 +109,7 @@ try
             sgtitle(figSlpAkt,figTitle,'FontSize',14,'Color','Blue');
         else
             %evaluation version text
-            evalWTxt=" - ActiPASS Beta v"+Settings.Version+ " - for Evaluation purpose only";
+            evalWTxt=" - Actipass Beta v"+Settings.Version+ " - for Evaluation purpose only";
             sgtitle(figSlpAkt,figTitle+evalWTxt,'FontSize',13,'Color','Blue');
         end
     end

@@ -1,5 +1,5 @@
 function status = genStats(statStruct,uiFig)
-% genStats generate ActiPASS stats tables (variables) from processed per-second data
+% genStats generate Actipass stats tables (variables) from processed per-second data
 %
 % Reads the project's master QC table, keeps the IDs selected for stats (batch and QC-status
 % filters), and checks that the batch processing settings of those IDs are compatible with the
@@ -11,7 +11,7 @@ function status = genStats(statStruct,uiFig)
 % table is backed up). Progress is shown in a cancelable progress dialog on uiFig.
 %
 % INPUT:
-% statStruct: structure with the stats settings and project paths (from the ActiPASS GUI)
+% statStruct: structure with the stats settings and project paths (from the Actipass GUI)
 % uiFig: the UI figure that hosts the progress dialog and alerts, or a progress object with
 %        Value, Message and CancelRequested (e.g. IpcProgress); its warn(msg) method, if any,
 %        receives the warnings otherwise shown as alerts
@@ -114,7 +114,7 @@ Settings.MET_INT_VPA = statStruct.ParamsAP.MET_INT_VPA; % 6.0;
 
 %cadence cutoffs for walk-slow, walk-fast and walk-very-fast
 Settings.Wlk_Slow_Cad = statStruct.ParamsAP.Threshold_slowfastwalk; %100;
-%2022-08-26 From ActiPASS version 1.42 Wlk_VFast_Cad=135, previously it was 130 (Myles O'Brien <Myles.OBrien@dal.ca>)
+%2022-08-26 From Actipass version 1.42 Wlk_VFast_Cad=135, previously it was 130 (Myles O'Brien <Myles.OBrien@dal.ca>)
 Settings.Wlk_VFast_Cad = statStruct.ParamsAP.Threshold_veryfastwalk; % 135; %prior versions: Wlk_VFast_Cad=130
 
 % the domains to calculate seperate decriptive stats
@@ -125,7 +125,7 @@ Settings.StatMtchMode=statStruct.StatMtchMode; % how stat domains are compared w
 Settings.DBedAsLeis=statStruct.DBedAsLeis; % treat bedtime as leisure during stat generation when bedtime is not explicitely a stat-domain
 
 %% defining variables for common all tables
-% the variables names of the per-sec-table saved by ActiPASS
+% the variables names of the per-sec-table saved by Actipass
 % perSecVarNms=["DateTime","Activity","Steps","Temperature","SVM","Event","Bedtime","SleepInterval"];
 
 %variables specific to all days of a specific ID

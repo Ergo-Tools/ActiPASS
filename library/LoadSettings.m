@@ -150,7 +150,7 @@ if isfile(ActiPASSConfig)
 end
 
 
-%% %% main ActiPASS options like file-paths etc
+%% %% main Actipass options like file-paths etc
 
 % the flag for Activating ProPASS mode of ActiPASS_GUI
 if ~isfield(Settings,'PROPASS')

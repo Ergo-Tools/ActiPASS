@@ -7,7 +7,7 @@ This project includes components under:
 - BSD-3-Clause (algorithms, utilities, library, configurations, statistics, and the example workflow in ./main)
 
 Attributions:
-- See: [Open source software used by ActiPASS](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS)
+- See: [Open source software used by Actipass](https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-Actipass)
 
 Preserve this NOTICE file in redistributions and retain all original copyright
 statements and license headers in source files.

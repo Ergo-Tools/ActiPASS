@@ -4,7 +4,7 @@ function status = VisualizeActvts(Settings,batchDir,qcDirOutP,Acti4QCTbl,dataVis
 
 % Copyright (c) 2021-2026, Pasan Hettiarachchi and Peter Johansson
 % SPDX-License-Identifier: BSD-3-Clause
-% See LICENSES/BSD-3-Clause.txt of the ActiPASS repository (https://github.com/Ergo-Tools/ActiPASS).
+% See LICENSES/BSD-3-Clause.txt of the Actipass repository (https://github.com/Ergo-Tools/ActiPASS).
 
 status=''; % a non empty status message is returned when errors occur
 maxPlotDays=10; % maximum number of days to plot in QualityCheck figure
@@ -59,7 +59,7 @@ visPtchHght=0.7;
 % the y-location of evaluation warning text
 visEvalWY=0.4;
 % the evaluation version warning
-evalWTxt="ActiPASS Beta v"+Settings.Version+ " - for Evaluation purpose only";
+evalWTxt="Actipass Beta v"+Settings.Version+ " - for Evaluation purpose only";
 % the y-location of steps-count text
 visDStatY=-0.08;
 % the names of the days

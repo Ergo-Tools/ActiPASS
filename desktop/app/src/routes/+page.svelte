@@ -1,6 +1,7 @@
 <script lang="ts">
   // SPDX-License-Identifier: GPL-3.0-or-later
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
+  import { nav } from "$lib/nav.svelte";
   import Sidebar from "$lib/components/Sidebar.svelte";
   import TopBar from "$lib/components/TopBar.svelte";
   import LogStrip from "$lib/components/LogStrip.svelte";
@@ -36,6 +37,15 @@
   // always start on the first page (Project): the app never resumes inside a workflow step
   let current = $state<StageId>("project");
   let stage = $derived(stages.find((s) => s.id === current) ?? stages[0]);
+
+  // a page asked for another page (and a settings section to scroll to)
+  $effect(() => {
+    const r = nav.request;
+    if (!r) return;
+    nav.request = null;
+    current = r.page;
+    if (r.section) tick().then(() => document.getElementById("settings-" + r.section)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  });
 
 
   // (re)load the settings when an engine connects and when another project is opened

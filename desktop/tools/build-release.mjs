@@ -1,4 +1,4 @@
-// build-release.mjs  Build the Actipass installer with the ActiPASS version.
+// build-release.mjs  Build the Actipass installer with the Actipass version.
 //
 //   npm run build:release        (in app/; extra arguments are passed to `tauri build`)
 //   npm run dev:app              (in app/: `tauri dev` with the same version, no engine check)
@@ -66,7 +66,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   fs.mkdirSync(outDir, { recursive: true });
   const versionConf = path.join(outDir, "version.conf.json");
   // the app carries a pre-release suffix while it is tested (alpha, beta); the engine and the
-  // ActiPASS version stay plain, so both GUIs keep one version number
+  // Actipass version stay plain, so both GUIs keep one version number
   const appVersion = PRERELEASE ? `${v.version}-${PRERELEASE}` : v.version;
   console.log(`build-release: app version ${appVersion}`);
   fs.writeFileSync(versionConf, JSON.stringify({ version: appVersion }) + "\n");

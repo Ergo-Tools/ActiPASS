@@ -12,6 +12,7 @@
   import SettingsSections from "../components/SettingsSections.svelte";
   import ProgressBar from "../components/ProgressBar.svelte";
   import ToolCard from "../components/ToolCard.svelte";
+  import { goTo } from "../nav.svelte";
 
   interface StatsResult { status: string; elapsedSec: number; warnings: string[]; tables: string[] }
 
@@ -106,7 +107,8 @@
       {/if}
     </div>
     <p class="muted small">Options used as well (Settings page): table format {s.TblFormat}, TAI filter {s.FilterTAI}, walk MET {s.WalkMET},
-      bouts {s.genBouts}; valid duration {s.minValidDur} h{#if persOn}; personal data{s.PERSRMR ? " with individual RMR" : ""}{/if}.</p>
+      bouts {s.genBouts}; valid duration {s.minValidDur} h{#if persOn}; personal data{s.PERSRMR ? " with individual RMR" : ""}{/if}.
+      <button class="link" onclick={() => goTo("settings", "stats")}>Statistics options…</button></p>
     {#if blocked}<p class="warn">{blocked}</p>{/if}
     <div class="row">
       <button class="primary" onclick={run} disabled={!!blocked || running || otherJob}>Generate statistics</button>

@@ -3,7 +3,7 @@ function status = calculate_wbv_segments(AP_folder,output_file,exclusions,uiPgDl
 %calculate_wbv_segments Predict WBV exposure for sitting segments
 
 % INPUTS
-% AP_folder [string]: ActiPASS project folder
+% AP_folder [string]: Actipass project folder
 % output_file [string]: Output table full-path
 % exclusions [string]: None, NotOK or Check+NotOK
 % UI progress dialog to be updated

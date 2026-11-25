@@ -6,12 +6,12 @@ function  Acc = ChangeAxes(Acc,Type,Orientation)
 % Orientation: 1, 2, 3, 4 
 % Acc: [n,3]: Triaxial accelerometer data
 %
-% Standard ActiPASS orientationn: x downwards, z inward towards body surface
-% for more info about ActiPASS default orientations for various brands, see:
-% https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-accelerometer-default-orientations
+% Standard Actipass orientationn: x downwards, z inward towards body surface
+% for more info about Actipass default orientations for various brands, see:
+% https://github.com/Ergo-Tools/ActiPASS/wiki/Actipass-accelerometer-default-orientations
 
 % Note: This function is different from original Acti4 ChangeAxesfunction. Acti4 negate all axes when accelerometer
-% data is converted to .acti4 file format. Since ActiPASS does not use intermediate .acti4 file format, we need to do
+% data is converted to .acti4 file format. Since Actipass does not use intermediate .acti4 file format, we need to do
 % the axes negation in this function. This is because Acti4 algorithms expects positive values towards gravity
 
 % **********************************************************************************

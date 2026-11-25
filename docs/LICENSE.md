@@ -33,4 +33,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Binary release license
 
-Read the [License agreement to use for ActiPASS compiled binary releases](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement) 
+Read the [License agreement to use for Actipass compiled binary releases](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement) 

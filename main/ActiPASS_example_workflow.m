@@ -1,9 +1,9 @@
-%% ActiPASS Example workflow for understanding how it works
+%% Actipass Example workflow for understanding how it works
 % WARNING: 
-% This is a very basic basic example workflow. Actual ActiPASS workflow used in the GUI is much more robust and
+% This is a very basic basic example workflow. Actual Actipass workflow used in the GUI is much more robust and
 % contains improved error handling including, visualizations, quality-checks and fallbacks to alternative methods
 % for reference-position corrections.
-% Use this just as an example script how ActiPASS algorithms can be used. 
+% Use this just as an example script how Actipass algorithms can be used. 
 
 % Copyright (c) 2024, Pasan Hettiarachchi
 % All rights reserved.
@@ -79,7 +79,7 @@ fprintf('%s Generic CSV file loading....\n',string(datetime,"HH:mm:ss.SSS"));
 [genCSVData,SF,deviceID]=readGenericCSV(acc_file);
 
 % generic CSV format follows Axivity ProPASS axes convention.
-%therefore y and z axes should be inverted to match ActiPASS internal convention
+%therefore y and z axes should be inverted to match Actipass internal convention
 genCSVData(:,3:4)=-genCSVData(:,3:4);
 
 % interpolate Acc. data at evenly spaced samples

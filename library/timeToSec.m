@@ -21,13 +21,13 @@ function sec = timeToSec(t)
 
 % Copyright (c) 2026, Pasan Hettiarachchi and Peter Johansson
 % SPDX-License-Identifier: BSD-3-Clause
-% See LICENSES/BSD-3-Clause.txt of the ActiPASS repository (https://github.com/Ergo-Tools/ActiPASS).
+% See LICENSES/BSD-3-Clause.txt of the Actipass repository (https://github.com/Ergo-Tools/ActiPASS).
 
 arguments
     t {mustBeA(t, ["double", "datetime"])}
 end
 if isdatetime(t)
-    t = datenum(t); %#ok<DATNM> datenum is the time format used in ActiPASS data
+    t = datenum(t); %#ok<DATNM> datenum is the time format used in Actipass data
 end
 sec = round(t*86400);
 end

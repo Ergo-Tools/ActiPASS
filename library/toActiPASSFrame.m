@@ -1,5 +1,5 @@
 function xyz = toActiPASSFrame(xyz, srcFormat, loc)
-% toActiPASSFrame  Map raw accelerometer axes of a device to the ActiPASS frame.
+% toActiPASSFrame  Map raw accelerometer axes of a device to the Actipass frame.
 %
 %   xyz = toActiPASSFrame(xyz, srcFormat, loc)
 %
@@ -22,7 +22,7 @@ function xyz = toActiPASSFrame(xyz, srcFormat, loc)
 
 % Copyright (c) 2026, Pasan Hettiarachchi and Peter Johansson
 % SPDX-License-Identifier: BSD-3-Clause
-% See LICENSES/BSD-3-Clause.txt of the ActiPASS repository (https://github.com/Ergo-Tools/ActiPASS).
+% See LICENSES/BSD-3-Clause.txt of the Actipass repository (https://github.com/Ergo-Tools/ActiPASS).
 
 switch lower(string(srcFormat))
     case {"axivity", "genericcsv"}  % Generic CSV follows the Axivity axes convention

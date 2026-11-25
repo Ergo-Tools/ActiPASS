@@ -4,7 +4,7 @@ function warned = cli_diary_tick_warnings(diaryStrct,timeFull,dataWin)
 %  - a time inside the data window that falls on no processed second, e.g. in a
 %    non-wear-trimmed start or end: that diary entry does not start an event period
 % 'Start' and 'Stop' are not checked against the processed seconds (they define the
-% data window). Same checks as diaryTickWarnings in the ActiPASS GUI version.
+% data window). Same checks as diaryTickWarnings in the Actipass GUI version.
 %
 %   diaryStrct : diary of the subject (open_diary), Ticks/Events
 %   timeFull   : processed per-second times (datenum)

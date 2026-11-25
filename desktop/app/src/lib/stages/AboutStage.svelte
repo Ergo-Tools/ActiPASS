@@ -15,8 +15,8 @@
 
   const links: [string, string][] = [
     ["Home", "https://github.com/Ergo-Tools/ActiPASS/"],
-    ["References", "https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-References"],
-    ["Open source software", "https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-ActiPASS"],
+    ["References", "https://github.com/Ergo-Tools/ActiPASS/wiki/Actipass-References"],
+    ["Open source software", "https://github.com/Ergo-Tools/ActiPASS/wiki/Open-source-software-used-by-Actipass"],
     ["Acknowledgements", "https://github.com/Ergo-Tools/ActiPASS/wiki/acknowledgements#actipass-acknowledgements"],
     ["License agreement", "https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement"],
   ];
@@ -66,7 +66,7 @@
   {/if}
 </div>
 </div>
-<div class="logo"><img src="/actipass_rectangular.png" alt="ActiPASS, with the logos of ProPASS, Uppsala University, Akademiska sjukhuset, the National Research Centre for the Working Environment (NFA) and Forte" /></div>
+<div class="logo"><img src="/actipass_rectangular.png" alt="Actipass, with the logos of ProPASS, Uppsala University, Akademiska sjukhuset, the National Research Centre for the Working Environment (NFA) and Forte" /></div>
 </div>
 
 <div class="card">
@@ -93,7 +93,7 @@
     </details>
   {/each}
   <p class="muted small">Changes of the processing (the same for the classic app):
-    <button class="link" onclick={() => open(PROCESSING_LOG)}>ActiPASS change log</button></p>
+    <button class="link" onclick={() => open(PROCESSING_LOG)}>Actipass change log</button></p>
 </div>
 
 <style>

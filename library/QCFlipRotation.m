@@ -30,13 +30,13 @@ function  [QCData,Acc,meanTEMP,status,warnings] = QCFlipRotation(Acc,TEMP,diaryS
 
 %   diaryStrct [struct] - structure containing diary data (forced NW and bed/night in diary are considered to improve NW)
 %   devType: "Axivity", "ActivPAL" etc passed on to ChangeAxes
-%   Settings [struct] main ActiPASS Settings structure
+%   Settings [struct] main Actipass Settings structure
 %       following fields are used from Settings structure
 %       Settings.FLIPROTATIONS [string] - two options: 'warn' or 'force' (LoadSettings allows only these)
 %         'warn' - find flips/rotations and report them (QC times, warnings), but transform the whole
 %                  file with the GUI default orientation (the 90 degree correction is still applied)
 %         'force'- find flips/rotations and return the corrected Acc data
-%       [Settings.Rotated, Settings.Flipped] [boolean,boolean] Rotated or Flipped according to ActiPASS default orientation
+%       [Settings.Rotated, Settings.Flipped] [boolean,boolean] Rotated or Flipped according to Actipass default orientation
 %   nwTrimMode: [boolean,boolean] flags for cropping NW at Start/End respectively
 %
 % Outputs:

@@ -1,6 +1,6 @@
 ## Configuration files
 
-Example configuration files in the JSON format ActiPASS uses (read by [`LoadSettings.m`](../library/LoadSettings.m)):
+Example configuration files in the JSON format Actipass uses (read by [`LoadSettings.m`](../library/LoadSettings.m)):
 
 | File | Contents |
 |---|---|

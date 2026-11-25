@@ -1,5 +1,5 @@
 function [status,finalEvntTbl] = genEventTable(perSecT,evntMeta,finalEvntTbl,evntGenStruct)
-% genEventTable generate the ActiPASS event based  table from the given per-sec table
+% genEventTable generate the Actipass event based  table from the given per-sec table
 % Copyright (c) 2023, Pasan Hettiarachchi .
 % All rights reserved.
 %

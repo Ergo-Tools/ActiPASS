@@ -55,6 +55,9 @@ export function checks(): Check[] {
       "the master QC table gets other columns, so the current one is moved to Backups and a new one is started.");
   }
 
+  // settings: the raw+posture intensity algorithm is experimental
+  if (s?.INT_ALG === "raw+posture") add("settings", "warning", "The raw+posture intensity algorithm is experimental: check its results before you use them.");
+
   // diary and calibration
   if (!batch.diaryFile && !batch.noDiary) add("diary", "error", "Choose a diary or 'No diary'.");
   if (!batch.calFile && !batch.noCal) add("diary", "error", "Choose a calibration file or 'No calibration file'.");

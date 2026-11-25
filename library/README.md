@@ -1,4 +1,4 @@
-## Various library functions used by ActiPASS software
+## Various library functions used by Actipass software
 
 ### Contents
 
@@ -9,12 +9,12 @@ non-wear, orientation checks, synchronisation, figures and small helpers.
 |---|---|
 | [`LoadSettings.m`](LoadSettings.m) | Default settings and algorithm parameters, and reading them from the JSON config files |
 | [`open_accfiles.m`](open_accfiles.m) | Information about the chosen accelerometer files (type, subject IDs, trunk/calf files) |
-| [`open_diary.m`](open_diary.m) | Reads an ActiPASS diary for given subject IDs |
+| [`open_diary.m`](open_diary.m) | Reads an Actipass diary for given subject IDs |
 | [`readCalFile.m`](readCalFile.m) | Reads a device calibration file (device IDs as text) |
 | [`readPersonalData.m`](readPersonalData.m) | Reads the personal data table (SubjectID, Age, Sex, Height, Weight) of the stats generation |
 | [`AutoCalibrate.m`](AutoCalibrate.m) | Automatic calibration of triaxial accelerometer data |
 | [`CalibrateData.m`](CalibrateData.m) | Applies calibration coefficients (from the calibration file or auto-calibration) |
-| [`toActiPASSFrame.m`](toActiPASSFrame.m) | Maps the raw axes of a device to the ActiPASS frame |
+| [`toActiPASSFrame.m`](toActiPASSFrame.m) | Maps the raw axes of a device to the Actipass frame |
 | [`ChangeAxes.m`](ChangeAxes.m) | Changes the raw data for orientation (flipped, rotated) and device type |
 | [`resampleAcc.m`](resampleAcc.m) | Resamples accelerometer data to an evenly spaced time axis |
 | [`FindAnglesAndVM.m`](FindAnglesAndVM.m) | Angles (6 Hz low-pass), vector magnitude and normalised acceleration |

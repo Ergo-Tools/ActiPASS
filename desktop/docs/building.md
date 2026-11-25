@@ -28,7 +28,7 @@ cargo --version
 
 ## 2. Get the source
 
-Download or clone the [ActiPASS repository](https://github.com/Ergo-Tools/ActiPASS). The app is in the
+Download or clone the [Actipass repository](https://github.com/Ergo-Tools/ActiPASS). The app is in the
 folder `desktop/app`:
 
 ```powershell
@@ -46,7 +46,7 @@ Set-Content version.json '{"version": "2026.11.3"}'
 npx tauri build --no-bundle --config version.json
 ```
 
-Write the ActiPASS version of the source (see `ChangeLog.txt` in the repository root) in `version.json`
+Write the Actipass version of the source (see `ChangeLog.txt` in the repository root) in `version.json`
 instead of 2026.11.3: the app compares it with the engine's version. Without `--config`, the app has the
 placeholder version 0.1.0 and warns that the engine has another version.
 
@@ -64,7 +64,7 @@ desktop\app\src-tauri\target\release\actipass-desktop.exe
 The app looks for the engine at `C:\Program Files\Ergo-Tools\Actipass Engine\application\actipass_engine.exe`,
 where the official installer puts it, and starts it automatically. If the engine is somewhere else, choose
 it on the app's **Engine** page (**Installed engine**, then the engine file). The engine must have the same
-ActiPASS version as the app source (the title bar and the About page show the app version); otherwise the
+Actipass version as the app source (the title bar and the About page show the app version); otherwise the
 app shows a warning.
 
 To try changes while you work on the user interface, start the app in development mode instead:
@@ -93,4 +93,4 @@ to use the installed engine instead.
 
 The desktop app source is licensed under the GNU General Public License, version 3.0 or later (see
 `../LICENSE.md`). The Actipass Engine is distributed in compiled form under the
-[ActiPASS End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement).
+[Actipass End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement).

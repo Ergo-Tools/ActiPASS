@@ -5,12 +5,12 @@ actipass_cli.exe "file_in" out "file_or_folder_out" ID "ID" diary "file_diary" d
    out:     optional. Output file (.csv, .xlsx or .mat) or folder for the 1 s data. Without it, no 1 s data
             are saved and the other outputs go to the folder of file_in
    ID:      optional participant ID. Default: the file name of file_in
-   diary:   optional ActiPASS formatted diary (Excel, .xlsx or .xls)
+   diary:   optional Actipass formatted diary (Excel, .xlsx or .xls)
    daily:   optional. Default "on". "off" disables the daily activity table
    vis:     optional. Default "on". "off" disables the quality-check figures
    loc:     optional device location: "front" (default), "right" or "left"
    mode:    optional operation mode: "PROPASS" (default: default settings and parameters), "ADVANCED" or "CLI"
-            (settings and parameters from the ActiPASS config files in %APPDATA%\ActiPASS)
+            (settings and parameters from the Actipass config files in %APPDATA%\Actipass)
 
 actipass_cli.exe --help
     - display the help/readme text in the console
@@ -30,9 +30,9 @@ Examples:
 
 * actipass_cli.exe "C:\Users\UNAME\Desktop\testdata.csv" out "C:\Users\UNAME\Downloads" daily "off" vis "off" mode "ADVANCED"
   - only the 1 s output is saved (to "C:\Users\UNAME\Downloads\testdata_actipass_1s.mat")
-  - settings and algorithm parameters are loaded from the ActiPASS json config files
+  - settings and algorithm parameters are loaded from the Actipass json config files
 
-ActiPASS CLI is developed by: Pasan Hettiarachchi pasan.hettiarachchi@medsci.uu.se
+Actipass CLI is developed by: Pasan Hettiarachchi pasan.hettiarachchi@medsci.uu.se
 at Occupational and Environmental Medicine, Department of Medical Sciences, Uppsala University
 
 See full license agreement:

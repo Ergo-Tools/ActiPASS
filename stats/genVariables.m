@@ -3,7 +3,7 @@ function [statTable,statMET] = genVariables(statTable,statMET,PerSecT,rows_SI,ro
 % INPUTS:
 % statTable - the table to fill data with
 % statMET - A cell array to hold 1s MET or PAEE values
-% PerSecT - ActiPASS 1s activity/posture table
+% PerSecT - Actipass 1s activity/posture table
 %    PerSecT.Activity - a vector representing an activity or behaviour for each second
 %    PerSecT.Steps - the steps count (when applicable) for each second
 %    PerSecT.paee - intensity calculated from R raw+posture algorithm (if enabled)

@@ -1,4 +1,4 @@
-### Files which are part of ActiPASS documentation
+### Files which are part of Actipass documentation
 
 ### License
 

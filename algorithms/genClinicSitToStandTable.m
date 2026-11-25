@@ -2,16 +2,16 @@ function status = genClinicSitToStandTable(projectDir,outDir,AP_MQCT,Params,uiPg
 %GENSITTOSTANDTABLE generate sit-to-stand transition table for currently loaded project
 
 % INPUTS
-% projectDir [string]: ActiPASS project folder
+% projectDir [string]: Actipass project folder
 % outDir [string]: Output directory
-% AP_MQCT [table]: ActiPASS master QC table
+% AP_MQCT [table]: Actipass master QC table
 % Params [struct]: STS peak detection parameters
 %            Params.prom - min prominence of peaks
 %            Params.width - min width 
 %            Params.sep - min seperation
 % exclusions [string, optional]: files left out by QC_Status: "Check+NotOK" (default, only
 %   OK files, as before), "NotOK" or "None" (all files)
-% Fs [double]: resampling frequency used in ActiPASS while processing data
+% Fs [double]: resampling frequency used in Actipass while processing data
 
 % OUTPUT
 % status [string]: "OK": everything went well, "Check": only some files processed,  "Error": none of the files processed
@@ -48,7 +48,7 @@ function status = genClinicSitToStandTable(projectDir,outDir,AP_MQCT,Params,uiPg
 figW=1280;
 figH=720;
 
-% Clinical sit-to-stand-test time-window w.r.t. trimStart time given by ActiPASS QC table
+% Clinical sit-to-stand-test time-window w.r.t. trimStart time given by Actipass QC table
 TestEndBuf=3; % default is four hours
 TestStartBuf=3; % default is one  hours
 

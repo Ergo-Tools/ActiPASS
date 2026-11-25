@@ -36,7 +36,7 @@
 {#if info && s && settingsUi.schema}
   {#key settingsUi.rev}
     {#each sections as sec (sec.id)}
-      <section class:card>
+      <section class:card id={"settings-" + sec.id}>
         <div class="head">
           <h2 class="title">{sec.title} <HelpLink doc={sec.doc} label={sec.title} /></h2>
           {#if fieldVisible(sec, s) && changedIn(sec.id).length}

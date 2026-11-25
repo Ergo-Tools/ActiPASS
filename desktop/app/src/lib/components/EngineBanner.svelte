@@ -1,6 +1,6 @@
 <script lang="ts">
   // Banner at the top of every page when the installed engine is not the one this app was
-  // released with (another ActiPASS version, or an older build of the same version).
+  // released with (another Actipass version, or an older build of the same version).
   // SPDX-License-Identifier: GPL-3.0-or-later
   import { engine, versionMismatch } from "../engine.svelte";
 

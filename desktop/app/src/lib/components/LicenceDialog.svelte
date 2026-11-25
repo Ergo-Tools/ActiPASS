@@ -107,7 +107,7 @@
       {/if}
       {#if licenceWarning(lic)}<p class="warn">{licenceWarning(lic)}</p>{/if}
       <p class="muted small">Licence files are kept in <button class="link mono" onclick={() => lic?.folder && revealItemInDir(lic.folder).catch(() => {})}>{lic.folder}</button>,
-        shared with the classic ActiPASS app. A licence is for one computer and two years.</p>
+        shared with the classic Actipass app. A licence is for one computer and two years.</p>
     </section>
 
     <section>

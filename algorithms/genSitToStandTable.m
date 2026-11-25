@@ -2,13 +2,13 @@ function status = genSitToStandTable(projectDir,outDir,AP_MQCT,Fs,AX_Orient,filt
 %GENSITTOSTANDTABLE generate sit-to-stand transition table for currently loaded project
 
 % INPUTS
-% projectDir [string]: ActiPASS project folder
+% projectDir [string]: Actipass project folder
 % outDir [string]: Output directory
-% AP_MQCT [table]: ActiPASS master QC table
-% AX_Orient [string]: New or old orientation defaults (because ActiPASS changed default orientations fall 2023)
+% AP_MQCT [table]: Actipass master QC table
+% AX_Orient [string]: New or old orientation defaults (because Actipass changed default orientations fall 2023)
 % filt_mode [string]: filtering mode ("Pickford or Löppönen)
 % cal_mode [string]: specify whch upright activities considered as "Stand" in sit-to-stand
-% Fs [double]: resampling frequency used in ActiPASS while processing data
+% Fs [double]: resampling frequency used in Actipass while processing data
 % uiPgDlg: a handle to UI-progress-dialog to show updates
 % exclusions [string, optional]: files left out by QC_Status: "Check+NotOK" (default, only
 %   OK files, as before), "NotOK" or "None" (all files)

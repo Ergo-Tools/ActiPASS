@@ -83,7 +83,7 @@ AccL = filter(Bl,Al,AccRot);
 %above three lines from original code by Jörgen Skotte is replaced with newer movstd & movmean functions
 Std=movstd(AccL,SF*2,0,1);% moving standard deviation of 2s window taken at dim 1 with no-normalization
 Std=Std(1:SF:end,:); % standard deviation of 2 sec. intervals given at each second
-%Correction for SENS accelerometer, 20/4-20 (acti4), 2024-02-29(ActiPASS)
+%Correction for SENS accelerometer, 20/4-20 (acti4), 2024-02-29(Actipass)
 if ParamsAP.ftype==6 
    Std = 0.18*Std.^2 +1.03*Std;
 end

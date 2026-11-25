@@ -9,7 +9,7 @@ function calStruct = readCalFile(calFile)
 
 % Copyright (c) 2026, Pasan Hettiarachchi and Peter Johansson
 % SPDX-License-Identifier: BSD-3-Clause
-% See LICENSES/BSD-3-Clause.txt of the ActiPASS repository (https://github.com/Ergo-Tools/ActiPASS).
+% See LICENSES/BSD-3-Clause.txt of the Actipass repository (https://github.com/Ergo-Tools/ActiPASS).
 opts = detectImportOptions(calFile);
 opts = setvartype(opts, 'DeviceID', 'string');
 calStruct = table2struct(readtable(calFile, opts));

@@ -50,7 +50,7 @@
 % an investigation of 50 measurements from the BAuA project, in which is was found that 
 % average FBthigh angle was 11 (+/-3.0) degrees during walking (14/1-19)
  
-% In ActiPASS old and default reference-position handling is taken over by the main workflow. 
+% In Actipass old and default reference-position handling is taken over by the main workflow. 
 % Therefore following functionality is no longer needed here
 %  persistent oldRef
 %  if firstDay  %first interval for ID: provisionel reference for calculation of Akt

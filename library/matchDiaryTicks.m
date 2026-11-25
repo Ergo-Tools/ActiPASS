@@ -21,7 +21,7 @@ function [iTick, iTime, unmatched] = matchDiaryTicks(ticks, t)
 
 % Copyright (c) 2026, Pasan Hettiarachchi and Peter Johansson
 % SPDX-License-Identifier: BSD-3-Clause
-% See LICENSES/BSD-3-Clause.txt of the ActiPASS repository (https://github.com/Ergo-Tools/ActiPASS).
+% See LICENSES/BSD-3-Clause.txt of the Actipass repository (https://github.com/Ergo-Tools/ActiPASS).
 
 arguments
     ticks {mustBeA(ticks, ["double", "datetime"])}

@@ -1,6 +1,6 @@
 
 function  [status,diaryStrct,diary_file] = open_diary(diary_file,subjectIDs,exMODE)
-% OPEN_DIARY Opens ActiPASS formatted diary and read information for given subject IDs.
+% OPEN_DIARY Opens Actipass formatted diary and read information for given subject IDs.
 % Inputs:
 %  diary_file: [string] last diary file - used in file-opening-dialog; ex. set to %USERPROFILE% first time
 %  subjectIDs: [string][nx1]: String vector of subjectIDs
@@ -54,7 +54,7 @@ VariableTypes={'string','datetime','duration','string','string'};
 VariableTypesQC={'string','string','string','string'};
 %variable names for QC output
 VariableNames={'ID','Date_Time','Event','Comment'};
-%expected variable names of the ActiPASS formatted diary
+%expected variable names of the Actipass formatted diary
 varNamesOrig={'ID','Date','Time','Event','Comment'};
 
 try

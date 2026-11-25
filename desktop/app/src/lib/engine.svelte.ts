@@ -67,7 +67,7 @@ export interface EngineInfo {
   compiledExe: string | null;
   devBuild: boolean;
   engineDir: string;
-  /** app version (ActiPASS version in release builds; placeholder in development) */
+  /** app version (Actipass version in release builds; placeholder in development) */
   appVersion: string;
 }
 
@@ -77,7 +77,7 @@ export const EXPECTED_ENGINE_BUILD: string = import.meta.env.VITE_ENGINE_BUILD ?
 const REINSTALL = "Install the engine that came with this app: run engine\\Actipass_Engine_Installer.exe in the " +
   "Actipass installation folder (usually C:\\Program Files\\Ergo-Tools\\Actipass), or install Actipass again.";
 
-/** Warning when a release app and its compiled engine have different ActiPASS versions, or
+/** Warning when a release app and its compiled engine have different Actipass versions, or
  *  the same version but another engine build (an older engine lacks newer methods) */
 export function versionMismatch(): string {
   const hello = engine.status.hello;

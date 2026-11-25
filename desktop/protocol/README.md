@@ -8,7 +8,8 @@ communication goes through the protocol described here. Everything in this file 
 code: [`actipass_engine.m`](../engine-matlab/actipass_engine.m),
 [`actipass_engine_main.m`](../engine-matlab/actipass_engine_main.m),
 [`EngineConn.m`](../engine-matlab/EngineConn.m), [`IpcProgress.m`](../engine-matlab/IpcProgress.m),
-[`engineHandlers.m`](../engine-matlab/engineHandlers.m), the `cmd_*.m` handlers,
+[`engineHandlers.m`](../engine-matlab/engineHandlers.m), the `cmd_*.m` handlers (the public repository has
+only the generic protocol layer of the engine: see [`../engine-matlab/README.md`](../engine-matlab/README.md)),
 [`settings.schema.json`](../engine-matlab/settings.schema.json), the app side in
 [`../app/src-tauri/src/engine.rs`](../app/src-tauri/src/engine.rs) and the minimal Node client
 [`../tools/engine-client.mjs`](../tools/engine-client.mjs). If the code and this file disagree, the
@@ -76,12 +77,12 @@ messages.
 |---|---|---|
 | `token` | string | The token from the command line. The app removes it before showing the hello. |
 | `engine` | string | `"matlab"`. |
-| `engineVersion` | string | ActiPASS version, e.g. `"2026.11.3"` (`"unknown"` if it cannot be read). |
+| `engineVersion` | string | Actipass version, e.g. `"2026.11.3"` (`"unknown"` if it cannot be read). |
 | `engineBuild` | string | Build of a compiled engine, e.g. `"2026.11.3.32718"`; `""` in MATLAB. The desktop app compares it with the engine build it was released with. |
 | `matlabVersion` | string | Output of MATLAB `version` (MATLAB or MATLAB Runtime). |
 | `deployed` | bool | `true` for the compiled engine. |
 | `pid` | number | Process ID of the engine. |
-| `paths` | object | `config`, `actipass`, `utils`, `binaryFileSupport` (folders used in MATLAB; `""` when compiled), `actipassFound` (bool: the ActiPASS processing code was found), `warnings` (array of strings). |
+| `paths` | object | `config`, `actipass`, `utils`, `binaryFileSupport` (folders used in MATLAB; `""` when compiled), `actipassFound` (bool: the Actipass processing code was found), `warnings` (array of strings). |
 
 ### Messages
 
@@ -190,7 +191,7 @@ A line for the app's log.
 The methods are listed in [`engineHandlers.m`](../engine-matlab/engineHandlers.m); each calls
 `result = handler(params, conn)` in a `cmd_*.m` file. Paths are full paths as strings. "Project" is
 an Actipass project folder (see the
-[project folder structure](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-project-folder-structure)).
+[project folder structure](https://github.com/Ergo-Tools/ActiPASS/wiki/Actipass-project-folder-structure)).
 
 Settings are **per project**: a project keeps them in `<project>/ProjectSettings/Actipass_UI.conf`
 and `AktDetect_UI.conf`. A project without these files uses the user's global (last used) settings
@@ -312,7 +313,7 @@ Result (all three):
 | `source` | `"project"` (the project's own settings) or `"global"` (not saved to the project yet). |
 | `projectDir` | The project (`""` for global). |
 | `configFile` | The settings file in use. |
-| `version` | ActiPASS version. |
+| `version` | Actipass version. |
 | `maxFiles` | Maximum files per batch (10 in evaluation mode). |
 | `licence` | The licence status, as `licence.status`. |
 

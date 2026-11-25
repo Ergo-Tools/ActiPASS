@@ -7,7 +7,7 @@ function [status,trnkDTbl,trnkETbl]=genTrnkVariables(Akt,vTrnkRot,dlyMeta,evntMe
 % INPUTS:
 % Akt [N,1] - a vector representing an activity or behaviour for each second
 % vTrnkRot [Fs*N,3] - trunk angles (after reference-positions (rotation))
-% Settings - the ActiPASS Settings structure containing  information about how to process data
+% Settings - the Actipass Settings structure containing  information about how to process data
 % dlyMeta - metadata for days (like indices and times)
 % evntMeta - metadata for intervals (like indices and times)
 % saveDir - directory where to save tables (usually ID folder under IndividualOut)  

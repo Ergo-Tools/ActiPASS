@@ -17,7 +17,7 @@ function [MaxTid,Imax] = MaxIncTid(V,Iok,Threshold,SF)
 % Copyright (c) 2020, Jørgen Skotte
 % Copyright (c) 2021-2026, Pasan Hettiarachchi and Peter Johansson
 % SPDX-License-Identifier: BSD-3-Clause
-% See LICENSES/BSD-3-Clause.txt of the ActiPASS repository (https://github.com/Ergo-Tools/ActiPASS).
+% See LICENSES/BSD-3-Clause.txt of the Actipass repository (https://github.com/Ergo-Tools/ActiPASS).
 
 V = V(1:SF:end);
 Iok = Iok(1:SF:end);

@@ -1,4 +1,4 @@
-## Various classifications algorithms used by ActiPASS software
+## Various classifications algorithms used by Actipass software
 
 ### Contents
 

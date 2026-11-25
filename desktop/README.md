@@ -3,7 +3,7 @@
 The Actipass desktop app is the new user interface of ActiPASS: a Windows desktop application
 (built with [Tauri](https://tauri.app/), a Svelte + TypeScript front end and a small Rust shell)
 that guides you through a project: data, diary and calibration, settings, processing, quality
-check, statistics and tools. It is released together with the classic ActiPASS app, with the same
+check, statistics and tools. It is released together with the classic Actipass app, with the same
 version number, and gives the same results.
 
 - **User manual:** [Actipass desktop app user manual](https://github.com/Ergo-Tools/ActiPASS/wiki/Desktop-App-User-Manual)
@@ -14,7 +14,7 @@ version number, and gives the same results.
 
 The app does no processing itself. It starts the **Actipass engine**, a separate program, and talks to
 it over a local socket with JSON-RPC 2.0 (see [`protocol/`](protocol/)). The engine runs the
-ActiPASS algorithms (the MATLAB code in this repository's `algorithms/`, `library/`, `stats/` and
+Actipass algorithms (the MATLAB code in this repository's `algorithms/`, `library/`, `stats/` and
 `utils/` folders) and handles the licence. The engine is distributed in compiled form only, under the
 [End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement);
 its source is not in this repository.
@@ -36,7 +36,8 @@ tools; `npm install` and `npm run dev:app` in `app/`.
 
 Notes for this public copy:
 
-- The engine sources (`engine-matlab/` in the build guide) are not included. To run the app you need an
+- Only the generic protocol layer of the engine is included ([`engine-matlab/`](engine-matlab/README.md)); the
+  handlers that run the Actipass workflow are part of the compiled engine. To run the app you need an
   installed Actipass engine (install the Actipass desktop app once, then choose **Installed engine** on
   the app's Engine page), or your own engine that implements the protocol.
 - `npm run build:release` builds the setup around the compiled engine installer, so it needs that
@@ -44,5 +45,5 @@ Notes for this public copy:
 
 ## License
 
-The desktop app is licensed under the GNU General Public License, version 3.0 or later; the ActiPASS
+The desktop app is licensed under the GNU General Public License, version 3.0 or later; the Actipass
 algorithms are licensed under the BSD 3-Clause License. See [LICENSE.md](LICENSE.md).
