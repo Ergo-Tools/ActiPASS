@@ -19,6 +19,8 @@ Readers for the supported accelerometer file formats (see [Supported acceleromet
 ### License
 Unless otherwise specified in an individual source file, all source code in this repositery are release under **BSD 3-Clause license**. This means if a different license is included in a source file, that license supersedes the BSD 3-Clause license.
 
+**Exception:** the ActiGraph .gt3x reader [`ActiGraph/readGT3xMex.cpp`](ActiGraph/readGT3xMex.cpp) and its compiled binary `ActiGraph/readGT3xMex.mexw64` are ported from the R package read.gt3x and are licensed under the **EUPL v1.2** (see [`ActiGraph/LICENSE-EUPL-1.2.txt`](ActiGraph/LICENSE-EUPL-1.2.txt) and [`ActiGraph/NOTICE-readGT3xMex.txt`](ActiGraph/NOTICE-readGT3xMex.txt)). The wrapper `readActGT3x.m` is BSD 3-Clause.
+
 **BSD 3-Clause license**
 
 Copyright (c) 2022, Pasan Hettiarachchi .
