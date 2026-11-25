@@ -23,6 +23,8 @@ Changes:
    participants processed without the trunk get empty trunk variables (trunk data files of an earlier batch are
    no longer used); a warning lists them. A warning also names batches processed with the trunk or calf
    accelerometer when it is off in the statistics.
+8. stats/genTrnkVariables.m: trunk variables use the resample frequency of processing (algorithm parameter Fs)
+   instead of a fixed 25 Hz.
 
 
 Actipass Version 2026.11.3 (2026-11-22)
