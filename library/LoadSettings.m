@@ -223,20 +223,23 @@ end
 
 %% settings related to thigh Acc and Flips/Rots/NWTrim module
 
-% flags for auto flips/rotatins corrections
+% automatic orientation correction (QCFlipRotation): 'force' corrects the orientation found per worn
+% period, 'warn' keeps the default orientation (Rotated/Flipped) and warns when the found one differs.
+% There is no 'off': any other value becomes 'force'.
 if ~isfield(Settings,'FLIPROTATIONS')|| ismissing( Settings.FLIPROTATIONS)||...
         ~matches(Settings.FLIPROTATIONS,["warn","force"])
-    Settings.FLIPROTATIONS="force";  % alternatives: 'warn', 'force'
+    Settings.FLIPROTATIONS="force";
 end
 
-% flags for Rotated' orientation, only used when FLIPROTATIONS=false
+% default orientation of the thigh accelerometer: Rotated = upside-down. Used for the whole file in 'warn'
+% mode, and in 'force' mode for non-wear and for periods where the orientation cannot be found
 if ~isfield(Settings,'Rotated')
     Settings.Rotated=false;
 else
     Settings.Rotated=logical(Settings.Rotated);
 end
 
-% flags for Flipped' orientation, only used when FLIPROTATIONS=false
+% default orientation of the thigh accelerometer: Flipped = inside-out (used as Rotated above)
 if ~isfield(Settings,'Flipped')
     Settings.Flipped=false;
 else

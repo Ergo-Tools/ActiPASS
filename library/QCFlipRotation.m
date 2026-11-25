@@ -341,7 +341,7 @@ try
                 % this error straight-away. We need also the mean values of y-axis during walking segments to do this
                 WalkMarkerY(wlkSmplPtStart:wlkSmplPtEnd)=mean(Acc(wlkSectAccInds,3)); %assign mean y-value to all seconds in current section 
             end
-            % Test for 90 degree rotation. This is always corrected, even when flip-rotation is set to off or warn.
+            % Test for 90 degree rotation. This is always corrected, also in warn mode.
             % It is a rare case and the FFT walking detection is too uncertain for short periods, so the test
             % is done only for worn periods of at least minRot90Period with more than minRot90Walk of walking.
             % Only the walking of the current worn period is used.
@@ -582,7 +582,7 @@ try
     end
     
     %% Final stage of QC-module 
-    % if exMode is Warn or off assume default flips/rotations
+    % in warn mode the whole file gets the default orientation (Settings.Rotated/Flipped)
     if ~strcmpi(exMode,'Force')
         
         % derive orientation form [Settings.Rotated, Settings.Flipped] (1=[0,0], 2=[0,1],3=[1,0], 4=[1,1]
