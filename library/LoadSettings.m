@@ -152,7 +152,7 @@ end
 
 %% %% main Actipass options like file-paths etc
 
-% the flag for Activating ProPASS mode of ActiPASS_GUI
+% the flag for Activating ProPASS mode of Actipass_GUI
 if ~isfield(Settings,'PROPASS')
     Settings.PROPASS=true;
 else

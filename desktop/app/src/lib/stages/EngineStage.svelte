@@ -70,7 +70,7 @@
       {#if engine.status.hello.paths}
         <dt>ActiPASSV2</dt>
         <dd class="mono" class:err={!engine.status.hello.paths.actipassFound}>
-          {engine.status.hello.paths.actipass || "(compiled in)"}{engine.status.hello.paths.actipassFound ? "" : "  - actiPass_UI_Process not found"}
+          {engine.status.hello.paths.actipass || "(compiled in)"}{engine.status.hello.paths.actipassFound ? "" : "  - actipass_UI_Process not found"}
         </dd>
       {/if}
     {/if}

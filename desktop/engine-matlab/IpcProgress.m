@@ -3,7 +3,7 @@ classdef IpcProgress < handle
     %
     % Has the properties ActiPASSV2 workflow functions use on a uiprogressdlg
     % (Value, Message, Title, Indeterminate, Cancelable, CancelRequested, close), so
-    % e.g. actiPass_UI_Process can be given an IpcProgress instead of a figure.
+    % e.g. actipass_UI_Process can be given an IpcProgress instead of a figure.
     % Setting Value/Message sends a throttled "progress" notification; reading
     % CancelRequested polls the connection for a "job.cancel" request. warn(msg) takes
     % the warnings a GUI would show as alerts (genStats).

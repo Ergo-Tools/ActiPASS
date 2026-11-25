@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Licence dialog (the classic GUI's Help > Activate License and ActiPASS_Licensing.mlapp):
+  // Licence dialog (the classic GUI's Help > Activate License and Actipass_Licensing.mlapp):
   // the licence of this computer, a licence request or renewal (Host-Details.txt, mailed to
   // the developers with the default mail program, or sent by hand), and installing the licence
   // files received back (ActiPASS.lic and ActiPASS.key).

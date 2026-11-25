@@ -1,5 +1,5 @@
 function name = engineTypeName(ftype)
-% engineTypeName  Device type name for the ftype numbers used by actiPass_UI_Process.
+% engineTypeName  Device type name for the ftype numbers used by actipass_UI_Process.
 % SPDX-License-Identifier: GPL-3.0-or-later
 names = ["Axivity CWA", "Axivity WAV", "ActivPAL DATX", "ActivPAL CSV", "ActiGraph CSV", ...
     "SENS Motion BIN", "Generic CSV", "", "Movisens"];

@@ -3,7 +3,7 @@ function result = cmd_debug_demoJob(params, conn)
 %
 % params.files (default 5) "files", params.steps (default 10) steps per file,
 % params.delay (default 0.2) seconds per step. Uses IpcProgress the same way
-% actiPass_UI_Process uses its progress dialog (Value, Message, CancelRequested).
+% actipass_UI_Process uses its progress dialog (Value, Message, CancelRequested).
 %
 % SPDX-License-Identifier: GPL-3.0-or-later
 

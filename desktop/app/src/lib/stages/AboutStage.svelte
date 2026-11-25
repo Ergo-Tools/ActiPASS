@@ -1,5 +1,5 @@
 <script lang="ts">
-  // About: versions, licence details, credits and links (as ActiPASS_About_UI.mlapp).
+  // About: versions, licence details, credits and links (as Actipass_About_UI.mlapp).
   // SPDX-License-Identifier: GPL-3.0-or-later
   import HelpLink from "../components/HelpLink.svelte";
   import { manual } from "../help";

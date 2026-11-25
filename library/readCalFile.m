@@ -1,6 +1,6 @@
 function calStruct = readCalFile(calFile)
 % readCalFile  Read a device calibration file (CSV or Excel, as written by
-% actiPass_UI_Process) into the calibration structure: one element per row with
+% actipass_UI_Process) into the calibration structure: one element per row with
 % DeviceID (string) and X_scale, X_offst, Y_scale, Y_offst, Z_scale, Z_offst.
 %
 % DeviceID is always read as text. A plain readtable would read the column as

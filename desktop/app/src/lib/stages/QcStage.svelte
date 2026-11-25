@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Quality check (as ActiPASS_Batch_GUI.mlapp): the master QC table or one batch's QC table,
+  // Quality check (as Actipass_Batch_GUI.mlapp): the master QC table or one batch's QC table,
   // the QC figures of the selected subject, and QC_Status editing in the master table.
   // Uses the full window width, in three views: split (table + figure), table only, figure
   // only. Browsing keeps the selected row and the figure in step in every view. Figures are
