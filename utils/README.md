@@ -9,6 +9,7 @@ Readers for the supported accelerometer file formats (see [Supported acceleromet
 | [`Axivity/CWA_readFile.m`](Axivity/CWA_readFile.m) | Axivity AX3/AX6 CWA files (with the mex helpers parseDate and parseValueBlock) |
 | [`readWAVtoACC.m`](readWAVtoACC.m) | Axivity WAV files exported by OmGui |
 | [`readActivPAL.m`](readActivPAL.m), [`readActivPALcsv.m`](readActivPALcsv.m), [`checkActivPALFile.m`](checkActivPALFile.m) | ActivPAL datx/dat and CSV files |
+| [`readActGT3x.m`](readActGT3x.m) | ActiGraph .gt3x files, read directly (with the mex reader [`ActiGraph/readGT3xMex`](ActiGraph/readGT3xMex.cpp), EUPL-1.2, ported from read.gt3x; see [`ActiGraph/readme.txt`](ActiGraph/readme.txt)) |
 | [`readActGT3xcsv.m`](readActGT3xcsv.m) | ActiGraph GT3X files converted to CSV by ActiLife (6.13 or later) |
 | [`readSENSBin.m`](readSENSBin.m) | SENS motion binary (bin/hex) files |
 | [`readMovisensBin.m`](readMovisensBin.m) | Movisens binary files |

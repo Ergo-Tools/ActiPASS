@@ -1,0 +1,18 @@
+Third-party notice: readGT3xMex (ActiGraph .gt3x reader)
+=======================================================
+
+readGT3xMex.mexw64 (compiled from readGT3xMex.cpp) reads ActiGraph .gt3x files. It is a
+port of the C++ parsing code of the R package read.gt3x:
+
+    read.gt3x
+    Copyright (c) Tuomo Nieminen, John Muschelli and contributors
+    https://github.com/THLfi/read.gt3x
+
+read.gt3x and this port (readGT3xMex.cpp / readGT3xMex.mexw64) are licensed under the
+European Union Public Licence (EUPL) v1.2; see LICENSE-EUPL-1.2.txt next to this file.
+This licence applies to readGT3xMex only; the rest of Actipass keeps its own licences.
+
+Source code of readGT3xMex: readGT3xMex.cpp, distributed in the same folder as this
+notice. Build it in MATLAB with:  mex -O readGT3xMex.cpp
+It is also published at https://github.com/Ergo-Tools/ActiPASS/tree/main/utils/ActiGraph
+The original read.gt3x source is at https://github.com/THLfi/read.gt3x
