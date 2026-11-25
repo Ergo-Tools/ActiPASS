@@ -12,7 +12,7 @@
 | [`findBouts.m`](findBouts.m) | Bouts of an activity |
 | [`genTrnkVariables.m`](genTrnkVariables.m), [`genEmptyTrunkT.m`](genEmptyTrunkT.m) | Trunk variables, and an empty trunk table when there are no trunk data |
 
-See [**Actipass variables**](https://github.com/Ergo-Tools/ActiPASS/wiki/Actipass-variables-and-other-quality-check-files) for more information about the variables and different tables.
+See [**Actipass variable definitions**](https://github.com/Ergo-Tools/ActiPASS/wiki/Actipass-variable-definitions) for more information about the variables and different tables.
 
 ## How stats generation module work
 1. The function [**genStat**](genStats.m) is called by Actipass GUI after the completion of one or more batch processes
