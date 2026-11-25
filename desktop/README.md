@@ -1,6 +1,6 @@
 # Actipass desktop app
 
-The Actipass desktop app is the new user interface of ActiPASS: a Windows desktop application
+The Actipass desktop app is the new user interface of Actipass: a Windows desktop application
 (built with [Tauri](https://tauri.app/), a Svelte + TypeScript front end and a small Rust shell)
 that guides you through a project: data, diary and calibration, settings, processing, quality
 check, statistics and tools. It is released together with the classic Actipass app, with the same

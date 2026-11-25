@@ -20,5 +20,5 @@ npm run tauri build                     # release build + installers
 npm run tauri build -- --debug --no-bundle   # quick debug exe, no installer
 ```
 
-Icons in `src-tauri/icons` were generated from ActiPASSV2 `actipass_square_231024.png`
+Icons in `src-tauri/icons` were generated from ActiPASSV2 `actipass_icon_231024.png` (the logo mark, transparent background)
 with `npx tauri icon <png>` (Android/iOS icons removed).

@@ -1,7 +1,7 @@
 # Source license
 
 
-**ActiPASS - Thigh accelerometer data processing software**
+**Actipass - Thigh accelerometer data processing software**
 
 Copyright 2020-2025 by Pasan Hettiarachchi & Peter Johansson
 
@@ -13,7 +13,7 @@ licenses below for more details.
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-- The **ActiPASS_CLI code** in this folder `cli/` is licensed under the
+- The **Actipass CLI code** in this folder `cli/` is licensed under the
   **GNU General Public License, version 3.0 or (at your option) any later version**.
   See `LICENSES/GPL-3.0-or-later.txt` and per-file license headers.
 
@@ -32,4 +32,4 @@ This overview does not replace the full license texts in `LICENSES/`.
 
 # Binary release license
 
-Read the [License agreement to use for ActiPASS compiled binary releases](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement) 
+Read the [License agreement to use for Actipass compiled binary releases](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement) 

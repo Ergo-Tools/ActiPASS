@@ -41,6 +41,14 @@ The cadence algorithms `Wavelet1` and `Wavelet2` (setting `CADALG`) use a modifi
 These files are not published here. The original code can be found at the author's repository:
 https://github.com/MStraczkiewicz/find_walking
 
+## raw+posture intensity algorithm (experimental, not included)
+
+The `raw+posture` intensity algorithm (setting `INT_ALG`) estimates physical activity energy expenditure (PAEE)
+with machine-learning models in R, from the raw thigh acceleration and the activity types. It is experimental:
+check its results before you use them. Its R code and models are not included here; they will be hosted in a
+separate repository and published in the future. The default `posture` algorithm (MET values per activity type)
+is part of this repository.
+
 
 ### License
 

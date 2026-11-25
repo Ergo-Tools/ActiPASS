@@ -1,7 +1,7 @@
 # Source license
 
 
-**Actipass desktop app - user interface of ActiPASS**
+**Actipass desktop app - user interface of Actipass**
 
 Copyright 2026 by Pasan Hettiarachchi & Peter Johansson
 
@@ -25,7 +25,7 @@ licenses below for more details.
 
 - The **Actipass engine**, which the desktop app starts and talks to, is a separate program. It is
   not part of this folder; it is distributed in compiled form under the
-  [ActiPASS End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement).
+  [Actipass End-User License Agreement](https://github.com/Ergo-Tools/ActiPASS/wiki/License-agreement#license-and-usage-agreement).
   The app communicates with it only through its protocol (JSON-RPC 2.0 over a local TCP socket,
   see `protocol/`); it is not linked into the app.
 

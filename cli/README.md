@@ -1,8 +1,8 @@
-## ActiPASS CLI
+## Actipass CLI
 
-A command-line version of ActiPASS for quick activity classification, previews and participant feedback. For study
-results use the full ActiPASS (desktop or classic app). See [ReadMe_CLI.txt](ReadMe_CLI.txt), [Usage_CLI.txt](Usage_CLI.txt) and the
-[ActiPASS CLI wiki page](https://github.com/Ergo-Tools/ActiPASS/wiki/ActiPASS-CLI-%E2%80%90-for-CLI-workflows-and-quick%E2%80%90previewing-accelerometer-files).
+A command-line version of Actipass for quick activity classification, previews and participant feedback. For study
+results use the full Actipass (desktop or classic app). See [ReadMe_CLI.txt](ReadMe_CLI.txt), [Usage_CLI.txt](Usage_CLI.txt) and the
+[Actipass CLI wiki page](https://github.com/Ergo-Tools/ActiPASS/wiki/Actipass-CLI-%E2%80%90-for-CLI-workflows-and-quick%E2%80%90previewing-accelerometer-files).
 
 ### Contents
 
