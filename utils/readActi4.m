@@ -50,7 +50,7 @@ try
     Fid = fopen(File,'r'); %open for reading file
     AccType = str2double(fgetl(Fid)); %version no/device type.
     deviceID = fgetl(Fid); %Serial number of ActiGraph unit
-    % convert the device ID to a number (until ActiPASS supports string device IDs)
+    % convert the device ID to a number (until Actipass supports string device IDs)
     deviceID = str2double(strjoin(extract(deviceID,digitsPattern),'')); 
     SF = str2double(fgetl(Fid)); %Sample frequency (Hz)
     Start = str2double(fgetl(Fid)); %Start time of recording (datenum value)

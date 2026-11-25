@@ -10,7 +10,7 @@ function [Data, SF, deviceID, devType] = readGenericCSV(PATH)
 %               n_rows is the number of sampled datapoints. The columns must be
 %               named [x, y, z] and arranged in the exact order.
 %               
-%               The acceleration axis must conform to the standard ActiPASS AX3
+%               The acceleration axis must conform to the standard Actipass AX3
 %               orientation (i.e. x-axis pointing down, z-axis inwards towards skin).
 %
 %               The first lines in the CSV file must contain the:
