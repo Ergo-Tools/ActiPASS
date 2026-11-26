@@ -1,5 +1,22 @@
 # Actipass desktop app: change log
 
+## 2026.11.6-alpha (2026-11-26)
+
+Released together with the classic Actipass app 2026.11.6.
+
+Changes:
+1. Fixed: after the computer slept (for example a laptop on battery), the log showed "Engine failed: Engine
+   exited (exit code: 0) before the engine connected" and the app had to be restarted. The engine stops itself
+   when it has not heard from the app for 60 s, which happens on wake-up. The app now says so ("The engine
+   stopped after a long time without contact with the app (the computer probably slept)") and starts the
+   engine again (when "start automatically" is on; not in attach mode). The open project stays open.
+2. An engine that connected and later exits is reported as "stopped" (exit code 0) or "exited (code)", not as
+   "exited before the engine connected".
+3. ActiGraph .gt3x files are read in memory, without temporary files (about 0.5 GB for a week at 100 Hz),
+   about twice as fast and with about 40% less memory. The licence text of miniz (MIT), now part of the .gt3x
+   reader, is in NOTICE-readGT3xMex.txt in the app's `licenses` folder and next to the engine.
+4. Warnings during processing no longer add an empty line to the log.
+
 ## 2026.11.5-alpha (2026-11-25)
 
 Released together with the classic Actipass app 2026.11.5.

@@ -13,6 +13,36 @@ European Union Public Licence (EUPL) v1.2; see LICENSE-EUPL-1.2.txt next to this
 This licence applies to readGT3xMex only; the rest of Actipass keeps its own licences.
 
 Source code of readGT3xMex: readGT3xMex.cpp, distributed in the same folder as this
-notice. Build it in MATLAB with:  mex -O readGT3xMex.cpp
+notice. Build it in MATLAB with miniz (below):  mex -O readGT3xMex.cpp miniz.c
 It is also published at https://github.com/Ergo-Tools/ActiPASS/tree/main/utils/ActiGraph
 The original read.gt3x source is at https://github.com/THLfi/read.gt3x
+
+miniz
+-----
+readGT3xMex.mexw64 also contains miniz 3.0.2 (miniz.c / miniz.h), used to read the
+.gt3x zip archive in memory: https://github.com/richgel999/miniz . miniz.c and miniz.h
+are published with readGT3xMex.cpp in the public repository above. miniz is licensed
+under the MIT licence (the EUPL v1.2 does not apply to it):
+
+    Copyright 2013-2014 RAD Game Tools and Valve Software
+    Copyright 2010-2014 Rich Geldreich and Tenacious Software LLC
+
+    All Rights Reserved.
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.

@@ -1,3 +1,20 @@
+Actipass Version 2026.11.6 (2026-11-26)
+#############################################
+
+Changes:
+1. ActiGraph .gt3x files are read in memory: the reader (utils/readActGT3x.m with utils/ActiGraph/readGT3xMex)
+   no longer unzips the file into a temporary folder (about 0.5 GB of temporary files for a week at 100 Hz). It
+   is about twice as fast and needs about 40% less memory; the data read are identical. readGT3xMex now
+   includes miniz 3.0.2 (MIT licence, utils/ActiGraph/miniz.c, miniz.h and LICENSE-miniz.txt); its licence text
+   is also in NOTICE-readGT3xMex.txt, which is installed with the programs. Also in Actipass CLI 2026.11.6 and
+   the desktop app.
+2. Warnings during processing (for example "Error reading file", "Less than 60s data in file", the reference
+   position and diary event warnings) no longer end with an extra empty line in the log (in the desktop app,
+   an empty line in the log).
+3. Actipass desktop app 2026.11.6-alpha (desktop/): after the computer slept, the app restarts the engine and
+   explains why it stopped, instead of "Engine failed" (see desktop/CHANGELOG.md).
+
+
 Actipass Version 2026.11.5 (2026-11-25)
 #############################################
 

@@ -18,7 +18,8 @@ function [Data,SF,deviceID] = readActGT3x(Fil)
 %       SF            [double] sample frequency
 %       deviceID      [string] the device serial number as written in the header
 %
-% The binary parsing is done by the MEX function ActiGraph/readGT3xMex, a port
+% The .gt3x (zip) archive is read in memory (no temporary files) and parsed
+% by the MEX function ActiGraph/readGT3xMex, a port
 % of the C++ parser of the R package read.gt3x (THLfi, EUPL licence):
 % https://github.com/THLfi/read.gt3x . See ActiGraph/readme.txt for how to
 % rebuild it.
@@ -60,15 +61,14 @@ if exist('readGT3xMex','file')~=3
     addpath(fullfile(fileparts(mfilename('fullpath')),'ActiGraph'));
 end
 
-tmpDir=tempname;
-cleanTmp=onCleanup(@() removeDir(tmpDir));
-
 try
-    files=unzip(Fil,tmpDir);
+    % the MEX reads the .gt3x (zip) archive in memory: no temporary files
+    Fil=char(Fil);
+    [infoTxt,files]=readGT3xMex(Fil);
     [~,names,exts]=fileparts(files);
     names=lower(string(names)+string(exts));
 
-    info=parseInfo(fullfile(tmpDir,'info.txt'));
+    info=parseInfo(infoTxt);
     deviceID=string(strtrim(getField(info,"Serial Number","")));
     SF=str2double(getField(info,"Sample Rate",""));
     if isnan(SF) || SF<=0
@@ -85,7 +85,6 @@ try
     hasLog=any(names=="log.bin");
     hasAct=any(names=="activity.bin");
     if hasLog && ~(hasAct && isOldVersion(info,deviceID))
-        binFile=files{names=="log.bin"};
         fmt=0;
         % ActiLife's export runs to the last sample time, filling idle sleep
         lastSec=ticks2unix(getField(info,"Last Sample Time",""));
@@ -98,20 +97,15 @@ try
             nRows=round((lastSec-startSec)*SF);
         end
     elseif hasAct
-        binFile=files{names=="activity.bin"};
         fmt=1;
         nRows=0;
     else
         error("no log.bin or activity.bin found in the .gt3x file");
     end
 
-    acc=readGT3xMex(binFile,fmt,startSec,SF,scale,nRows,1);
-
-    % create the time axis as a matlab datenum (device local time)
-    startTime=datenum(1970,1,1)+startSec/86400;
-    timeDN=startTime+(0:1:(size(acc,1)-1))'/SF/86400;
-    % acc columns are already in the order readActGT3xcsv returns
-    Data=[timeDN,acc];
+    % Data: time (matlab datenum, device local time) and the acc columns in
+    % the order readActGT3xcsv returns them
+    Data=readGT3xMex(Fil,fmt,startSec,SF,scale,nRows,1);
 
 catch APE
     error("Error loading Actigraph GT3X file: "+APE.message);
@@ -119,9 +113,9 @@ end
 end
 
 
-function info=parseInfo(infoFile)
+function info=parseInfo(infoTxt)
 % read the "Key: Value" lines of info.txt into a containers.Map of char values
-txt=readlines(infoFile);
+txt=splitlines(string(infoTxt));
 txt=txt(contains(txt,":"));
 info=containers.Map('KeyType','char','ValueType','char');
 for i=1:numel(txt)
@@ -167,10 +161,4 @@ fw=sscanf(getField(info,"Firmware","99"),'%d.%d.%d')';
 fw(end+1:3)=0;
 tf=startsWith(deviceID,["MRA","NEO"]) && ...
     (fw(1)<2 || (fw(1)==2 && (fw(2)<5 || (fw(2)==5 && fw(3)==0))));
-end
-
-function removeDir(d)
-if isfolder(d)
-    rmdir(d,'s');
-end
 end
