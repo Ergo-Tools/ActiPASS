@@ -22,7 +22,7 @@ function info = intensityPAEE(rawAcc, timeFull, aktFull, modelsFile, outFile)
 % The R version (IntensityCal.R, the .rds models and exportIntensityModels.R) is not part of the
 % public Actipass repository.
 
-% Copyright (c) 2026, Pasan Hettiarachchi and Peter Johansson
+% Copyright (c) 2026, Matthew Ahmadi and Pasan Hettiarachchi
 % SPDX-License-Identifier: BSD-3-Clause
 % See LICENSES/BSD-3-Clause.txt of the Actipass repository (https://github.com/Ergo-Tools/ActiPASS).
 
