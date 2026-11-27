@@ -197,24 +197,42 @@ impl Engine {
         let me = self.clone();
         let app2 = app.clone();
         self.spawn(async move {
+            let mut connected_once = false; // this process connected (and may since have left)
             loop {
+                connected_once |= me.status().state == "connected";
                 tokio::time::sleep(Duration::from_millis(500)).await;
                 let exited = {
                     let mut guard = me.inner.child.lock().unwrap();
                     match guard.as_mut().map(|c| c.try_wait()) {
                         Some(Ok(Some(code))) => {
                             *guard = None;
-                            Some(code.to_string())
+                            Some((code.to_string(), code.success()))
                         }
-                        Some(Err(e)) => Some(e.to_string()),
+                        Some(Err(e)) => Some((e.to_string(), false)),
                         _ => None,
                     }
                 };
-                if let Some(code) = exited {
+                if let Some((code, success)) = exited {
+                    // its socket closed with it: give the reader a moment to see that
+                    for _ in 0..50 {
+                        if me.status().state != "connected" {
+                            break;
+                        }
+                        tokio::time::sleep(Duration::from_millis(100)).await;
+                    }
                     if me.status().state != "connected" {
                         me.set_status(&app2, |s| {
-                            s.state = "failed".into();
-                            s.last_error = format!("{label} exited ({code}) before the engine connected");
+                            if !connected_once {
+                                s.state = "failed".into();
+                                s.last_error = format!("{label} exited ({code}) before the engine connected");
+                            } else if success {
+                                // it connected, then stopped by itself (e.g. its idle timeout)
+                                s.state = "stopped".into();
+                                s.last_error.clear();
+                            } else {
+                                s.state = "failed".into();
+                                s.last_error = format!("{label} exited ({code})");
+                            }
                         });
                     }
                     let _ = app2.emit("engine-output", json!({"stream": "system", "line": format!("{label} exited: {code}")}));

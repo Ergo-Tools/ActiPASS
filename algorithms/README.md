@@ -3,7 +3,8 @@
 ### Contents
 
 The classification and analysis algorithms: activity types, reference positions, lying, time-in-bed and sleep,
-kneeling, trunk variables, sit-to-stand and whole-body vibration (WBV).
+kneeling, trunk variables, sit-to-stand, whole-body vibration (WBV) and the experimental raw+posture intensity
+algorithm.
 
 | File | What it does |
 |---|---|
@@ -25,10 +26,11 @@ kneeling, trunk variables, sit-to-stand and whole-body vibration (WBV).
 | [`genTrnkVariables.m`](genTrnkVariables.m) | Daily and interval based trunk variables (as Acti4) |
 | [`genSitToStandTable.m`](genSitToStandTable.m) | Tool: sit-to-stand transition speeds (angular velocity) of a project |
 | [`genClinicSitToStandTable.m`](genClinicSitToStandTable.m) | Tool: sit-to-stand counts in a clinical test |
-| [`mergeSleepData.m`](mergeSleepData.m) | Tool: merge the sleep data of a project into one table |
 | [`calculate_wbv_segments.m`](calculate_wbv_segments.m) | Tool: whole-body vibration (ISO 2631) prediction for sitting segments |
 | [`load_AX3_iso2631.m`](load_AX3_iso2631.m) | Loads an Axivity CWA file with calibration and ISO 2631 frequency weighting (WBV) |
 | [`iso2631_wbv.m`](iso2631_wbv.m) | ISO 2631-1 frequency weighting filters (WBV) |
+| [`intensityPAEE.m`](intensityPAEE.m) | **Experimental:** raw+posture intensity algorithm, PAEE per 10 s window from the raw thigh acceleration and the activity types (setting `INT_ALG` = `raw+posture (M)`) |
+| [`IntensityModels.json`](IntensityModels.json) | **Experimental:** the MARS models used by `intensityPAEE.m` (coefficients, from a separate study) |
 
 ## Wavelet cadence algorithms (not included)
 
@@ -41,13 +43,25 @@ The cadence algorithms `Wavelet1` and `Wavelet2` (setting `CADALG`) use a modifi
 These files are not published here. The original code can be found at the author's repository:
 https://github.com/MStraczkiewicz/find_walking
 
-## raw+posture intensity algorithm (experimental, not included)
+## raw+posture intensity algorithm (experimental)
+
+> **Experimental.** The raw+posture algorithm and its models are still being evaluated. Check its results before
+> you use them, and do not use them as the only source of intensity variables in a study. The default `posture`
+> algorithm (MET values per activity type) is the recommended one.
 
 The `raw+posture` intensity algorithm (setting `INT_ALG`) estimates physical activity energy expenditure (PAEE)
-with machine-learning models in R, from the raw thigh acceleration and the activity types. It is experimental:
-check its results before you use them. Its R code and models are not included here; they will be hosted in a
-separate repository and published in the future. The default `posture` algorithm (MET values per activity type)
-is part of this repository.
+per 10 s window from the raw thigh acceleration and the activity types. Spectral features of each window (16 per
+axis of the vector magnitude and x, y, z) go into a MARS model chosen by the activity type (standing/moving,
+stairs, walking/running, cycling; "other" has a fixed PAEE, the remaining activities 0). The statistics apply
+each window's PAEE to its seconds and classify them with the PAEE cut-offs.
+
+It has two versions that give the same PAEE:
+
+- `raw+posture (M)`: the MATLAB version included here, [`intensityPAEE.m`](intensityPAEE.m) with the models
+  in [`IntensityModels.json`](IntensityModels.json). It writes `<ID> - PAEE.bin` (read with
+  [`library/readAPBin.m`](../library/readAPBin.m)).
+- `raw+posture (R)`: the original R version (R code and models). It is not included here; it will be hosted in
+  a separate repository and published in the future.
 
 
 ### License

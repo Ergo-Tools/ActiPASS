@@ -1,3 +1,30 @@
+Actipass Version 2026.11.7 (2026-11-27)
+#############################################
+
+Changes:
+1. The raw+posture intensity algorithm (EXPERIMENTAL: check its results before you use them) is now part of this
+   repository in a MATLAB version: algorithms/intensityPAEE.m with the models in algorithms/IntensityModels.json
+   (setting INT_ALG "raw+posture (M)"; no R needed, about 1-2 s for a 7-day recording). The original R version
+   ("raw+posture (R)", needs R) is kept in the programs but is not included here; it will be hosted in a separate
+   repository. Both versions use the same features and models and give the same PAEE (checked on nine
+   recordings: differences <5e-15 kJ/kg/min, no changed intensity class). Settings saved with "raw+posture" are
+   read as "raw+posture (R)" (library/LoadSettings.m, new library/intensityAlg.m).
+2. Both versions write "<ID> - PAEE.bin" (PAEE per 10 s window with the time, activity and the features the
+   models use), an Actipass binary table (new library/readAPBin.m and writeAPBin.m). "<ID> - rawAcc.mat",
+   "- ActOnly1s.mat", "- PAEE.csv" and "- intensity_calculation.rds" are no longer written. stats/genStats.m reads
+   PAEE.bin, or the PAEE.csv of projects processed earlier. The R version is about 2x faster, and its temporary
+   input files (~0.5 GB for 7 days) go to the local temp folder instead of the project folder.
+3. Statistics (stats/genStats.m): the 10 s PAEE is applied to the seconds of its own window. Before, each second
+   took the PAEE of the nearest window start, so the seconds 6-9 of a window took the next window's PAEE (and
+   second 5 either). Intensity times change slightly (e.g. a few minutes per day between classes).
+4. algorithms/genTrnkVariables.m: the sample rate of the trunk angles is the resample frequency of processing
+   (ParamsAP.Fs) instead of a fixed 25 Hz (results unchanged at the default 25 Hz).
+5. mergeSleepData.m moved from algorithms/ to stats/ (it merges the sleep data of a processed project).
+6. Actipass desktop app 2026.11.7-alpha (desktop/): the two raw+posture versions in the settings; the source of
+   the 2026.11.6-alpha changes is now also here (engine restart after sleep, licence files of readGT3xMex in the
+   installer, `npm run clean`) (see desktop/CHANGELOG.md).
+
+
 Actipass Version 2026.11.6 (2026-11-26)
 #############################################
 

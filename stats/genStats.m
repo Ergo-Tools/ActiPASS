@@ -266,11 +266,12 @@ try
         status="No valid data for trunk accelerometer found. Set ""Trunk Acc"" to off under Trunk Acc. Options";
         return;
     end
-    if strcmpi(Settings.INT_ALG,"raw+posture")
+    if intensityAlg(Settings.INT_ALG)~="posture"
         % check intensity-algorithm setting is consistent
-        allpaeeFs=fullfile(statStruct.projectDir,statStruct.indvDirOut,masterQCTbl.SubjectID,masterQCTbl.SubjectID+" - PAEE.csv");
+        % (PAEE.bin; PAEE.csv in projects processed before 2026-11-27)
+        allpaeeFs=fullfile(statStruct.projectDir,statStruct.indvDirOut,masterQCTbl.SubjectID,masterQCTbl.SubjectID+" - PAEE");
 
-        if ~all(isfile(allpaeeFs))
+        if ~all(isfile(allpaeeFs+".bin") | isfile(allpaeeFs+".csv"))
             status="raw+posture intensity algorithm output not found for some (or all) files. "+...
                 "Inconsistent intensity algorithm settings during batch processing. "+...
                 "Make sure all batches are processed with ""raw+posture"" setting.";
@@ -355,7 +356,7 @@ try
         persecF_CSV=fullfile(statStruct.projectDir,"epoch_data",subjctID+" - epoch_data.csv");
 
         metaF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Metadata.mat");
-        paeeF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - PAEE.csv");
+        paeeF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - PAEE");
         % define trunk daily and event data files if trunk data is saved
         trunkDF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Daily_TrunkData.csv");
         trunkEF=fullfile(statStruct.projectDir,statStruct.indvDirOut,subjctID,subjctID+" - Event_TrunkData.csv");
@@ -378,14 +379,30 @@ try
         % now load metadata from binary mat file
         metaOBJ = load(metaF,'-mat'); %load meta data directly
         
-        % load R intensity algorithm output if it's enabled
-        if strcmpi(Settings.INT_ALG,"raw+posture")
-            % read PAEE time series (time is in POSIX)
-            paeeT=readtable(paeeF,"FileType","text","Delimiter",",","VariableNamingRule","preserve");
-            % convert POSIX time to a datenumber (consider no timezone)
-            tPAEE=datenum(datetime(paeeT.time,"ConvertFrom","posixtime","TimeZone",''));
-            %interpolate 10s intensity-algorithm output back to 1s
-            paee=interp1(tPAEE,paeeT.paee,perSecT.DateTime,"nearest","extrap");
+        % load the raw+posture intensity algorithm output (R or MATLAB) if it's enabled
+        if intensityAlg(Settings.INT_ALG)~="posture"
+            if isfile(paeeF+".bin")
+                % PAEE per 10 s window (since 2026-11-27; time is a datenum)
+                paeeT=readAPBin(paeeF+".bin");
+                tPAEE=paeeT.time;
+            else
+                % projects processed earlier: PAEE.csv (time is in POSIX)
+                paeeT=readtable(paeeF+".csv","FileType","text","Delimiter",",","VariableNamingRule","preserve");
+                % convert POSIX time to a datenumber (consider no timezone)
+                tPAEE=datenum(datetime(paeeT.time,"ConvertFrom","posixtime","TimeZone",''));
+            end
+            % 10 s PAEE back to 1 s: each second takes the PAEE of the window it lies in (the
+            % window starting at or before its midpoint; before 2026-11-27 the nearest window
+            % start, so the seconds +6..+9 took the next window and +5 was a tie); seconds
+            % before the first / after the last window take the first / last window
+            if isscalar(tPAEE)
+                iWin=ones(height(perSecT),1);
+            else
+                iWin=interp1(tPAEE,(1:numel(tPAEE))',perSecT.DateTime+0.5/86400,"previous");
+            end
+            iWin(isnan(iWin) & perSecT.DateTime<tPAEE(1))=1;
+            iWin(isnan(iWin))=numel(tPAEE);
+            paee=paeeT.paee(iWin);
             % add 'paee' column to perSecT 
             perSecT=horzcat(perSecT,table(paee));
         end
@@ -711,7 +728,7 @@ if ~isnan(p.Height)
     S.wlkHeight=p.Height;
     has=true;
 end
-if S.PERSRMR && strcmpi(S.INT_ALG,"raw+posture") && ~any(isnan([p.Age,p.Height,p.Weight])) && ~ismissing(p.Sex)
+if S.PERSRMR && intensityAlg(S.INT_ALG)~="posture" &&~any(isnan([p.Age,p.Height,p.Weight])) && ~ismissing(p.Sex)
     if p.Sex=="M", s=5; else, s=-161; end
     rmr=10*p.Weight+6.25*p.Height-5*p.Age+s; % kcal/day (Mifflin-St Jeor)
     S.paeeScale=rmr/(24*p.Weight);

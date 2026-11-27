@@ -37,7 +37,7 @@ export const stages: Stage[] = [
   },
   {
     id: "process", label: "Process", workflow: true, planned: [
-      "Pre-flight checks (R for raw+posture, many files, writable project folder)",
+      "Pre-flight checks (R for raw+posture (R), many files, writable project folder)",
       "Start / cancel, per-file progress, live log, batch summary and orientation warning",
     ],
   },

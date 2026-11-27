@@ -12,6 +12,8 @@ non-wear, orientation checks, synchronisation, figures and small helpers.
 | [`open_diary.m`](open_diary.m) | Reads an Actipass diary for given subject IDs |
 | [`readCalFile.m`](readCalFile.m) | Reads a device calibration file (device IDs as text) |
 | [`readPersonalData.m`](readPersonalData.m) | Reads the personal data table (SubjectID, Age, Sex, Height, Weight) of the stats generation |
+| [`intensityAlg.m`](intensityAlg.m) | The intensity algorithm of the setting `INT_ALG`: posture, raw+posture (M) or raw+posture (R) |
+| [`readAPBin.m`](readAPBin.m), [`writeAPBin.m`](writeAPBin.m) | Read and write Actipass binary tables (`.bin`, e.g. `<ID> - PAEE.bin` of the raw+posture algorithm) |
 | [`AutoCalibrate.m`](AutoCalibrate.m) | Automatic calibration of triaxial accelerometer data |
 | [`CalibrateData.m`](CalibrateData.m) | Applies calibration coefficients (from the calibration file or auto-calibration) |
 | [`toActipassFrame.m`](toActipassFrame.m) | Maps the raw axes of a device to the Actipass frame |

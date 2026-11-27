@@ -6,6 +6,9 @@
       "../../engine-matlab/build/dist/Actipass_Engine_Installer.exe": "engine/Actipass_Engine_Installer.exe",
       "../../engine-matlab/build/dist/version.txt": "engine/version.txt",
       "../../engine-matlab/build/dist/build.txt": "engine/build.txt",
+      "../../engine-matlab/build/dist/LICENSE-EUPL-1.2.txt": "licenses/LICENSE-EUPL-1.2.txt",
+      "../../engine-matlab/build/dist/NOTICE-readGT3xMex.txt": "licenses/NOTICE-readGT3xMex.txt",
+      "../../engine-matlab/build/dist/readGT3xMex.cpp": "licenses/readGT3xMex.cpp",
       "../../CHANGELOG.md": "CHANGELOG.md"
     },
     "windows": {

@@ -146,6 +146,19 @@ if (import.meta.hot) import.meta.hot.accept(() => location.reload());
 
 let initialized = false;
 
+/** the engine reported that it stops after its idle timeout (no message from the app, for
+ *  example because the computer slept): when it has exited, start it again */
+let idleStop = false;
+const IDLE_STOP_LINE = /actipass_engine: no message from the UI for .* stopping/;
+
+function afterIdleStop(status: EngineStatus) {
+  idleStop = false;
+  const restart = engine.prefs.autoStart && status.mode !== "attach";
+  addLog("warning", "The engine stopped after a long time without contact with the app (the computer probably slept). " +
+    (restart ? "Starting it again..." : "Start it again on the Engine page."));
+  if (restart) void startEngine();
+}
+
 export async function initEngine() {
   if (initialized) return;
   initialized = true;
@@ -157,6 +170,7 @@ export async function initEngine() {
       addLog(e.payload.state === "failed" ? "error" : "system",
         `Engine ${e.payload.state}${e.payload.lastError ? ": " + e.payload.lastError : ""}`);
       if (e.payload.state === "connected" && versionMismatch()) addLog("warning", versionMismatch());
+      if (e.payload.state === "stopped" && idleStop) afterIdleStop(e.payload);
     }
   });
   await listen<{ method: string; params: any }>("engine-notification", (e) => {
@@ -172,6 +186,11 @@ export async function initEngine() {
   await listen<{ stream: string; line: string }>("engine-output", (e) => {
     const o = outputLine(e.payload.stream, e.payload.line);
     addLog(o.level, o.text);
+    if (IDLE_STOP_LINE.test(e.payload.line)) {
+      idleStop = true;
+      // the exit may be reported first (the app itself was suspended while the engine stopped)
+      if (engine.status.state === "stopped") afterIdleStop(engine.status);
+    }
   });
 
   engine.info = await invoke<EngineInfo>("engine_info");
@@ -217,6 +236,7 @@ export function effectiveMode(): EngineMode {
 }
 
 export async function startEngine() {
+  idleStop = false;
   const mode = effectiveMode();
   try {
     addLog("system", mode === "launch"

@@ -56,7 +56,7 @@ export function checks(): Check[] {
   }
 
   // settings: the raw+posture intensity algorithm is experimental
-  if (s?.INT_ALG === "raw+posture") add("settings", "warning", "The raw+posture intensity algorithm is experimental: check its results before you use them.");
+  if (typeof s?.INT_ALG === "string" && s.INT_ALG.startsWith("raw+posture")) add("settings", "warning", "The raw+posture intensity algorithm is experimental: check its results before you use them.");
 
   // diary and calibration
   if (!batch.diaryFile && !batch.noDiary) add("diary", "error", "Choose a diary or 'No diary'.");

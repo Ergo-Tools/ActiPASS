@@ -77,11 +77,31 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const engineBuild = !dev && fs.existsSync(distBuild) ? fs.readFileSync(distBuild, "utf8").trim() : "";
   if (!dev && !engineBuild) fail("engine-matlab/build/dist/build.txt is missing: rebuild the engine (cd tools; build_engine)");
   if (engineBuild) console.log(`build-release: engine build ${engineBuild}`);
+  // licence texts and source bundled as licenses/ (tauri.release.conf.json): readGT3xMex in the
+  // engine is EUPL-1.2, which requires its source with every binary distribution
+  for (const f of ["LICENSE-EUPL-1.2.txt", "NOTICE-readGT3xMex.txt", "readGT3xMex.cpp"]) {
+    if (!dev && !fs.existsSync(path.join(engineDir, "build", "dist", f))) {
+      fail(`engine-matlab/build/dist/${f} is missing: rebuild the engine (cd tools; build_engine)`);
+    }
+  }
 
   const extra = process.argv.slice(2).filter((a) => a !== "--dev");
   const args = dev ? ["tauri", "dev", "--config", versionConf, ...extra]
     : ["tauri", "build", "--config", "src-tauri/tauri.release.conf.json", "--config", versionConf, ...extra];
   const r = spawnSync("npx", args, { cwd: appDir, stdio: "inherit", shell: process.platform === "win32",
     env: { ...process.env, VITE_ENGINE_BUILD: engineBuild } });
+  if (!dev && r.status === 0) {
+    // keep a copy of the installer in dist/ (not tracked), so tools/clean-build.mjs can remove target/
+    const setup = `Actipass_${appVersion}_x64-setup.exe`;
+    const src = path.join(outDir, "release", "bundle", "nsis", setup);
+    if (fs.existsSync(src)) {
+      const distDir = path.join(repo, "dist");
+      fs.mkdirSync(distDir, { recursive: true });
+      fs.copyFileSync(src, path.join(distDir, setup));
+      console.log(`build-release: copied the installer to dist/${setup}`);
+    } else {
+      console.warn(`build-release: ${path.relative(repo, src)} not found; nothing copied to dist/`);
+    }
+  }
   process.exit(r.status ?? 1);
 }

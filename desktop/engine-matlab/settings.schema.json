@@ -81,8 +81,8 @@
     { "key": "TRANSPORT", "section": "processing", "label": "Seated transport detection", "type": "choice",
       "choices": [{ "value": "off" }, { "value": "on" }] },
     { "key": "INT_ALG", "section": "processing", "label": "Intensity algorithm", "type": "choice", "propass": true,
-      "choices": [{ "value": "posture" }, { "value": "raw+posture", "label": "raw+posture (needs R)" }],
-      "help": "How intensity is calculated: postures only, or raw accelerometer data and postures (R module). raw+posture is experimental: check its results before you use them." },
+      "choices": [{ "value": "posture" }, { "value": "raw+posture (M)" }, { "value": "raw+posture (R)", "label": "raw+posture (R) (needs R)" }],
+      "help": "How intensity is calculated: postures only, or raw accelerometer data and postures. raw+posture (M) runs in Actipass; raw+posture (R) runs the same features and models in R (IntensityCal.R, for model development) and needs an R installation. Both give the same PAEE. raw+posture is experimental: check its results before you use them." },
 
     { "key": "NWSHORTLIM", "section": "nonwear", "label": "Trim filter: ignore non-wear shorter than", "type": "number", "min": 1, "max": 12, "unit": "h",
       "help": "Auto trim only (quality check): decides where the start and end of a recording are trimmed off; does not change the non-wear in the results." },

@@ -1,5 +1,5 @@
 
-function [status,trnkDTbl,trnkETbl]=genTrnkVariables(Akt,vTrnkRot,dlyMeta,evntMeta,saveDir,ID,Settings)
+function [status,trnkDTbl,trnkETbl]=genTrnkVariables(Akt,vTrnkRot,dlyMeta,evntMeta,saveDir,ID,Settings,Fs)
 % genTrnkVariables generate daily and interval bbased trunk-variables and save them to files
 % Based on original Acti4 forward-bending detection logic found in:
 % https://github.com/motus-nfa/Acti4/blob/main/Version%20July%202020/AnalyseAndPlot.m
@@ -10,7 +10,9 @@ function [status,trnkDTbl,trnkETbl]=genTrnkVariables(Akt,vTrnkRot,dlyMeta,evntMe
 % Settings - the Actipass Settings structure containing  information about how to process data
 % dlyMeta - metadata for days (like indices and times)
 % evntMeta - metadata for intervals (like indices and times)
-% saveDir - directory where to save tables (usually ID folder under IndividualOut)  
+% saveDir - directory where to save tables (usually ID folder under IndividualOut)
+% Fs - sample rate (Hz) of vTrnkRot: the resample frequency of processing (ParamsAP.Fs). Optional: when it
+%      is not given, it is found from the data (samples of vTrnkRot per second of Akt)
 %
 % OUTPUTS:
 % status - "ok" if everything went well, otherwise detailed exception
@@ -42,7 +44,10 @@ function [status,trnkDTbl,trnkETbl]=genTrnkVariables(Akt,vTrnkRot,dlyMeta,evntMe
 % POSSIBILITY OF SUCH DAMAGE.
 
 
-Fs=25; % The resample frequency
+% the sample rate of the trunk angles (the resample frequency of processing, ParamsAP.Fs)
+if nargin<8 || isempty(Fs)
+    Fs=round(size(vTrnkRot,1)/numel(Akt)); % samples per second of activity data
+end
 baseVars=["StartT","EndT","Interval","RefPosStr","NW_Trnk","Valid_Trnk","VrefTrunkAP","VrefTrunkLat"]; % basic information
 angTres=["20","30","60","90"]; % thresholds for the variables below
 thrshTrnk=str2double(angTres)*pi/180; % the same angles above as numbers

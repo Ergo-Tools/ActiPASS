@@ -1,0 +1,40 @@
+{
+  "format": "Actipass intensity models 1",
+  "note": "MARS (earth) models of the raw+posture intensity algorithm, exported by exportIntensityModels.R from standmov.rds, stairs.rds, walkrun.rds, cycle.rds on 2026-11-27 (earth 5.3.6). PAEE in kJ/kg/min per 10 s window: sum(coef * prod(term factors)); factor = max(0, x-cut) (dir 1), max(0, cut-x) (dir -1) or x (dir 2); an empty term is the intercept.",
+  "windowSec": 10,
+  "defaultPAEE": 0,
+  "fixed": [
+    {"activity": [9], "paee": 0.10000000000000001}
+  ],
+  "models": [
+    {"name": "standmov", "activity": [3, 4], "variables": ["P90_y"],
+      "terms": [
+        {"vars": [], "dirs": [], "cuts": [], "coef": 0.084737636507098327},
+        {"vars": ["P90_y"], "dirs": [1], "cuts": [0.46502946729412509], "coef": 0.0046058009579506816}
+      ]},
+    {"name": "stairs", "activity": [7], "variables": ["Power253_x"],
+      "terms": [
+        {"vars": [], "dirs": [], "cuts": [], "coef": 0.53418082240927289},
+        {"vars": ["Power253_x"], "dirs": [-1], "cuts": [76.542178012083696], "coef": -0.0026516295162499299}
+      ]},
+    {"name": "walkrun", "activity": [5, 6], "variables": ["SD_vm", "SD_x", "Mean_y", "SD_y", "SigPow_y"],
+      "terms": [
+        {"vars": [], "dirs": [], "cuts": [], "coef": -1.1183858269284652},
+        {"vars": ["SD_y"], "dirs": [1], "cuts": [2.2014956306739366], "coef": 0.020581845877648972},
+        {"vars": ["SigPow_y"], "dirs": [1], "cuts": [465440.96804071992], "coef": -1.0455037845421192e-06},
+        {"vars": ["SigPow_y"], "dirs": [-1], "cuts": [465440.96804071992], "coef": 2.3010588669062922e-06},
+        {"vars": ["SD_y"], "dirs": [1], "cuts": [9.5031209051028167], "coef": 0.023566756213448399},
+        {"vars": ["SD_x"], "dirs": [1], "cuts": [12.853560682470114], "coef": 0.015682641266371627},
+        {"vars": ["SD_x"], "dirs": [-1], "cuts": [12.853560682470114], "coef": -0.024764590114199736},
+        {"vars": ["Mean_y"], "dirs": [1], "cuts": [0.12777406047670764], "coef": 0.02760361291072937},
+        {"vars": ["Mean_y"], "dirs": [-1], "cuts": [0.12777406047670764], "coef": 1.2712282654349196},
+        {"vars": ["SD_vm"], "dirs": [-1], "cuts": [18.859393280588709], "coef": 0.023012324988086023}
+      ]},
+    {"name": "cycle", "activity": [8], "variables": ["P25_z"],
+      "terms": [
+        {"vars": [], "dirs": [], "cuts": [], "coef": 0.44345661705016254},
+        {"vars": ["P25_z"], "dirs": [-1], "cuts": [1.4384808817916623], "coef": -0.1498093849496045}
+      ]}
+  ]
+}
+

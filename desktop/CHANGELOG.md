@@ -1,5 +1,18 @@
 # Actipass desktop app: change log
 
+## 2026.11.7-alpha (2026-11-27)
+
+Released together with the classic Actipass app 2026.11.7.
+
+Changes:
+1. Intensity algorithm (raw+posture is still experimental: check its results before you use them):
+   "raw+posture (M)" (new, computed by the engine, no R needed) and "raw+posture (R)" (the R module as before,
+   needs R; projects with "raw+posture" use it). Both give the same PAEE. The R check before processing runs
+   only for "raw+posture (R)"; the "experimental" warning shows for both.
+2. "raw+posture (R)" about 2x faster; its large temporary files go to the local temp folder, not the project.
+   PAEE is saved as "<ID> - PAEE.bin"; statistics also read the PAEE.csv of earlier projects. See the classic
+   app's ChangeLog.txt for details, including a fix of how the 10 s PAEE is applied to seconds.
+
 ## 2026.11.6-alpha (2026-11-26)
 
 Released together with the classic Actipass app 2026.11.6.

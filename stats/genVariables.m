@@ -72,7 +72,7 @@ statTable.SlpIntNW(itrSeg)=round(sum(Activity==0 & rows_SI)/60,prec); % NW durin
 
 % create MAP for exponential filtering (smoothing) TAI
 mapTC=containers.Map(["TC10","TC20","TC30","TC60","TC90","TC120"],[10,20,30,60,90,120]);
-if  strcmpi(Settings.INT_ALG,"posture")
+if  intensityAlg(Settings.INT_ALG)=="posture"
     dayTAI=Settings.MET_SI*(rows_SI & Activity~=-1 & Activity~=0)+... % sleep-interval
         Settings.MET_Lie*(~rows_SI & Activity==1)+...% lying
         Settings.MET_LieStill*(~rows_SI & Activity==11)+...% sleep-outside-bed (called LieStill)
@@ -106,7 +106,7 @@ if  strcmpi(Settings.INT_ALG,"posture")
     dayPALevels = discretize(dayTAI,[Settings.MET_INT_Slp,Settings.MET_INT_SED,Settings.MET_INT_LPA,Settings.MET_INT_LPA_Amb,Settings.MET_INT_MPA,Settings.MET_INT_VPA, inf],...
         'categorical',["Slp","SED","LPA","LPA_Amb","MPA","VPA"]);
 
-elseif strcmpi(Settings.INT_ALG,"raw+posture")
+else % raw+posture (R or MATLAB version: the same PAEE)
     % 1 MET of the cut-offs and fixed values: 1 kcal/kg/h (paeeScale 1), or the individual
     % resting metabolic rate from personal data (genStats personalSettings)
     sc=1;

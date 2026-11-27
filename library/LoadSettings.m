@@ -521,9 +521,13 @@ else
     Settings.PRINTCOMMNTS=logical(Settings.PRINTCOMMNTS);
 end
 
-% flag for thigh based intensity-class detection based on raw-data
+% flag for thigh based intensity-class detection based on raw-data: "posture", or raw+posture
+% computed in MATLAB ("raw+posture (M)") or R ("raw+posture (R)"; "raw+posture" before 2026-11-27)
+if isfield(Settings,'INT_ALG') && ~ismissing(Settings.INT_ALG) && matches(Settings.INT_ALG,"raw+posture")
+    Settings.INT_ALG="raw+posture (R)";
+end
 if ~isfield(Settings,'INT_ALG')|| ismissing(Settings.INT_ALG)||...
-        ~matches(Settings.INT_ALG,["posture","raw+posture"])
+        ~matches(Settings.INT_ALG,["posture","raw+posture (M)","raw+posture (R)"])
     Settings.INT_ALG="posture";
 end
 

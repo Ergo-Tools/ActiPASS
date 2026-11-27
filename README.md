@@ -63,9 +63,9 @@ Please contact developers via email to receive a compiled executable version of 
 
 | Folder | Contents | License |
 |---|---|---|
-| [`algorithms/`](algorithms) | classification and analysis algorithms (activities, reference positions, lying, time-in-bed and sleep, kneeling, trunk variables) and the analysis tools (sit-to-stand, merge sleep data, WBV) | BSD-3-Clause |
+| [`algorithms/`](algorithms) | classification and analysis algorithms (activities, reference positions, lying, time-in-bed and sleep, kneeling, trunk variables, the experimental raw+posture intensity algorithm) and the analysis tools (sit-to-stand, WBV) | BSD-3-Clause |
 | [`library/`](library) | functions of the processing workflow: settings, files and diary, calibration, resampling, non-wear, orientation checks, synchronisation, figures, helpers | BSD-3-Clause |
-| [`stats/`](stats) | stats generation: daily, event based and bout variables, trunk variables | BSD-3-Clause |
+| [`stats/`](stats) | stats generation: daily, event based and bout variables, trunk variables; merging the sleep data of a project | BSD-3-Clause |
 | [`utils/`](utils) | readers for the supported accelerometer file formats | BSD-3-Clause |
 | [`conf/`](conf) | example settings and algorithm parameter files | BSD-3-Clause |
 | [`main/`](main) | example workflow script | BSD-3-Clause |
