@@ -1,4 +1,4 @@
-Actipass CLI version 2026.11.5
+Actipass CLI version 2026.11.7
 
 WARNING:
 Use the CLI version only to quickly preview accelerometer files or to give participant feedback.

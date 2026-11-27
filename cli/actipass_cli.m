@@ -82,7 +82,7 @@ arguments
 end
 
 %% intialize actipass_cli
-version="2026.11.5"; % actipass_cli version string
+version="2026.11.7"; % actipass_cli version string
 exitcode=0; % set exit code to zero
 
 % define ProPASS or Advanced mode
